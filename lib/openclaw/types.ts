@@ -50,12 +50,46 @@ export type ErrorData = {
 };
 
 export type CronJobData = {
+  id: string;
   name: string;
   schedule: string;
   enabled: boolean;
   lastRun?: string;
   nextRun?: string;
+  message?: string;
   skill: string;
+};
+
+export type SessionInfo = {
+  key: string;
+  channel: string;
+  displayName: string;
+  model: string;
+  totalTokens: number;
+  contextTokens: number;
+  updatedAt: number;
+  lastChannel: string;
+};
+
+export type SessionMessage = {
+  role: string;
+  content: Array<{ type: string; text?: string; thinking?: string }>;
+  model?: string;
+  usage?: {
+    input: number;
+    output: number;
+    totalTokens: number;
+    cost?: { total?: number };
+  };
+  timestamp: number;
+};
+
+export type DebugInfo = {
+  gatewayUrl: string;
+  connected: boolean;
+  statusText: string;
+  sessionCount: number;
+  timestamp: string;
 };
 
 export type CostDataPoint = {

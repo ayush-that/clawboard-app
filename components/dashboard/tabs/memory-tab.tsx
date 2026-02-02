@@ -14,6 +14,11 @@ export const MemoryTab = () => {
   const [memories, setMemories] = useState<MemoryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newMemory, setNewMemory] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [saveResult, setSaveResult] = useState<string | null>(null);
+  const [expandedKey, setExpandedKey] = useState<string | null>(null);
 
   const handleSearch = async () => {
     if (!query.trim()) {
@@ -22,7 +27,7 @@ export const MemoryTab = () => {
     setLoading(true);
     try {
       const res = await fetch(
-        `/api/openclaw/memory?query=${encodeURIComponent(query)}`
+        `/api/openclaw/memory?q=${encodeURIComponent(query)}`
       );
       const json = (await res.json()) as MemoryItem[];
       setMemories(json);
@@ -34,9 +39,73 @@ export const MemoryTab = () => {
     }
   };
 
+  const handleAddMemory = async () => {
+    if (!newMemory.trim()) {
+      return;
+    }
+    setSaving(true);
+    setSaveResult(null);
+    try {
+      const res = await fetch("/api/openclaw/memory", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: newMemory }),
+      });
+      const json = (await res.json()) as {
+        success: boolean;
+        response: string;
+      };
+      setSaveResult(json.response);
+      if (json.success) {
+        setNewMemory("");
+      }
+    } catch {
+      setSaveResult("Failed to add memory");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   return (
     <div className="space-y-4 p-4">
-      <h2 className="text-lg font-semibold">Memory Browser</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold">Memory Browser</h2>
+        <button
+          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+          onClick={() => {
+            setShowAddForm(!showAddForm);
+            setSaveResult(null);
+          }}
+          type="button"
+        >
+          {showAddForm ? "Cancel" : "Add Memory"}
+        </button>
+      </div>
+
+      {showAddForm ? (
+        <div className="space-y-2 rounded-md border border-border/50 p-3">
+          <textarea
+            className="w-full rounded-md border border-border/50 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            onChange={(e) => {
+              setNewMemory(e.target.value);
+            }}
+            placeholder="Tell the agent what to remember..."
+            rows={3}
+            value={newMemory}
+          />
+          <button
+            className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+            disabled={saving || !newMemory.trim()}
+            onClick={handleAddMemory}
+            type="button"
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+          {saveResult ? (
+            <p className="text-xs text-muted-foreground">{saveResult}</p>
+          ) : null}
+        </div>
+      ) : null}
 
       <div className="flex gap-2">
         <input
@@ -78,9 +147,13 @@ export const MemoryTab = () => {
       {memories.length > 0 ? (
         <div className="space-y-2">
           {memories.map((mem) => (
-            <div
-              className="rounded-md border border-border/30 p-3"
+            <button
+              className="w-full rounded-md border border-border/30 p-3 text-left transition-colors hover:bg-muted/30"
               key={mem.key}
+              onClick={() => {
+                setExpandedKey(expandedKey === mem.key ? null : mem.key);
+              }}
+              type="button"
             >
               <div className="flex items-center justify-between">
                 <span className="font-mono text-xs font-medium text-muted-foreground">
@@ -90,8 +163,12 @@ export const MemoryTab = () => {
                   {(mem.relevance * 100).toFixed(0)}% match
                 </span>
               </div>
-              <p className="mt-1 text-sm">{mem.summary}</p>
-            </div>
+              <p
+                className={`mt-1 text-sm ${expandedKey === mem.key ? "" : "line-clamp-2"}`}
+              >
+                {mem.summary}
+              </p>
+            </button>
           ))}
         </div>
       ) : null}

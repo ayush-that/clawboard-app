@@ -2,8 +2,11 @@ import type {
   AgentStatusData,
   CostDataPoint,
   CronJobData,
+  DebugInfo,
   ErrorData,
   MemoryData,
+  SessionInfo,
+  SessionMessage,
   SkillData,
   TaskData,
   WebhookEventData,
@@ -233,11 +236,13 @@ type CronDetails = {
 
 const cronToJobs = (details: CronDetails): CronJobData[] =>
   details.jobs.map((j) => ({
+    id: j.id ?? j.name ?? "unknown",
     name: j.name ?? j.id ?? "unnamed",
     schedule: j.schedule ?? "* * * * *",
     enabled: j.enabled ?? true,
     lastRun: j.lastRun,
     nextRun: j.nextRun,
+    message: j.message,
     skill: "cron",
   }));
 
@@ -345,5 +350,109 @@ export const getCostData = async (): Promise<CostDataPoint[]> => {
     return historyToCosts(details);
   } catch {
     return [];
+  }
+};
+
+// --- Cron CRUD ---
+
+export const addCronJob = async (data: {
+  name: string;
+  schedule: string;
+  message?: string;
+}): Promise<{ success: boolean }> => {
+  await invokeTool("cron", { action: "add", ...data });
+  return { success: true };
+};
+
+export const updateCronJob = async (
+  id: string,
+  patch: {
+    name?: string;
+    schedule?: string;
+    message?: string;
+    enabled?: boolean;
+  }
+): Promise<{ success: boolean }> => {
+  await invokeTool("cron", { action: "update", id, ...patch });
+  return { success: true };
+};
+
+export const removeCronJob = async (
+  id: string
+): Promise<{ success: boolean }> => {
+  await invokeTool("cron", { action: "remove", id });
+  return { success: true };
+};
+
+// --- Sessions ---
+
+export const getSessionsList = async (): Promise<SessionInfo[]> => {
+  try {
+    const details = await invokeTool<SessionsListDetails>("sessions_list", {});
+    return details.sessions.map((s) => ({
+      key: s.key,
+      channel: s.channel,
+      displayName: s.displayName,
+      model: s.model,
+      totalTokens: s.totalTokens,
+      contextTokens: s.contextTokens,
+      updatedAt: s.updatedAt,
+      lastChannel: s.lastChannel,
+    }));
+  } catch {
+    return [];
+  }
+};
+
+export const getSessionMessages = async (
+  sessionKey: string
+): Promise<SessionMessage[]> => {
+  try {
+    const details = await invokeTool<SessionHistoryDetails>(
+      "sessions_history",
+      { sessionKey }
+    );
+    return details.messages;
+  } catch {
+    return [];
+  }
+};
+
+// --- Memory ---
+
+export const addMemory = async (
+  text: string
+): Promise<{ success: boolean; response: string }> => {
+  try {
+    return await chatCompletions(`Remember this permanently: ${text}`);
+  } catch {
+    return { success: false, response: "Failed to add memory" };
+  }
+};
+
+// --- Debug ---
+
+export const getDebugInfo = async (): Promise<DebugInfo> => {
+  const gatewayUrl = GATEWAY_URL;
+  try {
+    const [statusDetails, sessionsDetails] = await Promise.all([
+      invokeTool<SessionStatusDetails>("session_status", {}),
+      invokeTool<SessionsListDetails>("sessions_list", {}),
+    ]);
+    return {
+      gatewayUrl,
+      connected: statusDetails.ok,
+      statusText: statusDetails.statusText ?? "",
+      sessionCount: sessionsDetails.count ?? sessionsDetails.sessions.length,
+      timestamp: new Date().toISOString(),
+    };
+  } catch {
+    return {
+      gatewayUrl,
+      connected: false,
+      statusText: "Gateway unreachable",
+      sessionCount: 0,
+      timestamp: new Date().toISOString(),
+    };
   }
 };

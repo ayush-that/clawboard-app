@@ -2,6 +2,7 @@
 
 import { EventFeed } from "@/components/dashboard/event-feed";
 import { CronTab } from "@/components/dashboard/tabs/cron-tab";
+import { DebugTab } from "@/components/dashboard/tabs/debug-tab";
 import { MemoryTab } from "@/components/dashboard/tabs/memory-tab";
 import { SessionsTab } from "@/components/dashboard/tabs/sessions-tab";
 import { StatusTab } from "@/components/dashboard/tabs/status-tab";
@@ -37,6 +38,7 @@ export default function DashboardPage() {
             <TabsTrigger value="sessions">Sessions</TabsTrigger>
             <TabsTrigger value="cron">Cron</TabsTrigger>
             <TabsTrigger value="memory">Memory</TabsTrigger>
+            <TabsTrigger value="debug">Debug</TabsTrigger>
           </TabsList>
         </div>
 
@@ -52,6 +54,9 @@ export default function DashboardPage() {
           </TabsContent>
           <TabsContent className="flex-1" value="memory">
             <MemoryTab />
+          </TabsContent>
+          <TabsContent className="flex-1" value="debug">
+            <DebugTab />
           </TabsContent>
         </main>
       </Tabs>
