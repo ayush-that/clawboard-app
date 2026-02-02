@@ -22,6 +22,8 @@ export type SkillData = {
   name: string;
   description: string;
   enabled: boolean;
+  source: string;
+  path?: string;
   lastUsed?: string;
 };
 
@@ -97,4 +99,35 @@ export type CostDataPoint = {
   tokens: number;
   cost: number;
   model: string;
+};
+
+export type UsageBySession = {
+  sessionKey: string;
+  displayName: string;
+  channel: string;
+  totalTokens: number;
+  contextTokens: number;
+  updatedAt: number;
+};
+
+export type ModelBreakdown = {
+  model: string;
+  tokens: number;
+  cost: number;
+};
+
+export type UsageSummary = {
+  totalTokens: number;
+  totalCost: number;
+  modelBreakdown: ModelBreakdown[];
+  dailyCosts: CostDataPoint[];
+  sessions: UsageBySession[];
+};
+
+export type OpenClawConfig = {
+  agent?: { model?: string };
+  gateway?: { auth?: { mode?: string } };
+  channels?: Record<string, unknown>;
+  raw: string;
+  hash: string;
 };

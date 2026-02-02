@@ -5,10 +5,13 @@ import type {
   DebugInfo,
   ErrorData,
   MemoryData,
+  ModelBreakdown,
+  OpenClawConfig,
   SessionInfo,
   SessionMessage,
   SkillData,
   TaskData,
+  UsageSummary,
   WebhookEventData,
 } from "./types";
 
@@ -300,9 +303,15 @@ export const getRecentTasks = async (
   }
 };
 
-// skills_list does NOT exist on the OpenClaw HTTP API.
-export const getInstalledSkills = (): Promise<SkillData[]> =>
-  Promise.resolve([]);
+// Skills are extracted from the config object
+export const getInstalledSkills = async (): Promise<SkillData[]> => {
+  try {
+    const config = await getConfig();
+    return extractSkillsFromConfig(config);
+  } catch {
+    return [];
+  }
+};
 
 export const queryMemory = async (query: string): Promise<MemoryData[]> => {
   try {
@@ -427,6 +436,142 @@ export const addMemory = async (
     return await chatCompletions(`Remember this permanently: ${text}`);
   } catch {
     return { success: false, response: "Failed to add memory" };
+  }
+};
+
+// --- Config ---
+
+type ConfigGetResult = {
+  config: Record<string, unknown>;
+  hash: string;
+};
+
+export const getConfig = async (): Promise<OpenClawConfig> => {
+  try {
+    const result = await invokeTool<ConfigGetResult>("config_get", {
+      action: "json",
+    });
+    const raw = JSON.stringify(result.config ?? {}, null, 2);
+    const cfg = result.config ?? {};
+    return {
+      agent: cfg.agent as OpenClawConfig["agent"],
+      gateway: cfg.gateway as OpenClawConfig["gateway"],
+      channels: cfg.channels as OpenClawConfig["channels"],
+      raw,
+      hash: result.hash ?? "",
+    };
+  } catch {
+    return { raw: "{}", hash: "" };
+  }
+};
+
+export const patchConfig = async (
+  patch: Record<string, unknown>,
+  hash: string
+): Promise<{ success: boolean }> => {
+  await invokeTool("config_patch", { patch, hash });
+  return { success: true };
+};
+
+const extractSkillsFromConfig = (config: OpenClawConfig): SkillData[] => {
+  const skills: SkillData[] = [];
+  try {
+    const raw = JSON.parse(config.raw) as Record<string, unknown>;
+
+    // Extract from skills section if present
+    const skillsSection = raw.skills as Record<string, unknown> | undefined;
+    if (skillsSection && typeof skillsSection === "object") {
+      for (const [name, value] of Object.entries(skillsSection)) {
+        const skill = value as Record<string, unknown>;
+        skills.push({
+          name,
+          description: (skill.description as string) ?? "",
+          enabled: (skill.enabled as boolean) ?? true,
+          source: (skill.source as string) ?? "installed",
+          path: skill.path as string | undefined,
+        });
+      }
+    }
+
+    // Extract from tools section as fallback
+    const toolsSection = raw.tools as Record<string, unknown> | undefined;
+    if (
+      toolsSection &&
+      typeof toolsSection === "object" &&
+      skills.length === 0
+    ) {
+      for (const [name, value] of Object.entries(toolsSection)) {
+        if (typeof value === "object" && value !== null) {
+          skills.push({
+            name,
+            description: "",
+            enabled: true,
+            source: "config",
+          });
+        }
+      }
+    }
+  } catch {
+    // parse error — return empty
+  }
+  return skills;
+};
+
+// --- Usage ---
+
+export const getUsageSummary = async (): Promise<UsageSummary> => {
+  try {
+    const [sessions, dailyCosts] = await Promise.all([
+      getSessionsList(),
+      getCostData(),
+    ]);
+
+    // Aggregate totals from sessions
+    const totalTokens = sessions.reduce((sum, s) => sum + s.totalTokens, 0);
+    const totalCost = dailyCosts.reduce((sum, d) => sum + d.cost, 0);
+
+    // Build model breakdown from daily costs
+    const modelMap = new Map<string, { tokens: number; cost: number }>();
+    for (const d of dailyCosts) {
+      const model = d.model || "unknown";
+      const existing = modelMap.get(model) ?? { tokens: 0, cost: 0 };
+      existing.tokens += d.tokens;
+      existing.cost += d.cost;
+      modelMap.set(model, existing);
+    }
+    const modelBreakdown: ModelBreakdown[] = [...modelMap.entries()].map(
+      ([model, data]) => ({
+        model,
+        tokens: data.tokens,
+        cost: Number.parseFloat(data.cost.toFixed(4)),
+      })
+    );
+
+    // Map sessions to usage
+    const sessionUsage = sessions.map((s) => ({
+      sessionKey: s.key,
+      displayName: s.displayName,
+      channel: s.channel || s.lastChannel,
+      totalTokens: s.totalTokens,
+      contextTokens: s.contextTokens,
+      updatedAt: s.updatedAt,
+    }));
+
+    return {
+      totalTokens,
+      totalCost: Number.parseFloat(totalCost.toFixed(4)),
+      modelBreakdown,
+      dailyCosts,
+      sessions: sessionUsage,
+    };
+  } catch {
+    return {
+      totalTokens: 0,
+      totalCost: 0,
+      modelBreakdown: [],
+      dailyCosts: [],
+      sessions: [],
+    };
   }
 };
 

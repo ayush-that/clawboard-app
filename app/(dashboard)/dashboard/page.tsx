@@ -1,11 +1,14 @@
 "use client";
 
 import { EventFeed } from "@/components/dashboard/event-feed";
+import { ConfigTab } from "@/components/dashboard/tabs/config-tab";
 import { CronTab } from "@/components/dashboard/tabs/cron-tab";
 import { DebugTab } from "@/components/dashboard/tabs/debug-tab";
 import { MemoryTab } from "@/components/dashboard/tabs/memory-tab";
 import { SessionsTab } from "@/components/dashboard/tabs/sessions-tab";
+import { SkillsTab } from "@/components/dashboard/tabs/skills-tab";
 import { StatusTab } from "@/components/dashboard/tabs/status-tab";
+import { UsageTab } from "@/components/dashboard/tabs/usage-tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function DashboardPage() {
@@ -38,6 +41,9 @@ export default function DashboardPage() {
             <TabsTrigger value="sessions">Sessions</TabsTrigger>
             <TabsTrigger value="cron">Cron</TabsTrigger>
             <TabsTrigger value="memory">Memory</TabsTrigger>
+            <TabsTrigger value="skills">Skills</TabsTrigger>
+            <TabsTrigger value="usage">Usage</TabsTrigger>
+            <TabsTrigger value="config">Config</TabsTrigger>
             <TabsTrigger value="debug">Debug</TabsTrigger>
           </TabsList>
         </div>
@@ -54,6 +60,15 @@ export default function DashboardPage() {
           </TabsContent>
           <TabsContent className="flex-1" value="memory">
             <MemoryTab />
+          </TabsContent>
+          <TabsContent className="flex-1" value="skills">
+            <SkillsTab />
+          </TabsContent>
+          <TabsContent className="flex-1" value="usage">
+            <UsageTab />
+          </TabsContent>
+          <TabsContent className="flex-1" value="config">
+            <ConfigTab />
           </TabsContent>
           <TabsContent className="flex-1" value="debug">
             <DebugTab />
