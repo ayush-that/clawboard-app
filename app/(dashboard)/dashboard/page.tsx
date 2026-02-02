@@ -1,9 +1,12 @@
 "use client";
 
 import { EventFeed } from "@/components/dashboard/event-feed";
+import { ExecApprovalOverlay } from "@/components/dashboard/exec-approval-overlay";
+import { ChannelsTab } from "@/components/dashboard/tabs/channels-tab";
 import { ConfigTab } from "@/components/dashboard/tabs/config-tab";
 import { CronTab } from "@/components/dashboard/tabs/cron-tab";
 import { DebugTab } from "@/components/dashboard/tabs/debug-tab";
+import { LogsTab } from "@/components/dashboard/tabs/logs-tab";
 import { MemoryTab } from "@/components/dashboard/tabs/memory-tab";
 import { SessionsTab } from "@/components/dashboard/tabs/sessions-tab";
 import { SkillsTab } from "@/components/dashboard/tabs/skills-tab";
@@ -14,6 +17,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 export default function DashboardPage() {
   return (
     <div className="flex h-dvh flex-col bg-background">
+      {/* Exec approval overlay — global, always mounted */}
+      <ExecApprovalOverlay />
+
       {/* Header */}
       <header className="flex items-center justify-between border-b border-border/50 px-6 py-3">
         <div className="flex items-center gap-3">
@@ -39,10 +45,12 @@ export default function DashboardPage() {
           <TabsList className="w-full justify-start">
             <TabsTrigger value="status">Status</TabsTrigger>
             <TabsTrigger value="sessions">Sessions</TabsTrigger>
+            <TabsTrigger value="logs">Logs</TabsTrigger>
             <TabsTrigger value="cron">Cron</TabsTrigger>
             <TabsTrigger value="memory">Memory</TabsTrigger>
             <TabsTrigger value="skills">Skills</TabsTrigger>
             <TabsTrigger value="usage">Usage</TabsTrigger>
+            <TabsTrigger value="channels">Channels</TabsTrigger>
             <TabsTrigger value="config">Config</TabsTrigger>
             <TabsTrigger value="debug">Debug</TabsTrigger>
           </TabsList>
@@ -55,6 +63,9 @@ export default function DashboardPage() {
           <TabsContent className="flex-1" value="sessions">
             <SessionsTab />
           </TabsContent>
+          <TabsContent className="flex-1" value="logs">
+            <LogsTab />
+          </TabsContent>
           <TabsContent className="flex-1" value="cron">
             <CronTab />
           </TabsContent>
@@ -66,6 +77,9 @@ export default function DashboardPage() {
           </TabsContent>
           <TabsContent className="flex-1" value="usage">
             <UsageTab />
+          </TabsContent>
+          <TabsContent className="flex-1" value="channels">
+            <ChannelsTab />
           </TabsContent>
           <TabsContent className="flex-1" value="config">
             <ConfigTab />

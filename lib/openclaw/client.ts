@@ -1,9 +1,12 @@
 import type {
   AgentStatusData,
+  ChannelConfig,
   CostDataPoint,
   CronJobData,
   DebugInfo,
   ErrorData,
+  ExecApprovalRequest,
+  LogEntry,
   MemoryData,
   ModelBreakdown,
   OpenClawConfig,
@@ -600,4 +603,156 @@ export const getDebugInfo = async (): Promise<DebugInfo> => {
       timestamp: new Date().toISOString(),
     };
   }
+};
+
+// --- Logs ---
+
+export const getRecentLogs = async (): Promise<LogEntry[]> => {
+  try {
+    const sessionKey = await getPrimarySessionKey();
+    const details = await invokeTool<SessionHistoryDetails>(
+      "sessions_history",
+      { sessionKey }
+    );
+
+    const logs: LogEntry[] = [];
+    for (const m of details.messages) {
+      if (!m.timestamp) {
+        continue;
+      }
+      const textPart = m.content?.find((c) => c.type === "text");
+      const thinkPart = m.content?.find((c) => c.type === "thinking");
+      const toolPart = m.content?.find((c) => c.type === "tool_use");
+
+      if (textPart?.text) {
+        logs.push({
+          timestamp: new Date(m.timestamp).toISOString(),
+          level: m.role === "assistant" ? "info" : "debug",
+          source: m.role === "assistant" ? (m.model ?? "agent") : "user",
+          content: textPart.text.slice(0, 500),
+        });
+      }
+
+      if (thinkPart?.thinking) {
+        logs.push({
+          timestamp: new Date(m.timestamp).toISOString(),
+          level: "debug",
+          source: "thinking",
+          content: thinkPart.thinking.slice(0, 300),
+        });
+      }
+
+      if (toolPart) {
+        logs.push({
+          timestamp: new Date(m.timestamp).toISOString(),
+          level: "info",
+          source: "tool",
+          content: `Tool call: ${(toolPart as Record<string, unknown>).name ?? "unknown"}`,
+        });
+      }
+    }
+
+    return logs
+      .sort(
+        (a, b) =>
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      )
+      .slice(0, 100);
+  } catch {
+    return [];
+  }
+};
+
+// --- Exec Approvals ---
+
+type ExecPendingDetails = {
+  approvals: Array<{
+    id: string;
+    sessionKey: string;
+    tool: string;
+    args: Record<string, unknown>;
+    requestedAt: string;
+  }>;
+};
+
+export const getPendingApprovals = async (): Promise<ExecApprovalRequest[]> => {
+  try {
+    const details = await invokeTool<ExecPendingDetails>("exec_pending", {});
+    return (details.approvals ?? []).map((a) => ({
+      id: a.id,
+      sessionKey: a.sessionKey,
+      tool: a.tool,
+      args: a.args ?? {},
+      requestedAt: a.requestedAt ?? new Date().toISOString(),
+    }));
+  } catch {
+    return [];
+  }
+};
+
+export const resolveApproval = async (
+  id: string,
+  action: "allow-once" | "allow-always" | "deny"
+): Promise<{ success: boolean }> => {
+  try {
+    await invokeTool("exec_resolve", { id, action });
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+};
+
+// --- Channels ---
+
+export const getChannels = async (): Promise<ChannelConfig[]> => {
+  try {
+    const config = await getConfig();
+    return extractChannelsFromConfig(config);
+  } catch {
+    return [];
+  }
+};
+
+export const updateChannel = async (
+  name: string,
+  settings: Record<string, unknown>,
+  hash: string
+): Promise<{ success: boolean }> => {
+  try {
+    await patchConfig({ channels: { [name]: settings } }, hash);
+    return { success: true };
+  } catch {
+    return { success: false };
+  }
+};
+
+const extractChannelsFromConfig = (config: OpenClawConfig): ChannelConfig[] => {
+  const channels: ChannelConfig[] = [];
+  try {
+    const raw = JSON.parse(config.raw) as Record<string, unknown>;
+    const channelsSection = raw.channels as Record<string, unknown> | undefined;
+    if (channelsSection && typeof channelsSection === "object") {
+      for (const [name, value] of Object.entries(channelsSection)) {
+        if (typeof value === "object" && value !== null) {
+          const ch = value as Record<string, unknown>;
+          channels.push({
+            name,
+            type: (ch.type as string) ?? name,
+            enabled: (ch.enabled as boolean) ?? true,
+            settings: ch,
+          });
+        } else {
+          channels.push({
+            name,
+            type: name,
+            enabled: true,
+            settings: { value },
+          });
+        }
+      }
+    }
+  } catch {
+    // parse error
+  }
+  return channels;
 };

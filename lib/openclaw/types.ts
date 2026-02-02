@@ -131,3 +131,25 @@ export type OpenClawConfig = {
   raw: string;
   hash: string;
 };
+
+export type LogEntry = {
+  timestamp: string;
+  level: "info" | "warn" | "error" | "debug";
+  source: string;
+  content: string;
+};
+
+export type ExecApprovalRequest = {
+  id: string;
+  sessionKey: string;
+  tool: string;
+  args: Record<string, unknown>;
+  requestedAt: string;
+};
+
+export type ChannelConfig = {
+  name: string;
+  type: string;
+  enabled: boolean;
+  settings: Record<string, unknown>;
+};
