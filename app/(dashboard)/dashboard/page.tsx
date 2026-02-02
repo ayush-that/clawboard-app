@@ -11,6 +11,7 @@ import { MemoryTab } from "@/components/dashboard/tabs/memory-tab";
 import { SessionsTab } from "@/components/dashboard/tabs/sessions-tab";
 import { SkillsTab } from "@/components/dashboard/tabs/skills-tab";
 import { StatusTab } from "@/components/dashboard/tabs/status-tab";
+import { TasksTab } from "@/components/dashboard/tabs/tasks-tab";
 import { UsageTab } from "@/components/dashboard/tabs/usage-tab";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -44,6 +45,7 @@ export default function DashboardPage() {
         <div className="border-b border-border/50 px-4 pt-2">
           <TabsList className="w-full justify-start">
             <TabsTrigger value="status">Status</TabsTrigger>
+            <TabsTrigger value="tasks">Tasks</TabsTrigger>
             <TabsTrigger value="sessions">Sessions</TabsTrigger>
             <TabsTrigger value="logs">Logs</TabsTrigger>
             <TabsTrigger value="cron">Cron</TabsTrigger>
@@ -59,6 +61,9 @@ export default function DashboardPage() {
         <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">
           <TabsContent className="flex-1" value="status">
             <StatusTab />
+          </TabsContent>
+          <TabsContent className="flex-1" value="tasks">
+            <TasksTab />
           </TabsContent>
           <TabsContent className="flex-1" value="sessions">
             <SessionsTab />
