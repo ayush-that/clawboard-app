@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 
 type CodeBlockProps = {
   code: string;
@@ -29,29 +28,22 @@ export const CodeBlock = ({
 
   return (
     <Card className="w-full border-border/50 bg-card/80 backdrop-blur-sm">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <CardTitle className="font-mono text-sm">
-            {filename ?? "Code"}
-          </CardTitle>
-          <div className="flex items-center gap-2">
-            <Badge className="font-mono text-xs" variant="secondary">
-              {language}
-            </Badge>
-            <button
-              className="rounded-md px-2 py-1 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              onClick={handleCopy}
-              type="button"
-            >
-              {copied ? "Copied!" : "Copy"}
-            </button>
-          </div>
-        </div>
-        {description ? (
-          <p className="text-xs text-muted-foreground">{description}</p>
-        ) : null}
-      </CardHeader>
-      <CardContent>
+      <div className="flex items-center justify-between px-3 py-1.5">
+        <span className="font-mono text-xs text-muted-foreground">
+          {filename ?? language}
+        </span>
+        <button
+          className="rounded px-1.5 py-0.5 font-mono text-xs text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          onClick={handleCopy}
+          type="button"
+        >
+          {copied ? "Copied!" : "Copy"}
+        </button>
+      </div>
+      {description ? (
+        <p className="px-3 pb-1 text-xs text-muted-foreground">{description}</p>
+      ) : null}
+      <CardContent className="p-0">
         <pre className="overflow-x-auto rounded-lg bg-background/80 p-4 font-mono text-sm leading-relaxed">
           <code>{code}</code>
         </pre>
