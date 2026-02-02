@@ -1,10 +1,8 @@
 "use server";
 
-import { generateText, type UIMessage } from "ai";
+import type { UIMessage } from "ai";
 import { cookies } from "next/headers";
 import type { VisibilityType } from "@/components/visibility-selector";
-import { titlePrompt } from "@/lib/ai/prompts";
-import { getTitleModel } from "@/lib/ai/providers";
 import {
   deleteMessagesByChatIdAfterTimestamp,
   getMessageById,
@@ -17,20 +15,18 @@ export async function saveChatModelAsCookie(model: string) {
   cookieStore.set("chat-model", model);
 }
 
+// biome-ignore lint/suspicious/useAwait: Server Actions must be async
 export async function generateTitleFromUserMessage({
   message,
 }: {
   message: UIMessage;
 }) {
-  const { text } = await generateText({
-    model: getTitleModel(),
-    system: titlePrompt,
-    prompt: getTextFromMessage(message),
-  });
-  return text
-    .replace(/^[#*"\s]+/, "")
-    .replace(/["]+$/, "")
-    .trim();
+  const text = getTextFromMessage(message).trim();
+  if (!text) {
+    return "New Conversation";
+  }
+  const words = text.split(/\s+/).slice(0, 5).join(" ");
+  return words.length > 50 ? `${words.slice(0, 50)}...` : words;
 }
 
 export async function deleteTrailingMessages({ id }: { id: string }) {

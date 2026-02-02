@@ -1,4 +1,5 @@
 import { gateway } from "@ai-sdk/gateway";
+import { createOpenAI } from "@ai-sdk/openai";
 import {
   customProvider,
   extractReasoningMiddleware,
@@ -32,6 +33,14 @@ export function getLanguageModel(modelId: string) {
     return myProvider.languageModel(modelId);
   }
 
+  if (modelId === "openclaw") {
+    const openclaw = createOpenAI({
+      baseURL: `${process.env.OPENCLAW_GATEWAY_URL ?? "http://localhost:18789"}/v1`,
+      apiKey: process.env.OPENCLAW_GATEWAY_TOKEN ?? "dummy",
+    });
+    return openclaw.chat("openclaw:main");
+  }
+
   const isReasoningModel =
     modelId.includes("reasoning") || modelId.endsWith("-thinking");
 
@@ -47,16 +56,24 @@ export function getLanguageModel(modelId: string) {
   return gateway.languageModel(modelId);
 }
 
+function getOpenClawChat() {
+  const openclaw = createOpenAI({
+    baseURL: `${process.env.OPENCLAW_GATEWAY_URL ?? "http://localhost:18789"}/v1`,
+    apiKey: process.env.OPENCLAW_GATEWAY_TOKEN ?? "dummy",
+  });
+  return openclaw.chat("openclaw:main");
+}
+
 export function getTitleModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("title-model");
   }
-  return gateway.languageModel("google/gemini-2.5-flash-lite");
+  return getOpenClawChat();
 }
 
 export function getArtifactModel() {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("artifact-model");
   }
-  return gateway.languageModel("anthropic/claude-haiku-4.5");
+  return getOpenClawChat();
 }

@@ -26,7 +26,6 @@ import {
   getMessagesByChatId,
   saveChat,
   saveMessages,
-  updateChatTitleById,
   updateMessage,
 } from "@/lib/db/queries";
 import type { DBMessage } from "@/lib/db/schema";
@@ -83,7 +82,7 @@ export async function POST(request: Request) {
 
     const chat = await getChatById({ id });
     let messagesFromDb: DBMessage[] = [];
-    let titlePromise: Promise<string> | null = null;
+    let chatTitle: string | null = null;
 
     if (chat) {
       if (chat.userId !== session.user.id) {
@@ -93,13 +92,13 @@ export async function POST(request: Request) {
         messagesFromDb = await getMessagesByChatId({ id });
       }
     } else if (message?.role === "user") {
+      chatTitle = await generateTitleFromUserMessage({ message });
       await saveChat({
         id,
         userId: session.user.id,
-        title: "New chat",
+        title: chatTitle ?? "New chat",
         visibility: selectedVisibilityType,
       });
-      titlePromise = generateTitleFromUserMessage({ message });
     }
 
     const uiMessages = isToolApprovalFlow
@@ -133,6 +132,7 @@ export async function POST(request: Request) {
     const isReasoningModel =
       selectedChatModel.includes("reasoning") ||
       selectedChatModel.includes("thinking");
+    const isOpenClaw = selectedChatModel === "openclaw";
 
     const modelMessages = await convertToModelMessages(uiMessages);
 
@@ -144,14 +144,15 @@ export async function POST(request: Request) {
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: modelMessages,
           stopWhen: stepCountIs(5),
-          experimental_activeTools: isReasoningModel
-            ? []
-            : [
-                "getWeather",
-                "createDocument",
-                "updateDocument",
-                "requestSuggestions",
-              ],
+          experimental_activeTools:
+            isReasoningModel || isOpenClaw
+              ? []
+              : [
+                  "getWeather",
+                  "createDocument",
+                  "updateDocument",
+                  "requestSuggestions",
+                ],
           providerOptions: isReasoningModel
             ? {
                 anthropic: {
@@ -171,12 +172,12 @@ export async function POST(request: Request) {
           },
         });
 
-        dataStream.merge(result.toUIMessageStream({ sendReasoning: true }));
+        await dataStream.merge(
+          result.toUIMessageStream({ sendReasoning: true })
+        );
 
-        if (titlePromise) {
-          const title = await titlePromise;
-          dataStream.write({ type: "data-chat-title", data: title });
-          updateChatTitleById({ chatId: id, title });
+        if (chatTitle) {
+          dataStream.write({ type: "data-chat-title", data: chatTitle });
         }
       },
       generateId: generateUUID,
@@ -217,7 +218,10 @@ export async function POST(request: Request) {
           });
         }
       },
-      onError: () => "Oops, an error occurred!",
+      onError: (error) => {
+        console.error("Stream error:", error);
+        return "Oops, an error occurred!";
+      },
     });
 
     return createUIMessageStreamResponse({

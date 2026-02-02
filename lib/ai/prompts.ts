@@ -65,6 +65,11 @@ export const systemPrompt = ({
 }) => {
   const requestPrompt = getRequestPromptFromHints(requestHints);
 
+  // OpenClaw has its own system prompt — keep ours minimal
+  if (selectedChatModel === "openclaw") {
+    return `You are an OpenClaw autonomous agent. Respond naturally to user queries.\n\n${requestPrompt}`;
+  }
+
   // reasoning models don't need artifacts prompt (they can't use tools)
   if (
     selectedChatModel.includes("reasoning") ||

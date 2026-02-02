@@ -1,7 +1,6 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { useState } from "react";
-import type { Vote } from "@/lib/db/schema";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
 import { useDataStream } from "./data-stream-provider";
@@ -27,7 +26,6 @@ const PurePreviewMessage = ({
   addToolApprovalResponse,
   chatId,
   message,
-  vote,
   isLoading,
   setMessages,
   regenerate,
@@ -37,7 +35,6 @@ const PurePreviewMessage = ({
   addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];
   chatId: string;
   message: ChatMessage;
-  vote: Vote | undefined;
   isLoading: boolean;
   setMessages: UseChatHelpers<ChatMessage>["setMessages"];
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
@@ -140,7 +137,13 @@ const PurePreviewMessage = ({
                           : undefined
                       }
                     >
-                      <Response>{sanitizeText(part.text)}</Response>
+                      {message.role === "user" ? (
+                        <span className="whitespace-pre-wrap">
+                          {sanitizeText(part.text)}
+                        </span>
+                      ) : (
+                        <Response>{sanitizeText(part.text)}</Response>
+                      )}
                     </MessageContent>
                   </div>
                 );
@@ -352,7 +355,6 @@ const PurePreviewMessage = ({
               key={`action-${message.id}`}
               message={message}
               setMode={setMode}
-              vote={vote}
             />
           )}
         </div>
