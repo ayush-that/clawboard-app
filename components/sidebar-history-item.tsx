@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { memo } from "react";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
+import { useActiveView } from "@/lib/contexts/active-view-context";
 import type { Chat } from "@/lib/db/schema";
 import {
   CheckCircleFillIcon,
@@ -42,10 +43,18 @@ const PureChatItem = ({
     initialVisibilityType: chat.visibility,
   });
 
+  const { setChat } = useActiveView();
+
   return (
     <SidebarMenuItem>
       <SidebarMenuButton asChild isActive={isActive}>
-        <Link href={`/chat/${chat.id}`} onClick={() => setOpenMobile(false)}>
+        <Link
+          href={`/chat/${chat.id}`}
+          onClick={() => {
+            setOpenMobile(false);
+            setChat();
+          }}
+        >
           <span>{chat.title}</span>
         </Link>
       </SidebarMenuButton>

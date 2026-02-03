@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { PlusIcon, TrashIcon } from "@/components/icons";
+import { SidebarDashboardNav } from "@/components/sidebar-dashboard-nav";
 import {
   getChatHistoryPaginationKey,
   SidebarHistory,
@@ -22,6 +23,7 @@ import {
   SidebarMenu,
   useSidebar,
 } from "@/components/ui/sidebar";
+import { useActiveView } from "@/lib/contexts/active-view-context";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -37,6 +39,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();
   const { setOpenMobile } = useSidebar();
+  const { setChat } = useActiveView();
   const { mutate } = useSWRConfig();
   const [showDeleteAllDialog, setShowDeleteAllDialog] = useState(false);
 
@@ -69,10 +72,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 href="/"
                 onClick={() => {
                   setOpenMobile(false);
+                  setChat();
                 }}
               >
                 <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
-                  Chatbot
+                  ClawBoard
                 </span>
               </Link>
               <div className="flex flex-row gap-1">
@@ -99,6 +103,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       className="h-8 p-1 md:h-fit md:p-2"
                       onClick={() => {
                         setOpenMobile(false);
+                        setChat();
                         router.push("/");
                         router.refresh();
                       }}
@@ -118,6 +123,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
         </SidebarHeader>
         <SidebarContent>
           <SidebarHistory user={user} />
+          <SidebarDashboardNav />
         </SidebarContent>
         <SidebarFooter>{user && <SidebarUserNav user={user} />}</SidebarFooter>
       </Sidebar>
