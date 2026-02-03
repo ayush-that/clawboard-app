@@ -2,7 +2,6 @@
 
 import type { PanelName } from "@/lib/contexts/active-view-context";
 import { useActiveView } from "@/lib/contexts/active-view-context";
-import { EventFeed } from "./dashboard/event-feed";
 import { ChannelsTab } from "./dashboard/tabs/channels-tab";
 import { ConfigTab } from "./dashboard/tabs/config-tab";
 import { CronTab } from "./dashboard/tabs/cron-tab";
@@ -43,7 +42,6 @@ export const DashboardPanelView = () => {
       <div className="flex-1 overflow-y-auto">
         <PanelComponent />
       </div>
-      <EventFeed />
     </div>
   );
 };
