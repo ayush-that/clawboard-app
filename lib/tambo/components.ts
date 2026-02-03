@@ -10,42 +10,10 @@ import { MemoryView } from "@/components/generative/memory-view";
 import { ProConList } from "@/components/generative/pro-con-list";
 import { SkillCard } from "@/components/generative/skill-card";
 import { StepGuide } from "@/components/generative/step-guide";
-import { TaskTimeline } from "@/components/generative/task-timeline";
 import { WebhookLog } from "@/components/generative/webhook-log";
 
 export const tamboComponents: TamboComponent[] = [
   // ── Agent-specific components ──────────────────────────────────
-  {
-    name: "TaskTimeline",
-    description:
-      "Shows a timeline of recent task executions with status indicators. Use when the user asks about recent activity, what happened overnight, task history, what the agent has been doing, or job executions.",
-    component: TaskTimeline,
-    propsSchema: z.object({
-      tasks: z
-        .array(
-          z.object({
-            name: z.string().describe("Name of the task that ran"),
-            status: z
-              .enum(["success", "failed", "running"])
-              .describe("Current status of the task"),
-            startedAt: z
-              .string()
-              .describe("ISO 8601 timestamp when the task started"),
-            duration: z
-              .number()
-              .describe("Duration in milliseconds. 0 if still running."),
-            result: z
-              .string()
-              .optional()
-              .describe("Human-readable result summary"),
-          })
-        )
-        .describe("Array of task execution records"),
-      timeRange: z
-        .enum(["1h", "6h", "24h", "7d"])
-        .describe("Time range filter. Default to '24h' unless user specifies."),
-    }),
-  },
   {
     name: "CostChart",
     description:

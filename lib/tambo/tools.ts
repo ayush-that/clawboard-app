@@ -2,29 +2,6 @@ import { z } from "zod";
 
 export const tamboTools = [
   {
-    name: "getRecentTasks",
-    description:
-      "Fetch recent task executions from OpenClaw session history. Use when the user asks about recent activity, what happened overnight, task history, or what the agent has been doing.",
-    tool: async ({ timeRange }: { timeRange: string }) => {
-      const res = await fetch(`/api/openclaw/tasks?range=${timeRange}`);
-      return res.json();
-    },
-    inputSchema: z.object({
-      timeRange: z
-        .enum(["1h", "6h", "24h", "7d"])
-        .describe("Time range to fetch tasks for. Use '24h' as default."),
-    }),
-    outputSchema: z.array(
-      z.object({
-        name: z.string(),
-        status: z.enum(["success", "failed", "running"]),
-        startedAt: z.string(),
-        duration: z.number(),
-        result: z.string().optional(),
-      })
-    ),
-  },
-  {
     name: "getInstalledSkills",
     description:
       "List all installed OpenClaw skills and their status. Use when the user asks about capabilities, installed skills, what the agent can do, or integrations.",

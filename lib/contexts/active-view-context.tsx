@@ -10,7 +10,6 @@ import {
 } from "react";
 
 export type PanelName =
-  | "tasks"
   | "sessions"
   | "logs"
   | "cron"

@@ -1,5 +1,6 @@
 "use client";
 
+import { code } from "@streamdown/code";
 import type { ComponentProps } from "react";
 import { Streamdown } from "streamdown";
 import { cn } from "@/lib/utils";
@@ -13,6 +14,7 @@ export function Response({ className, children, ...props }: ResponseProps) {
         "max-w-full overflow-hidden [&>*:first-child]:mt-0 [&>*:last-child]:mb-0 [&_code]:whitespace-pre-wrap [&_code]:break-words [&_pre]:max-w-full [&_pre]:overflow-x-auto",
         className
       )}
+      plugins={{ code }}
       {...props}
     >
       {children}

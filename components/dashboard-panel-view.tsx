@@ -9,12 +9,10 @@ import { LogsTab } from "./dashboard/tabs/logs-tab";
 import { MemoryTab } from "./dashboard/tabs/memory-tab";
 import { SessionsTab } from "./dashboard/tabs/sessions-tab";
 import { SkillsTab } from "./dashboard/tabs/skills-tab";
-import { TasksTab } from "./dashboard/tabs/tasks-tab";
 import { UsageTab } from "./dashboard/tabs/usage-tab";
 import { SidebarToggle } from "./sidebar-toggle";
 
 const panels: Record<PanelName, () => JSX.Element> = {
-  tasks: TasksTab,
   sessions: SessionsTab,
   logs: LogsTab,
   cron: CronTab,

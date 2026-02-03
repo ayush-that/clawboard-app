@@ -4,7 +4,6 @@ import type { ReactNode } from "react";
 import type { PanelName } from "@/lib/contexts/active-view-context";
 import { useActiveView } from "@/lib/contexts/active-view-context";
 import {
-  CheckCircleFillIcon,
   CodeIcon,
   LineChartIcon,
   LogsIcon,
@@ -24,7 +23,6 @@ import {
 } from "./ui/sidebar";
 
 const navItems: Array<{ name: PanelName; label: string; icon: ReactNode }> = [
-  { name: "tasks", label: "Tasks", icon: <CheckCircleFillIcon size={16} /> },
   { name: "sessions", label: "Sessions", icon: <MessageIcon size={16} /> },
   { name: "logs", label: "Logs", icon: <LogsIcon size={16} /> },
   { name: "cron", label: "Cron", icon: <TerminalIcon size={16} /> },
