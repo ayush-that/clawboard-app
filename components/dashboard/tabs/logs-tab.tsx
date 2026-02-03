@@ -19,16 +19,6 @@ const levelColors: Record<string, string> = {
   debug: "text-muted-foreground",
 };
 
-const levelBadgeVariant: Record<
-  string,
-  "default" | "secondary" | "destructive" | "outline"
-> = {
-  info: "default",
-  warn: "secondary",
-  error: "destructive",
-  debug: "outline",
-};
-
 const LEVELS = ["all", "info", "warn", "error", "debug"] as const;
 
 export const LogsTab = () => {
@@ -151,25 +141,24 @@ export const LogsTab = () => {
         ) : (
           displayLogs.map((entry) => (
             <div
-              className="flex gap-2 rounded px-1 py-0.5 hover:bg-white/5"
+              className="min-w-0 rounded px-1 py-0.5 hover:bg-white/5"
               key={`${entry.timestamp}-${entry.source}-${entry.content.slice(0, 20)}`}
             >
-              <span className="shrink-0 text-muted-foreground">
+              <span className="text-muted-foreground">
                 {new Date(entry.timestamp).toLocaleTimeString("en-US", {
                   hour: "2-digit",
                   minute: "2-digit",
                   second: "2-digit",
                   hour12: false,
                 })}
-              </span>
-              <Badge
-                className="shrink-0 px-1.5 py-0 text-xs"
-                variant={levelBadgeVariant[entry.level] ?? "outline"}
-              >
-                {entry.level.padEnd(5)}
-              </Badge>
-              <span className="shrink-0 text-purple-400">[{entry.source}]</span>
+              </span>{" "}
               <span className={levelColors[entry.level] ?? "text-foreground"}>
+                {entry.level.padEnd(5)}
+              </span>{" "}
+              <span className="text-purple-400">[{entry.source}]</span>{" "}
+              <span
+                className={`break-words ${levelColors[entry.level] ?? "text-foreground"}`}
+              >
                 {entry.content}
               </span>
             </div>
