@@ -3,7 +3,7 @@
 import * as React from "react"
 import { Dialog as SheetPrimitive } from "radix-ui"
 import { cva, type VariantProps } from "class-variance-authority"
-import { X } from "lucide-react"
+import { X } from "@/lib/hugeicons"
 
 import { cn } from "@/lib/utils"
 

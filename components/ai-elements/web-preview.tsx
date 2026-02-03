@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronDownIcon } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, useContext, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -16,6 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ChevronDownIcon } from "@/lib/hugeicons";
 import { cn } from "@/lib/utils";
 
 export type WebPreviewContextValue = {

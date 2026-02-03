@@ -1,6 +1,5 @@
 "use client";
 
-import { ChevronsUpDownIcon } from "lucide-react";
 import type { ComponentProps } from "react";
 import { createContext, useContext } from "react";
 import { Button } from "@/components/ui/button";
@@ -18,6 +17,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { ChevronsUpDownIcon } from "@/lib/hugeicons";
 import { cn } from "@/lib/utils";
 import { Shimmer } from "./shimmer";
 

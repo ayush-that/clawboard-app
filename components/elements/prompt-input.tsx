@@ -1,7 +1,6 @@
 "use client";
 
 import type { ChatStatus } from "ai";
-import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "lucide-react";
 import type {
   ComponentProps,
   HTMLAttributes,
@@ -17,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "@/lib/hugeicons";
 import { cn } from "@/lib/utils";
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;

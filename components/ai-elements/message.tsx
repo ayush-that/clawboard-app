@@ -1,12 +1,7 @@
 "use client";
 
+import { code } from "@streamdown/code";
 import type { FileUIPart, UIMessage } from "ai";
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  PaperclipIcon,
-  XIcon,
-} from "lucide-react";
 import type { ComponentProps, HTMLAttributes, ReactElement } from "react";
 import { createContext, memo, useContext, useEffect, useState } from "react";
 import { Streamdown } from "streamdown";
@@ -18,6 +13,12 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  PaperclipIcon,
+  XIcon,
+} from "@/lib/hugeicons";
 import { cn } from "@/lib/utils";
 
 export type MessageProps = HTMLAttributes<HTMLDivElement> & {
@@ -310,6 +311,7 @@ export const MessageResponse = memo(
         "size-full [&>*:first-child]:mt-0 [&>*:last-child]:mb-0",
         className
       )}
+      plugins={{ code }}
       {...props}
     />
   ),

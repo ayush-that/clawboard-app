@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react";
 import {
   type ComponentProps,
   createContext,
@@ -21,6 +20,7 @@ import {
   HoverCardContent,
   HoverCardTrigger,
 } from "@/components/ui/hover-card";
+import { ArrowLeftIcon, ArrowRightIcon } from "@/lib/hugeicons";
 import { cn } from "@/lib/utils";
 
 export type InlineCitationProps = ComponentProps<"span">;

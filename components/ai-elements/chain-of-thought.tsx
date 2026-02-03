@@ -1,12 +1,6 @@
 "use client";
 
 import { useControllableState } from "@radix-ui/react-use-controllable-state";
-import {
-  BrainIcon,
-  ChevronDownIcon,
-  DotIcon,
-  type LucideIcon,
-} from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
 import { createContext, memo, useContext, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +9,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import {
+  BrainIcon,
+  ChevronDownIcon,
+  DotIcon,
+  type IconComponent,
+} from "@/lib/hugeicons";
 import { cn } from "@/lib/utils";
 
 type ChainOfThoughtContextValue = {
@@ -109,7 +109,7 @@ export const ChainOfThoughtHeader = memo(
 );
 
 export type ChainOfThoughtStepProps = ComponentProps<"div"> & {
-  icon?: LucideIcon;
+  icon?: IconComponent;
   label: ReactNode;
   description?: ReactNode;
   status?: "complete" | "active" | "pending";
