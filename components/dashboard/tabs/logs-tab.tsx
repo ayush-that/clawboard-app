@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type LogEntry = {
   timestamp: string;
@@ -27,6 +29,8 @@ const levelBadgeVariant: Record<
   debug: "outline",
 };
 
+const LEVELS = ["all", "info", "warn", "error", "debug"] as const;
+
 export const LogsTab = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,7 +49,6 @@ export const LogsTab = () => {
       const res = await fetch("/api/openclaw/logs");
       const json = (await res.json()) as LogEntry[];
       setLogs(json);
-      // Defer scroll to after React renders the new logs
       requestAnimationFrame(() => {
         if (autoScrollRef.current) {
           scrollToBottom();
@@ -58,7 +61,6 @@ export const LogsTab = () => {
     }
   }, [scrollToBottom]);
 
-  // Use a ref for autoScroll so the fetch callback doesn't need it as a dep
   const autoScrollRef = useRef(autoScroll);
   autoScrollRef.current = autoScroll;
 
@@ -72,14 +74,27 @@ export const LogsTab = () => {
 
   const filteredLogs =
     filter === "all" ? logs : logs.filter((l) => l.level === filter);
-
-  // Show logs in chronological order (oldest first) for a terminal feel
   const displayLogs = [...filteredLogs].reverse();
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading logs...</p>
+      <div className="flex h-full flex-col">
+        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+          <Skeleton className="h-4 w-16" />
+          <div className="flex gap-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <Skeleton
+                className="h-7 w-12 rounded-md"
+                key={`skel-${String(i)}`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 space-y-1 p-3">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <Skeleton className="h-4 w-full" key={`log-skel-${String(i)}`} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -87,7 +102,7 @@ export const LogsTab = () => {
   return (
     <div className="flex h-full flex-col">
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-border/30 px-4 py-2">
+      <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold">Logs</h2>
           <Badge className="text-xs" variant="outline">
@@ -96,21 +111,18 @@ export const LogsTab = () => {
         </div>
         <div className="flex items-center gap-3">
           <div className="flex gap-1">
-            {["all", "info", "warn", "error", "debug"].map((level) => (
-              <button
-                className={`rounded px-2 py-0.5 text-xs transition-colors ${
-                  filter === level
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
+            {LEVELS.map((level) => (
+              <Button
+                className="h-7 px-2.5 text-xs"
                 key={level}
                 onClick={() => {
                   setFilter(level);
                 }}
-                type="button"
+                size="sm"
+                variant={filter === level ? "default" : "ghost"}
               >
                 {level}
-              </button>
+              </Button>
             ))}
           </div>
           <label className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground">
@@ -129,7 +141,7 @@ export const LogsTab = () => {
 
       {/* Log stream */}
       <div
-        className="flex-1 overflow-y-auto bg-black/20 p-2 font-mono text-xs"
+        className="flex-1 overflow-y-auto bg-black/20 p-3 font-mono text-xs"
         ref={scrollRef}
       >
         {displayLogs.length === 0 ? (
@@ -139,7 +151,7 @@ export const LogsTab = () => {
         ) : (
           displayLogs.map((entry) => (
             <div
-              className="flex gap-2 py-0.5 hover:bg-white/5"
+              className="flex gap-2 rounded px-1 py-0.5 hover:bg-white/5"
               key={`${entry.timestamp}-${entry.source}-${entry.content.slice(0, 20)}`}
             >
               <span className="shrink-0 text-muted-foreground">
@@ -151,7 +163,7 @@ export const LogsTab = () => {
                 })}
               </span>
               <Badge
-                className="shrink-0 px-1 py-0 text-xs"
+                className="shrink-0 px-1.5 py-0 text-xs"
                 variant={levelBadgeVariant[entry.level] ?? "outline"}
               >
                 {entry.level.padEnd(5)}

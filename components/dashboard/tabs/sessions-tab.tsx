@@ -2,6 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type SessionInfo = {
   key: string;
@@ -65,6 +69,18 @@ const roleBadgeVariant = (
   return "outline";
 };
 
+const LoadingSkeleton = () => (
+  <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-5 w-24" />
+      <Skeleton className="h-4 w-16" />
+    </div>
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Skeleton className="h-20 w-full rounded-lg" key={`skel-${String(i)}`} />
+    ))}
+  </div>
+);
+
 export const SessionsTab = () => {
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -104,30 +120,26 @@ export const SessionsTab = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading sessions...</p>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   // Message viewer
   if (selectedKey) {
     const session = sessions.find((s) => s.key === selectedKey);
     return (
-      <div className="flex flex-col p-4">
-        <div className="mb-3 flex items-center gap-3">
-          <button
-            className="rounded-md px-2 py-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+        <div className="mb-4 flex items-center gap-3">
+          <Button
             onClick={() => {
               setSelectedKey(null);
               setMessages([]);
             }}
-            type="button"
+            size="sm"
+            variant="ghost"
           >
             &larr; Back
-          </button>
-          <h2 className="text-lg font-semibold">
+          </Button>
+          <h2 className="text-base font-semibold">
             {session?.displayName ?? selectedKey}
           </h2>
           {session ? (
@@ -138,15 +150,22 @@ export const SessionsTab = () => {
         </div>
 
         {loadingMessages ? (
-          <div className="flex items-center justify-center p-12">
-            <p className="text-sm text-muted-foreground">Loading messages...</p>
+          <div className="space-y-3">
+            {Array.from({ length: 3 }).map((_, i) => (
+              <Skeleton
+                className="h-24 w-full rounded-lg"
+                key={`msg-skel-${String(i)}`}
+              />
+            ))}
           </div>
         ) : messages.length === 0 ? (
-          <div className="flex items-center justify-center p-12">
-            <p className="text-sm text-muted-foreground">
-              No messages in this session
-            </p>
-          </div>
+          <Card>
+            <CardContent className="flex items-center justify-center py-12">
+              <p className="text-sm text-muted-foreground">
+                No messages in this session
+              </p>
+            </CardContent>
+          </Card>
         ) : (
           <div className="space-y-3">
             {messages.map((msg) => {
@@ -156,46 +175,46 @@ export const SessionsTab = () => {
                 .join("\n");
 
               return (
-                <div
-                  className="rounded-md border border-border/30 p-3"
-                  key={`${msg.role}-${msg.timestamp}`}
-                >
-                  <div className="mb-1.5 flex items-center gap-2">
-                    <Badge
-                      className="text-xs"
-                      variant={roleBadgeVariant(msg.role)}
-                    >
-                      {msg.role}
-                    </Badge>
-                    {msg.model ? (
-                      <span className="font-mono text-xs text-muted-foreground">
-                        {msg.model}
-                      </span>
-                    ) : null}
-                    {msg.timestamp ? (
-                      <span className="font-mono text-xs text-muted-foreground">
-                        {new Date(msg.timestamp).toLocaleTimeString("en-US", {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          second: "2-digit",
-                          hour12: false,
-                        })}
-                      </span>
-                    ) : null}
-                    {msg.usage ? (
-                      <span className="font-mono text-xs text-muted-foreground">
-                        {formatTokens(msg.usage.totalTokens)} tokens
-                      </span>
-                    ) : null}
-                  </div>
-                  {textParts ? (
-                    <p className="whitespace-pre-wrap text-sm">{textParts}</p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground italic">
-                      (no text content)
-                    </p>
-                  )}
-                </div>
+                <Card key={`${msg.role}-${msg.timestamp}`}>
+                  <CardContent className="p-4">
+                    <div className="mb-2 flex items-center gap-2">
+                      <Badge
+                        className="text-xs"
+                        variant={roleBadgeVariant(msg.role)}
+                      >
+                        {msg.role}
+                      </Badge>
+                      {msg.model ? (
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {msg.model}
+                        </span>
+                      ) : null}
+                      {msg.timestamp ? (
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {new Date(msg.timestamp).toLocaleTimeString("en-US", {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            second: "2-digit",
+                            hour12: false,
+                          })}
+                        </span>
+                      ) : null}
+                      {msg.usage ? (
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {formatTokens(msg.usage.totalTokens)} tokens
+                        </span>
+                      ) : null}
+                    </div>
+                    <Separator className="mb-2" />
+                    {textParts ? (
+                      <p className="whitespace-pre-wrap text-sm">{textParts}</p>
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">
+                        (no text content)
+                      </p>
+                    )}
+                  </CardContent>
+                </Card>
               );
             })}
           </div>
@@ -207,47 +226,57 @@ export const SessionsTab = () => {
   // Session list
   if (sessions.length === 0) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">No sessions found</p>
+      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">No sessions found</p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-1 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Sessions</h2>
+    <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold">Sessions</h2>
         <span className="text-xs text-muted-foreground">
           {sessions.length} sessions
         </span>
       </div>
-      {sessions.map((session) => (
-        <button
-          className="flex w-full items-start gap-3 rounded-md border border-border/30 p-3 text-left transition-colors hover:bg-muted/50"
-          key={session.key}
-          onClick={() => {
-            loadMessages(session.key);
-          }}
-          type="button"
-        >
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <span className="truncate font-mono text-sm font-medium">
-                {session.displayName || session.key}
-              </span>
-              <Badge className="shrink-0 text-xs" variant="outline">
-                {session.channel || session.lastChannel}
-              </Badge>
-            </div>
-            <div className="mt-0.5 flex gap-3 font-mono text-xs text-muted-foreground">
-              <span>{session.model}</span>
-              <span>{formatTokens(session.totalTokens)} tokens</span>
-              <span>{formatTimeAgo(session.updatedAt)}</span>
-            </div>
-          </div>
-          <span className="mt-1 text-xs text-muted-foreground">&rarr;</span>
-        </button>
-      ))}
+      <div className="space-y-2">
+        {sessions.map((session) => (
+          <Card
+            className="cursor-pointer transition-colors hover:bg-muted/50"
+            key={session.key}
+          >
+            <button
+              className="w-full p-4 text-left"
+              onClick={() => {
+                loadMessages(session.key);
+              }}
+              type="button"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="truncate font-mono text-sm font-medium">
+                    {session.displayName || session.key}
+                  </span>
+                  <Badge className="shrink-0 text-xs" variant="outline">
+                    {session.channel || session.lastChannel}
+                  </Badge>
+                </div>
+                <span className="text-xs text-muted-foreground">&rarr;</span>
+              </div>
+              <div className="mt-1.5 flex gap-3 font-mono text-xs text-muted-foreground">
+                <span>{session.model}</span>
+                <span>{formatTokens(session.totalTokens)} tokens</span>
+                <span>{formatTimeAgo(session.updatedAt)}</span>
+              </div>
+            </button>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 };

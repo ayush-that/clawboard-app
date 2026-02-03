@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type SkillItem = {
   name: string;
@@ -17,6 +20,18 @@ const sourceColors: Record<string, string> = {
   installed: "text-purple-400",
   config: "text-yellow-400",
 };
+
+const LoadingSkeleton = () => (
+  <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-5 w-16" />
+      <Skeleton className="h-4 w-16" />
+    </div>
+    {Array.from({ length: 4 }).map((_, i) => (
+      <Skeleton className="h-16 w-full rounded-lg" key={`skel-${String(i)}`} />
+    ))}
+  </div>
+);
 
 export const SkillsTab = () => {
   const [skills, setSkills] = useState<SkillItem[]>([]);
@@ -38,32 +53,32 @@ export const SkillsTab = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading skills...</p>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (skills.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center gap-3 p-12">
-        <p className="text-sm text-muted-foreground">No skills found</p>
-        <p className="text-xs text-muted-foreground">
-          Install skills via{" "}
-          <code className="rounded bg-muted px-1 py-0.5">
-            npx clawhub install &lt;skill&gt;
-          </code>{" "}
-          or browse{" "}
-          <a
-            className="text-primary underline"
-            href="https://clawhub.com"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            ClawHub
-          </a>
-        </p>
+      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
+            <p className="text-sm text-muted-foreground">No skills found</p>
+            <p className="text-xs text-muted-foreground">
+              Install skills via{" "}
+              <code className="rounded bg-muted px-1.5 py-0.5 font-mono text-xs">
+                npx clawhub install &lt;skill&gt;
+              </code>{" "}
+              or browse{" "}
+              <a
+                className="text-primary underline"
+                href="https://clawhub.com"
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                ClawHub
+              </a>
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -78,9 +93,9 @@ export const SkillsTab = () => {
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Skills</h2>
+        <h2 className="text-base font-semibold">Skills</h2>
         <span className="text-xs text-muted-foreground">
           {skills.length} skills
         </span>
@@ -88,19 +103,16 @@ export const SkillsTab = () => {
 
       {[...grouped.entries()].map(([source, items]) => (
         <div key={source}>
-          <div className="mb-2 flex items-center gap-2">
+          <div className="mb-3 flex items-center gap-2">
             <h3 className="text-sm font-medium capitalize">{source}</h3>
             <Badge className="text-xs" variant="outline">
               {items.length}
             </Badge>
           </div>
-          <div className="space-y-1">
+          <div className="space-y-2">
             {items.map((skill) => (
-              <div
-                className="flex items-start gap-3 rounded-md border border-border/30 p-3"
-                key={skill.name}
-              >
-                <div className="min-w-0 flex-1">
+              <Card key={skill.name}>
+                <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-sm font-medium">
                       {skill.name}
@@ -119,35 +131,34 @@ export const SkillsTab = () => {
                     </Badge>
                   </div>
                   {skill.description ? (
-                    <p className="mt-1 text-xs text-muted-foreground">
+                    <p className="mt-1.5 text-xs text-muted-foreground">
                       {skill.description}
                     </p>
                   ) : null}
                   {skill.path ? (
-                    <p className="mt-0.5 font-mono text-xs text-muted-foreground">
+                    <p className="mt-1 font-mono text-xs text-muted-foreground">
                       {skill.path}
                     </p>
                   ) : null}
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
         </div>
       ))}
 
-      <div className="border-t border-border/30 pt-4">
-        <p className="text-xs text-muted-foreground">
-          Browse and install more skills from{" "}
-          <a
-            className="text-primary underline"
-            href="https://clawhub.com"
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            ClawHub
-          </a>
-        </p>
-      </div>
+      <Separator />
+      <p className="text-xs text-muted-foreground">
+        Browse and install more skills from{" "}
+        <a
+          className="text-primary underline"
+          href="https://clawhub.com"
+          rel="noopener noreferrer"
+          target="_blank"
+        >
+          ClawHub
+        </a>
+      </p>
     </div>
   );
 };

@@ -1,6 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type MemoryItem = {
   key: string;
@@ -67,49 +71,53 @@ export const MemoryTab = () => {
   };
 
   return (
-    <div className="space-y-4 p-4">
+    <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Memory Browser</h2>
-        <button
-          className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+        <h2 className="text-base font-semibold">Memory Browser</h2>
+        <Button
           onClick={() => {
             setShowAddForm(!showAddForm);
             setSaveResult(null);
           }}
-          type="button"
+          size="sm"
+          variant={showAddForm ? "ghost" : "default"}
         >
           {showAddForm ? "Cancel" : "Add Memory"}
-        </button>
+        </Button>
       </div>
 
       {showAddForm ? (
-        <div className="space-y-2 rounded-md border border-border/50 p-3">
-          <textarea
-            className="w-full rounded-md border border-border/50 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            onChange={(e) => {
-              setNewMemory(e.target.value);
-            }}
-            placeholder="Tell the agent what to remember..."
-            rows={3}
-            value={newMemory}
-          />
-          <button
-            className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-            disabled={saving || !newMemory.trim()}
-            onClick={handleAddMemory}
-            type="button"
-          >
-            {saving ? "Saving..." : "Save"}
-          </button>
-          {saveResult ? (
-            <p className="text-xs text-muted-foreground">{saveResult}</p>
-          ) : null}
-        </div>
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <Textarea
+              onChange={(e) => {
+                setNewMemory(e.target.value);
+              }}
+              placeholder="Tell the agent what to remember..."
+              rows={3}
+              value={newMemory}
+            />
+            <div className="flex items-center gap-3">
+              <Button
+                disabled={saving || !newMemory.trim()}
+                onClick={handleAddMemory}
+                size="sm"
+              >
+                {saving ? "Saving..." : "Save"}
+              </Button>
+              {saveResult ? (
+                <span className="text-xs text-muted-foreground">
+                  {saveResult}
+                </span>
+              ) : null}
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
 
       <div className="flex gap-2">
-        <input
-          className="flex-1 rounded-md border border-border/50 bg-background px-3 py-2 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+        <Input
+          className="flex-1"
           onChange={(e) => {
             setQuery(e.target.value);
           }}
@@ -119,56 +127,64 @@ export const MemoryTab = () => {
             }
           }}
           placeholder="Search agent memory..."
-          type="text"
           value={query}
         />
-        <button
-          className="rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
+        <Button
           disabled={loading || !query.trim()}
           onClick={handleSearch}
-          type="button"
+          size="default"
         >
           {loading ? "..." : "Search"}
-        </button>
+        </Button>
       </div>
 
       {!searched && memories.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          Enter a query to search agent memory
-        </p>
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">
+              Enter a query to search agent memory
+            </p>
+          </CardContent>
+        </Card>
       ) : null}
 
       {searched && memories.length === 0 ? (
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          No memories found
-        </p>
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">No memories found</p>
+          </CardContent>
+        </Card>
       ) : null}
 
       {memories.length > 0 ? (
         <div className="space-y-2">
           {memories.map((mem) => (
-            <button
-              className="w-full rounded-md border border-border/30 p-3 text-left transition-colors hover:bg-muted/30"
+            <Card
+              className="cursor-pointer transition-colors hover:bg-muted/50"
               key={mem.key}
-              onClick={() => {
-                setExpandedKey(expandedKey === mem.key ? null : mem.key);
-              }}
-              type="button"
             >
-              <div className="flex items-center justify-between">
-                <span className="font-mono text-xs font-medium text-muted-foreground">
-                  {mem.key}
-                </span>
-                <span className="font-mono text-xs text-muted-foreground">
-                  {(mem.relevance * 100).toFixed(0)}% match
-                </span>
-              </div>
-              <p
-                className={`mt-1 text-sm ${expandedKey === mem.key ? "" : "line-clamp-2"}`}
+              <button
+                className="w-full p-4 text-left"
+                onClick={() => {
+                  setExpandedKey(expandedKey === mem.key ? null : mem.key);
+                }}
+                type="button"
               >
-                {mem.summary}
-              </p>
-            </button>
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-medium text-muted-foreground">
+                    {mem.key}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    {(mem.relevance * 100).toFixed(0)}% match
+                  </span>
+                </div>
+                <p
+                  className={`mt-1.5 text-sm ${expandedKey === mem.key ? "" : "line-clamp-2"}`}
+                >
+                  {mem.summary}
+                </p>
+              </button>
+            </Card>
           ))}
         </div>
       ) : null}

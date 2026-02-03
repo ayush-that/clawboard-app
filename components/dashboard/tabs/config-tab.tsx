@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 type ConfigData = {
   agent?: { model?: string };
@@ -10,6 +16,18 @@ type ConfigData = {
   raw: string;
   hash: string;
 };
+
+const LoadingSkeleton = () => (
+  <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-5 w-28" />
+      <Skeleton className="h-9 w-28 rounded-md" />
+    </div>
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Skeleton className="h-24 w-full rounded-lg" key={`skel-${String(i)}`} />
+    ))}
+  </div>
+);
 
 export const ConfigTab = () => {
   const [config, setConfig] = useState<ConfigData | null>(null);
@@ -28,7 +46,6 @@ export const ConfigTab = () => {
         setConfig(json);
         setModel(json.agent?.model ?? "");
 
-        // Try to extract SOUL.md content from raw config
         try {
           const raw = JSON.parse(json.raw) as Record<string, unknown>;
           const soul = raw.soul as string | undefined;
@@ -87,17 +104,19 @@ export const ConfigTab = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading config...</p>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (!config) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Unable to fetch config</p>
+      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">
+              Unable to fetch config
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
@@ -105,107 +124,111 @@ export const ConfigTab = () => {
   const channelNames = config.channels ? Object.keys(config.channels) : [];
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Configuration</h2>
-        <button
-          className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-          disabled={saving}
-          onClick={handleSave}
-          type="button"
-        >
-          {saving ? "Saving..." : "Save Changes"}
-        </button>
+        <h2 className="text-base font-semibold">Configuration</h2>
+        <div className="flex items-center gap-3">
+          {saveResult ? (
+            <span
+              className={`text-xs ${saveResult.startsWith("Error") ? "text-red-400" : "text-emerald-400"}`}
+            >
+              {saveResult}
+            </span>
+          ) : null}
+          <Button disabled={saving} onClick={handleSave} size="sm">
+            {saving ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
       </div>
-
-      {saveResult ? (
-        <p
-          className={`text-xs ${saveResult.startsWith("Error") ? "text-red-400" : "text-emerald-400"}`}
-        >
-          {saveResult}
-        </p>
-      ) : null}
 
       {/* Model */}
-      <div className="rounded-md border border-border/30 p-4">
-        <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-          Model
-        </p>
-        <input
-          className="w-full rounded-md border border-border/50 bg-background px-3 py-2 font-mono text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          onChange={(e) => {
-            setModel(e.target.value);
-          }}
-          placeholder="e.g. anthropic/claude-opus-4-6"
-          type="text"
-          value={model}
-        />
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <p className="mb-2 text-xs text-muted-foreground">Model</p>
+          <Input
+            className="font-mono"
+            onChange={(e) => {
+              setModel(e.target.value);
+            }}
+            placeholder="e.g. anthropic/claude-opus-4-6"
+            value={model}
+          />
+        </CardContent>
+      </Card>
 
       {/* Gateway Auth */}
-      <div className="rounded-md border border-border/30 p-4">
-        <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-          Gateway Auth
-        </p>
-        <Badge className="font-mono text-xs" variant="outline">
-          {config.gateway?.auth?.mode ?? "none"}
-        </Badge>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <p className="mb-2 text-xs text-muted-foreground">Gateway Auth</p>
+          <Badge className="font-mono text-xs" variant="outline">
+            {config.gateway?.auth?.mode ?? "none"}
+          </Badge>
+        </CardContent>
+      </Card>
 
       {/* Channels */}
       {channelNames.length > 0 ? (
-        <div className="rounded-md border border-border/30 p-4">
-          <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-            Configured Channels
-          </p>
-          <div className="flex flex-wrap gap-1.5">
-            {channelNames.map((ch) => (
-              <Badge className="text-xs" key={ch} variant="outline">
-                {ch}
-              </Badge>
-            ))}
-          </div>
-        </div>
+        <Card>
+          <CardContent className="p-4">
+            <p className="mb-2 text-xs text-muted-foreground">
+              Configured Channels
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {channelNames.map((ch) => (
+                <Badge className="text-xs" key={ch} variant="outline">
+                  {ch}
+                </Badge>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       ) : null}
 
       {/* SOUL.md */}
-      <div className="rounded-md border border-border/30 p-4">
-        <p className="mb-2 text-xs uppercase tracking-wider text-muted-foreground">
-          SOUL.md (Agent Personality)
-        </p>
-        <textarea
-          className="w-full rounded-md border border-border/50 bg-background px-3 py-2 font-mono text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-          onChange={(e) => {
-            setSoulMd(e.target.value);
-          }}
-          placeholder="Define your agent's personality and goals..."
-          rows={8}
-          value={soulMd}
-        />
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <p className="mb-2 text-xs text-muted-foreground">
+            SOUL.md (Agent Personality)
+          </p>
+          <Textarea
+            className="font-mono"
+            onChange={(e) => {
+              setSoulMd(e.target.value);
+            }}
+            placeholder="Define your agent's personality and goals..."
+            rows={8}
+            value={soulMd}
+          />
+        </CardContent>
+      </Card>
 
       {/* Raw config */}
-      <div className="rounded-md border border-border/30 p-4">
-        <button
-          className="flex w-full items-center justify-between text-left"
-          onClick={() => {
-            setShowRaw(!showRaw);
-          }}
-          type="button"
-        >
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Raw Config (read-only)
-          </p>
-          <span className="text-xs text-muted-foreground">
-            {showRaw ? "Hide" : "Show"}
-          </span>
-        </button>
-        {showRaw ? (
-          <pre className="mt-2 max-h-96 overflow-auto rounded bg-muted p-3 font-mono text-xs">
-            {config.raw}
-          </pre>
-        ) : null}
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <button
+            className="flex w-full items-center justify-between text-left"
+            onClick={() => {
+              setShowRaw(!showRaw);
+            }}
+            type="button"
+          >
+            <p className="text-xs text-muted-foreground">
+              Raw Config (read-only)
+            </p>
+            <span className="text-xs text-muted-foreground">
+              {showRaw ? "Hide" : "Show"}
+            </span>
+          </button>
+          {showRaw ? (
+            <>
+              <Separator className="my-3" />
+              <pre className="max-h-96 overflow-auto rounded-md bg-muted p-3 font-mono text-xs">
+                {config.raw}
+              </pre>
+            </>
+          ) : null}
+        </CardContent>
+      </Card>
     </div>
   );
 };

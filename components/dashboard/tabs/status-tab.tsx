@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type StatusData = {
   uptime: string;
@@ -11,12 +14,6 @@ type StatusData = {
   activeChannels: string[];
   lastActivity: string;
   status: "online" | "offline" | "degraded";
-};
-
-const statusColors: Record<string, string> = {
-  online: "bg-emerald-500",
-  offline: "bg-red-500",
-  degraded: "bg-yellow-500",
 };
 
 const formatTokens = (tokens: number): string => {
@@ -45,6 +42,24 @@ const formatTimeAgo = (isoDate: string): string => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
+const LoadingSkeleton = () => (
+  <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    <div className="flex items-center gap-3">
+      <Skeleton className="h-3 w-3 rounded-full" />
+      <Skeleton className="h-5 w-32" />
+    </div>
+    <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      {Array.from({ length: 4 }).map((_, i) => (
+        <Skeleton
+          className="h-20 w-full rounded-lg"
+          key={`skel-${String(i)}`}
+        />
+      ))}
+    </div>
+    <Skeleton className="h-16 w-full rounded-lg" />
+  </div>
+);
+
 export const StatusTab = () => {
   const [data, setData] = useState<StatusData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -69,28 +84,36 @@ export const StatusTab = () => {
   }, []);
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading status...</p>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (!data) {
     return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Unable to reach gateway</p>
+      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">
+              Unable to reach gateway
+            </p>
+          </CardContent>
+        </Card>
       </div>
     );
   }
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
       <div className="flex items-center gap-3">
         <span
-          className={`h-3 w-3 rounded-full ${statusColors[data.status] ?? statusColors.offline}`}
+          className={`h-3 w-3 rounded-full ${
+            data.status === "online"
+              ? "bg-emerald-500"
+              : data.status === "degraded"
+                ? "bg-yellow-500"
+                : "bg-red-500"
+          }`}
         />
-        <h2 className="text-lg font-semibold">Agent Status</h2>
+        <h2 className="text-base font-semibold">Agent Status</h2>
         <Badge
           className="font-mono text-xs"
           variant={data.status === "online" ? "default" : "destructive"}
@@ -99,63 +122,67 @@ export const StatusTab = () => {
         </Badge>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 sm:grid-cols-4">
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Uptime
-          </p>
-          <p className="font-mono text-sm font-medium">{data.uptime}</p>
-        </div>
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Last Activity
-          </p>
-          <p className="font-mono text-sm font-medium">
-            {formatTimeAgo(data.lastActivity)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Tokens Today
-          </p>
-          <p className="font-mono text-sm font-medium">
-            {formatTokens(data.tokensToday)}
-          </p>
-        </div>
-        <div>
-          <p className="text-xs uppercase tracking-wider text-muted-foreground">
-            Cost Today
-          </p>
-          <p className="font-mono text-sm font-medium">
-            ${(data.costToday ?? 0).toFixed(2)}
-          </p>
-        </div>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Uptime</p>
+            <p className="mt-1 font-mono text-lg font-semibold">
+              {data.uptime}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Last Activity</p>
+            <p className="mt-1 font-mono text-lg font-semibold">
+              {formatTimeAgo(data.lastActivity)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Tokens Today</p>
+            <p className="mt-1 font-mono text-lg font-semibold">
+              {formatTokens(data.tokensToday)}
+            </p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Cost Today</p>
+            <p className="mt-1 font-mono text-lg font-semibold">
+              ${(data.costToday ?? 0).toFixed(2)}
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      <div>
-        <p className="mb-1.5 text-xs uppercase tracking-wider text-muted-foreground">
-          Model
-        </p>
-        <Badge className="font-mono text-xs" variant="secondary">
-          {data.model}
-        </Badge>
-      </div>
-
-      <div>
-        <p className="mb-1.5 text-xs uppercase tracking-wider text-muted-foreground">
-          Active Channels
-        </p>
-        <div className="flex flex-wrap gap-1.5">
-          {data.activeChannels.map((channel) => (
-            <Badge className="text-xs" key={channel} variant="outline">
-              {channel}
+      <Card>
+        <CardContent className="space-y-4 p-4">
+          <div>
+            <p className="mb-1.5 text-xs text-muted-foreground">Model</p>
+            <Badge className="font-mono text-xs" variant="secondary">
+              {data.model}
             </Badge>
-          ))}
-          {data.activeChannels.length === 0 && (
-            <span className="text-xs text-muted-foreground">None</span>
-          )}
-        </div>
-      </div>
+          </div>
+          <Separator />
+          <div>
+            <p className="mb-1.5 text-xs text-muted-foreground">
+              Active Channels
+            </p>
+            <div className="flex flex-wrap gap-1.5">
+              {data.activeChannels.map((channel) => (
+                <Badge className="text-xs" key={channel} variant="outline">
+                  {channel}
+                </Badge>
+              ))}
+              {data.activeChannels.length === 0 && (
+                <span className="text-xs text-muted-foreground">None</span>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

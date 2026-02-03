@@ -2,6 +2,11 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 
 type CronJob = {
   id: string;
@@ -21,6 +26,18 @@ type NewJobForm = {
 };
 
 const emptyForm: NewJobForm = { name: "", schedule: "", message: "" };
+
+const LoadingSkeleton = () => (
+  <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+    <div className="flex items-center justify-between">
+      <Skeleton className="h-5 w-24" />
+      <Skeleton className="h-9 w-20 rounded-md" />
+    </div>
+    {Array.from({ length: 3 }).map((_, i) => (
+      <Skeleton className="h-20 w-full rounded-lg" key={`skel-${String(i)}`} />
+    ))}
+  </div>
+);
 
 export const CronTab = () => {
   const [jobs, setJobs] = useState<CronJob[]>([]);
@@ -117,231 +134,227 @@ export const CronTab = () => {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center p-12">
-        <p className="text-sm text-muted-foreground">Loading cron jobs...</p>
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   return (
-    <div className="space-y-2 p-4">
-      <div className="mb-3 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Cron Jobs</h2>
+    <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+      <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">
-            {jobs.length} jobs
-          </span>
-          <button
-            className="rounded-md bg-primary px-3 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-            onClick={() => {
-              setShowForm(!showForm);
-            }}
-            type="button"
-          >
-            {showForm ? "Cancel" : "New Job"}
-          </button>
+          <h2 className="text-base font-semibold">Cron Jobs</h2>
+          <Badge className="text-xs" variant="outline">
+            {jobs.length}
+          </Badge>
         </div>
+        <Button
+          onClick={() => {
+            setShowForm(!showForm);
+          }}
+          size="sm"
+          variant={showForm ? "ghost" : "default"}
+        >
+          {showForm ? "Cancel" : "New Job"}
+        </Button>
       </div>
 
       {showForm ? (
-        <div className="rounded-md border border-border/50 p-3 space-y-2">
-          <input
-            className="w-full rounded-md border border-border/50 bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            onChange={(e) => {
-              setForm({ ...form, name: e.target.value });
-            }}
-            placeholder="Job name"
-            type="text"
-            value={form.name}
-          />
-          <input
-            className="w-full rounded-md border border-border/50 bg-background px-3 py-1.5 font-mono text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            onChange={(e) => {
-              setForm({ ...form, schedule: e.target.value });
-            }}
-            placeholder="Schedule (e.g. */5 * * * * or every 30m)"
-            type="text"
-            value={form.schedule}
-          />
-          <textarea
-            className="w-full rounded-md border border-border/50 bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-            onChange={(e) => {
-              setForm({ ...form, message: e.target.value });
-            }}
-            placeholder="Message to send the agent"
-            rows={2}
-            value={form.message}
-          />
-          <button
-            className="rounded-md bg-primary px-4 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
-            disabled={saving || !form.name.trim() || !form.schedule.trim()}
-            onClick={handleCreate}
-            type="button"
-          >
-            {saving ? "Creating..." : "Create"}
-          </button>
-        </div>
+        <Card>
+          <CardContent className="space-y-3 p-4">
+            <Input
+              onChange={(e) => {
+                setForm({ ...form, name: e.target.value });
+              }}
+              placeholder="Job name"
+              value={form.name}
+            />
+            <Input
+              className="font-mono"
+              onChange={(e) => {
+                setForm({ ...form, schedule: e.target.value });
+              }}
+              placeholder="Schedule (e.g. */5 * * * * or every 30m)"
+              value={form.schedule}
+            />
+            <Textarea
+              onChange={(e) => {
+                setForm({ ...form, message: e.target.value });
+              }}
+              placeholder="Message to send the agent"
+              rows={2}
+              value={form.message}
+            />
+            <Button
+              disabled={saving || !form.name.trim() || !form.schedule.trim()}
+              onClick={handleCreate}
+              size="sm"
+            >
+              {saving ? "Creating..." : "Create"}
+            </Button>
+          </CardContent>
+        </Card>
       ) : null}
 
       {jobs.length === 0 && !showForm ? (
-        <div className="flex items-center justify-center p-12">
-          <p className="text-sm text-muted-foreground">
-            No cron jobs configured
-          </p>
-        </div>
+        <Card>
+          <CardContent className="flex items-center justify-center py-12">
+            <p className="text-sm text-muted-foreground">
+              No cron jobs configured
+            </p>
+          </CardContent>
+        </Card>
       ) : null}
 
       {jobs.map((job) => (
-        <div className="rounded-md border border-border/30 p-3" key={job.id}>
-          {editingId === job.id ? (
-            <div className="space-y-2">
-              <input
-                className="w-full rounded-md border border-border/50 bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                onChange={(e) => {
-                  setEditForm({ ...editForm, name: e.target.value });
-                }}
-                type="text"
-                value={editForm.name}
-              />
-              <input
-                className="w-full rounded-md border border-border/50 bg-background px-3 py-1.5 font-mono text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                onChange={(e) => {
-                  setEditForm({ ...editForm, schedule: e.target.value });
-                }}
-                type="text"
-                value={editForm.schedule}
-              />
-              <textarea
-                className="w-full rounded-md border border-border/50 bg-background px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                onChange={(e) => {
-                  setEditForm({ ...editForm, message: e.target.value });
-                }}
-                rows={2}
-                value={editForm.message}
-              />
-              <div className="flex gap-2">
-                <button
-                  className="rounded-md bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
-                  disabled={saving}
-                  onClick={() => {
-                    handleUpdate(job.id);
+        <Card key={job.id}>
+          <CardContent className="p-4">
+            {editingId === job.id ? (
+              <div className="space-y-3">
+                <Input
+                  onChange={(e) => {
+                    setEditForm({ ...editForm, name: e.target.value });
                   }}
-                  type="button"
-                >
-                  {saving ? "Saving..." : "Save"}
-                </button>
-                <button
-                  className="rounded-md px-3 py-1 text-xs text-muted-foreground hover:text-foreground"
-                  onClick={() => {
-                    setEditingId(null);
+                  value={editForm.name}
+                />
+                <Input
+                  className="font-mono"
+                  onChange={(e) => {
+                    setEditForm({ ...editForm, schedule: e.target.value });
                   }}
-                  type="button"
-                >
-                  Cancel
-                </button>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <button
-                    className={`h-4 w-8 rounded-full transition-colors ${job.enabled ? "bg-emerald-500" : "bg-muted"}`}
+                  value={editForm.schedule}
+                />
+                <Textarea
+                  onChange={(e) => {
+                    setEditForm({ ...editForm, message: e.target.value });
+                  }}
+                  rows={2}
+                  value={editForm.message}
+                />
+                <div className="flex gap-2">
+                  <Button
+                    disabled={saving}
                     onClick={() => {
-                      handleToggle(job);
+                      handleUpdate(job.id);
                     }}
-                    title={job.enabled ? "Disable" : "Enable"}
-                    type="button"
+                    size="sm"
                   >
-                    <span
-                      className={`block h-3 w-3 rounded-full bg-white transition-transform ${job.enabled ? "translate-x-4" : "translate-x-0.5"}`}
-                    />
-                  </button>
-                  <span className="font-mono text-sm font-medium">
-                    {job.name}
-                  </span>
-                  <Badge
-                    className="text-xs"
-                    variant={job.enabled ? "default" : "secondary"}
-                  >
-                    {job.enabled ? "active" : "disabled"}
-                  </Badge>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Badge className="font-mono text-xs" variant="outline">
-                    {job.schedule}
-                  </Badge>
-                  <button
-                    className="rounded p-1 text-muted-foreground transition-colors hover:text-foreground"
+                    {saving ? "Saving..." : "Save"}
+                  </Button>
+                  <Button
                     onClick={() => {
-                      startEdit(job);
+                      setEditingId(null);
                     }}
-                    title="Edit"
-                    type="button"
+                    size="sm"
+                    variant="ghost"
                   >
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                      <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-                    </svg>
-                  </button>
-                  <button
-                    className="rounded p-1 text-muted-foreground transition-colors hover:text-red-400"
-                    onClick={() => {
-                      handleDelete(job.id);
-                    }}
-                    title="Delete"
-                    type="button"
-                  >
-                    <svg
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2}
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M3 6h18" />
-                      <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
-                    </svg>
-                  </button>
+                    Cancel
+                  </Button>
                 </div>
               </div>
-              {job.message ? (
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  {job.message}
-                </p>
-              ) : null}
-              <div className="mt-1.5 flex gap-4 font-mono text-xs text-muted-foreground">
-                {job.lastRun ? (
-                  <span>
-                    Last:{" "}
-                    {new Date(job.lastRun).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })}
-                  </span>
+            ) : (
+              <>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <button
+                      className={`h-5 w-9 rounded-full transition-colors ${job.enabled ? "bg-emerald-500" : "bg-muted"}`}
+                      onClick={() => {
+                        handleToggle(job);
+                      }}
+                      title={job.enabled ? "Disable" : "Enable"}
+                      type="button"
+                    >
+                      <span
+                        className={`block h-3.5 w-3.5 rounded-full bg-white transition-transform ${job.enabled ? "translate-x-4.5" : "translate-x-0.5"}`}
+                      />
+                    </button>
+                    <span className="font-mono text-sm font-medium">
+                      {job.name}
+                    </span>
+                    <Badge
+                      className="text-xs"
+                      variant={job.enabled ? "default" : "secondary"}
+                    >
+                      {job.enabled ? "active" : "disabled"}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Badge className="font-mono text-xs" variant="outline">
+                      {job.schedule}
+                    </Badge>
+                    <Button
+                      className="h-7 w-7"
+                      onClick={() => {
+                        startEdit(job);
+                      }}
+                      size="icon-sm"
+                      title="Edit"
+                      variant="ghost"
+                    >
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <title>Edit job</title>
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
+                    </Button>
+                    <Button
+                      className="h-7 w-7 hover:text-red-400"
+                      onClick={() => {
+                        handleDelete(job.id);
+                      }}
+                      size="icon-sm"
+                      title="Delete"
+                      variant="ghost"
+                    >
+                      <svg
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2}
+                        viewBox="0 0 24 24"
+                      >
+                        <title>Delete job</title>
+                        <path d="M3 6h18" />
+                        <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                      </svg>
+                    </Button>
+                  </div>
+                </div>
+                {job.message ? (
+                  <p className="mt-2 text-xs text-muted-foreground">
+                    {job.message}
+                  </p>
                 ) : null}
-                {job.nextRun ? (
-                  <span>
-                    Next:{" "}
-                    {new Date(job.nextRun).toLocaleTimeString("en-US", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      hour12: false,
-                    })}
-                  </span>
-                ) : null}
-              </div>
-            </>
-          )}
-        </div>
+                <div className="mt-2 flex gap-4 font-mono text-xs text-muted-foreground">
+                  {job.lastRun ? (
+                    <span>
+                      Last:{" "}
+                      {new Date(job.lastRun).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })}
+                    </span>
+                  ) : null}
+                  {job.nextRun ? (
+                    <span>
+                      Next:{" "}
+                      {new Date(job.nextRun).toLocaleTimeString("en-US", {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                        hour12: false,
+                      })}
+                    </span>
+                  ) : null}
+                </div>
+              </>
+            )}
+          </CardContent>
+        </Card>
       ))}
     </div>
   );
