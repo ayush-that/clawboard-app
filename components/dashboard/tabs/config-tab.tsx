@@ -146,7 +146,6 @@ export const ConfigTab = () => {
         <CardContent className="p-4">
           <p className="mb-2 text-xs text-muted-foreground">Model</p>
           <Input
-            className="font-mono"
             onChange={(e) => {
               setModel(e.target.value);
             }}
@@ -160,7 +159,7 @@ export const ConfigTab = () => {
       <Card>
         <CardContent className="p-4">
           <p className="mb-2 text-xs text-muted-foreground">Gateway Auth</p>
-          <Badge className="font-mono text-xs" variant="outline">
+          <Badge className="text-xs" variant="outline">
             {config.gateway?.auth?.mode ?? "none"}
           </Badge>
         </CardContent>
@@ -191,7 +190,6 @@ export const ConfigTab = () => {
             SOUL.md (Agent Personality)
           </p>
           <Textarea
-            className="font-mono"
             onChange={(e) => {
               setSoulMd(e.target.value);
             }}

@@ -152,7 +152,7 @@ export const TasksTab = () => {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <span className="font-mono text-sm">{task.name}</span>
+                      <span className="text-sm font-medium">{task.name}</span>
                       <Badge
                         className="text-xs"
                         variant={statusVariant[task.status] ?? "secondary"}
@@ -161,9 +161,7 @@ export const TasksTab = () => {
                       </Badge>
                     </div>
                     <div className="flex gap-3 text-xs text-muted-foreground">
-                      <span className="font-mono">
-                        {formatDuration(task.duration)}
-                      </span>
+                      <span>{formatDuration(task.duration)}</span>
                       <span>{formatTimeAgo(task.startedAt)}</span>
                     </div>
                   </div>

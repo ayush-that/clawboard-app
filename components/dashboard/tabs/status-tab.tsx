@@ -115,7 +115,7 @@ export const StatusTab = () => {
         />
         <h2 className="text-base font-semibold">Agent Status</h2>
         <Badge
-          className="font-mono text-xs"
+          className="text-xs"
           variant={data.status === "online" ? "default" : "destructive"}
         >
           {data.status}
@@ -126,15 +126,13 @@ export const StatusTab = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Uptime</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
-              {data.uptime}
-            </p>
+            <p className="mt-1 text-lg font-semibold">{data.uptime}</p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Last Activity</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
+            <p className="mt-1 text-lg font-semibold">
               {formatTimeAgo(data.lastActivity)}
             </p>
           </CardContent>
@@ -142,7 +140,7 @@ export const StatusTab = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Tokens Today</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
+            <p className="mt-1 text-lg font-semibold">
               {formatTokens(data.tokensToday)}
             </p>
           </CardContent>
@@ -150,7 +148,7 @@ export const StatusTab = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Cost Today</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
+            <p className="mt-1 text-lg font-semibold">
               ${(data.costToday ?? 0).toFixed(2)}
             </p>
           </CardContent>
@@ -161,7 +159,7 @@ export const StatusTab = () => {
         <CardContent className="space-y-4 p-4">
           <div>
             <p className="mb-1.5 text-xs text-muted-foreground">Model</p>
-            <Badge className="font-mono text-xs" variant="secondary">
+            <Badge className="text-xs" variant="secondary">
               {data.model}
             </Badge>
           </div>

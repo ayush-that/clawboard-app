@@ -20,14 +20,8 @@ const LoadingSkeleton = () => (
       <Skeleton className="h-5 w-24" />
       <Skeleton className="h-5 w-20 rounded-full" />
     </div>
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-      {Array.from({ length: 4 }).map((_, i) => (
-        <Skeleton
-          className="h-20 w-full rounded-lg"
-          key={`skel-${String(i)}`}
-        />
-      ))}
-    </div>
+    <Skeleton className="h-24 w-full rounded-lg" />
+    <Skeleton className="h-48 w-full rounded-lg" />
   </div>
 );
 
@@ -74,55 +68,41 @@ export const DebugTab = () => {
 
   return (
     <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
-      <div className="flex items-center gap-3">
-        <h2 className="text-base font-semibold">Debug</h2>
-        <Badge variant={data.connected ? "default" : "destructive"}>
-          {data.connected ? "connected" : "disconnected"}
-        </Badge>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <span
+            className={`h-2.5 w-2.5 rounded-full ${data.connected ? "bg-emerald-500" : "bg-red-500"}`}
+          />
+          <h2 className="text-base font-semibold">Debug</h2>
+          <Badge variant={data.connected ? "default" : "destructive"}>
+            {data.connected ? "connected" : "disconnected"}
+          </Badge>
+        </div>
+        <span className="text-xs text-muted-foreground">
+          Checked{" "}
+          {new Date(data.timestamp).toLocaleTimeString("en-US", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          })}
+        </span>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Gateway URL</p>
-            <p className="mt-1 truncate font-mono text-sm">{data.gatewayUrl}</p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Active Sessions</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
-              {data.sessionCount}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Last Check</p>
-            <p className="mt-1 font-mono text-sm">
-              {new Date(data.timestamp).toLocaleTimeString("en-US", {
-                hour: "2-digit",
-                minute: "2-digit",
-                second: "2-digit",
-                hour12: false,
-              })}
-            </p>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Connection</p>
-            <div className="mt-1 flex items-center gap-2">
-              <span
-                className={`h-2 w-2 rounded-full ${data.connected ? "bg-emerald-500" : "bg-red-500"}`}
-              />
-              <span className="font-mono text-sm">
-                {data.connected ? "Online" : "Offline"}
-              </span>
+      <Card>
+        <CardContent className="p-4">
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div>
+              <p className="text-xs text-muted-foreground">Gateway URL</p>
+              <p className="mt-1 truncate text-sm">{data.gatewayUrl}</p>
             </div>
-          </CardContent>
-        </Card>
-      </div>
+            <div>
+              <p className="text-xs text-muted-foreground">Active Sessions</p>
+              <p className="mt-1 text-sm font-semibold">{data.sessionCount}</p>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {data.statusText ? (
         <Card>

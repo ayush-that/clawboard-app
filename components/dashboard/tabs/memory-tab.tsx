@@ -171,10 +171,10 @@ export const MemoryTab = () => {
                 type="button"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-mono text-xs font-medium text-muted-foreground">
+                  <span className="text-xs font-medium text-muted-foreground">
                     {mem.key}
                   </span>
-                  <span className="font-mono text-xs text-muted-foreground">
+                  <span className="text-xs text-muted-foreground">
                     {(mem.relevance * 100).toFixed(0)}% match
                   </span>
                 </div>

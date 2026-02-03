@@ -1,6 +1,13 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
+import {
+  GlobeIcon,
+  MessageIcon,
+  RouteIcon,
+  TerminalIcon,
+} from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -15,12 +22,12 @@ type ChannelItem = {
   settings: Record<string, unknown>;
 };
 
-const channelIcons: Record<string, string> = {
-  telegram: "T",
-  webhook: "W",
-  cron: "C",
-  discord: "D",
-  slack: "S",
+const channelIcons: Record<string, ReactNode> = {
+  telegram: <MessageIcon size={14} />,
+  webhook: <RouteIcon size={14} />,
+  cron: <TerminalIcon size={14} />,
+  discord: <GlobeIcon size={14} />,
+  slack: <GlobeIcon size={14} />,
 };
 
 const channelColors: Record<string, string> = {
@@ -158,14 +165,14 @@ export const ChannelsTab = () => {
           >
             <div className="flex items-center gap-3">
               <span
-                className={`flex h-8 w-8 items-center justify-center rounded-md bg-muted font-mono text-sm font-bold ${
+                className={`flex h-8 w-8 items-center justify-center rounded-md bg-muted ${
                   channelColors[ch.type] ?? "text-foreground"
                 }`}
               >
-                {channelIcons[ch.type] ?? ch.type.charAt(0).toUpperCase()}
+                {channelIcons[ch.type] ?? <GlobeIcon size={14} />}
               </span>
               <div>
-                <span className="font-mono text-sm font-medium">{ch.name}</span>
+                <span className="text-sm font-medium">{ch.name}</span>
                 <div className="mt-0.5 flex items-center gap-1.5">
                   <Badge className="text-xs" variant="outline">
                     {ch.type}

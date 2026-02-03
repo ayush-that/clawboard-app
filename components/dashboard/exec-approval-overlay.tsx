@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { WarningIcon } from "../icons";
 
 type ApprovalRequest = {
   id: string;
@@ -66,7 +67,7 @@ export const ExecApprovalOverlay = () => {
           <Card className="border-yellow-500/50 shadow-2xl" key={approval.id}>
             <CardContent className="p-6">
               <div className="mb-4 flex items-center gap-2">
-                <span className="text-xl">&#x26A0;</span>
+                <WarningIcon size={16} />
                 <h3 className="text-lg font-semibold">Approval Required</h3>
                 <Badge className="text-xs" variant="secondary">
                   {approval.sessionKey}
@@ -92,7 +93,7 @@ export const ExecApprovalOverlay = () => {
 
                 <div>
                   <p className="text-xs text-muted-foreground">Requested</p>
-                  <p className="font-mono text-xs">
+                  <p className="text-xs">
                     {new Date(approval.requestedAt).toLocaleString()}
                   </p>
                 </div>

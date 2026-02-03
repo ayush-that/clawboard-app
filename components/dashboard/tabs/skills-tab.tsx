@@ -114,9 +114,7 @@ export const SkillsTab = () => {
               <Card key={skill.name}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm font-medium">
-                      {skill.name}
-                    </span>
+                    <span className="text-sm font-medium">{skill.name}</span>
                     <Badge
                       className={`text-xs ${sourceColors[source] ?? ""}`}
                       variant="outline"

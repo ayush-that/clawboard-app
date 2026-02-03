@@ -185,12 +185,12 @@ export const SessionsTab = () => {
                         {msg.role}
                       </Badge>
                       {msg.model ? (
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {msg.model}
                         </span>
                       ) : null}
                       {msg.timestamp ? (
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {new Date(msg.timestamp).toLocaleTimeString("en-US", {
                             hour: "2-digit",
                             minute: "2-digit",
@@ -200,7 +200,7 @@ export const SessionsTab = () => {
                         </span>
                       ) : null}
                       {msg.usage ? (
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {formatTokens(msg.usage.totalTokens)} tokens
                         </span>
                       ) : null}
@@ -259,7 +259,7 @@ export const SessionsTab = () => {
             >
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <span className="truncate font-mono text-sm font-medium">
+                  <span className="truncate text-sm font-medium">
                     {session.displayName || session.key}
                   </span>
                   <Badge className="shrink-0 text-xs" variant="outline">
@@ -268,7 +268,7 @@ export const SessionsTab = () => {
                 </div>
                 <span className="text-xs text-muted-foreground">&rarr;</span>
               </div>
-              <div className="mt-1.5 flex gap-3 font-mono text-xs text-muted-foreground">
+              <div className="mt-1.5 flex gap-3 text-xs text-muted-foreground">
                 <span>{session.model}</span>
                 <span>{formatTokens(session.totalTokens)} tokens</span>
                 <span>{formatTimeAgo(session.updatedAt)}</span>

@@ -126,7 +126,7 @@ export const UsageTab = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Total Tokens</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
+            <p className="mt-1 text-lg font-semibold">
               {formatTokens(data.totalTokens)}
             </p>
           </CardContent>
@@ -134,7 +134,7 @@ export const UsageTab = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Total Cost</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
+            <p className="mt-1 text-lg font-semibold">
               ${data.totalCost.toFixed(4)}
             </p>
           </CardContent>
@@ -142,9 +142,7 @@ export const UsageTab = () => {
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Sessions</p>
-            <p className="mt-1 font-mono text-lg font-semibold">
-              {data.sessions.length}
-            </p>
+            <p className="mt-1 text-lg font-semibold">{data.sessions.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -158,8 +156,8 @@ export const UsageTab = () => {
             {data.modelBreakdown.map((m) => (
               <div key={m.model}>
                 <div className="mb-1.5 flex items-center justify-between">
-                  <span className="font-mono text-sm">{m.model}</span>
-                  <div className="flex gap-3 font-mono text-xs text-muted-foreground">
+                  <span className="text-sm">{m.model}</span>
+                  <div className="flex gap-3 text-xs text-muted-foreground">
                     <span>{formatTokens(m.tokens)} tokens</span>
                     <span>${m.cost.toFixed(4)}</span>
                   </div>
@@ -193,13 +191,11 @@ export const UsageTab = () => {
                 <tbody>
                   {data.dailyCosts.map((d) => (
                     <tr className="border-b border-border/50" key={d.date}>
-                      <td className="py-2 font-mono">{d.date}</td>
-                      <td className="py-2 font-mono">
-                        {formatTokens(d.tokens)}
-                      </td>
-                      <td className="py-2 font-mono">${d.cost.toFixed(4)}</td>
+                      <td className="py-2">{d.date}</td>
+                      <td className="py-2">{formatTokens(d.tokens)}</td>
+                      <td className="py-2">${d.cost.toFixed(4)}</td>
                       <td className="py-2">
-                        <Badge className="font-mono text-xs" variant="outline">
+                        <Badge className="text-xs" variant="outline">
                           {d.model}
                         </Badge>
                       </td>
@@ -225,14 +221,14 @@ export const UsageTab = () => {
                   key={s.sessionKey}
                 >
                   <div className="flex items-center gap-2">
-                    <span className="font-mono text-sm">
+                    <span className="text-sm">
                       {s.displayName || s.sessionKey}
                     </span>
                     <Badge className="text-xs" variant="outline">
                       {s.channel}
                     </Badge>
                   </div>
-                  <div className="flex gap-3 font-mono text-xs text-muted-foreground">
+                  <div className="flex gap-3 text-xs text-muted-foreground">
                     <span>{formatTokens(s.totalTokens)} tokens</span>
                     <span>{formatTimeAgo(s.updatedAt)}</span>
                   </div>

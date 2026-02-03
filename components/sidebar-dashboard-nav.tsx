@@ -1,7 +1,21 @@
 "use client";
 
+import type { ReactNode } from "react";
 import type { PanelName } from "@/lib/contexts/active-view-context";
 import { useActiveView } from "@/lib/contexts/active-view-context";
+import {
+  CheckCircleFillIcon,
+  CodeIcon,
+  CpuIcon,
+  LineChartIcon,
+  LogsIcon,
+  MessageIcon,
+  PencilEditIcon,
+  RouteIcon,
+  SparklesIcon,
+  TerminalIcon,
+  TerminalWindowIcon,
+} from "./icons";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -11,18 +25,18 @@ import {
   SidebarMenuItem,
 } from "./ui/sidebar";
 
-const navItems: Array<{ name: PanelName; label: string; icon: string }> = [
-  { name: "status", label: "Status", icon: "S" },
-  { name: "tasks", label: "Tasks", icon: "T" },
-  { name: "sessions", label: "Sessions", icon: "H" },
-  { name: "logs", label: "Logs", icon: "L" },
-  { name: "cron", label: "Cron", icon: "C" },
-  { name: "memory", label: "Memory", icon: "M" },
-  { name: "skills", label: "Skills", icon: "K" },
-  { name: "usage", label: "Usage", icon: "U" },
-  { name: "channels", label: "Channels", icon: "N" },
-  { name: "config", label: "Config", icon: "G" },
-  { name: "debug", label: "Debug", icon: "D" },
+const navItems: Array<{ name: PanelName; label: string; icon: ReactNode }> = [
+  { name: "status", label: "Status", icon: <CpuIcon size={16} /> },
+  { name: "tasks", label: "Tasks", icon: <CheckCircleFillIcon size={16} /> },
+  { name: "sessions", label: "Sessions", icon: <MessageIcon size={16} /> },
+  { name: "logs", label: "Logs", icon: <LogsIcon size={16} /> },
+  { name: "cron", label: "Cron", icon: <TerminalIcon size={16} /> },
+  { name: "memory", label: "Memory", icon: <SparklesIcon size={16} /> },
+  { name: "skills", label: "Skills", icon: <CodeIcon size={16} /> },
+  { name: "usage", label: "Usage", icon: <LineChartIcon size={16} /> },
+  { name: "channels", label: "Channels", icon: <RouteIcon size={16} /> },
+  { name: "config", label: "Config", icon: <PencilEditIcon size={16} /> },
+  { name: "debug", label: "Debug", icon: <TerminalWindowIcon size={16} /> },
 ];
 
 export const SidebarDashboardNav = () => {
@@ -42,7 +56,7 @@ export const SidebarDashboardNav = () => {
                 }}
                 tooltip={item.label}
               >
-                <span className="font-mono text-xs">{item.icon}</span>
+                {item.icon}
                 <span>{item.label}</span>
               </SidebarMenuButton>
             </SidebarMenuItem>

@@ -266,9 +266,7 @@ export const CronTab = () => {
                         className={`block h-3.5 w-3.5 rounded-full bg-white transition-transform ${job.enabled ? "translate-x-4.5" : "translate-x-0.5"}`}
                       />
                     </button>
-                    <span className="font-mono text-sm font-medium">
-                      {job.name}
-                    </span>
+                    <span className="text-sm font-medium">{job.name}</span>
                     <Badge
                       className="text-xs"
                       variant={job.enabled ? "default" : "secondary"}
@@ -329,7 +327,7 @@ export const CronTab = () => {
                     {job.message}
                   </p>
                 ) : null}
-                <div className="mt-2 flex gap-4 font-mono text-xs text-muted-foreground">
+                <div className="mt-2 flex gap-4 text-xs text-muted-foreground">
                   {job.lastRun ? (
                     <span>
                       Last:{" "}
