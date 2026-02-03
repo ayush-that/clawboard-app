@@ -131,7 +131,7 @@ export const LogsTab = () => {
 
       {/* Log stream */}
       <div
-        className="flex-1 overflow-y-auto bg-black/20 p-3 font-mono text-xs"
+        className="flex-1 overflow-y-auto overflow-x-hidden bg-black/20 p-3 font-mono text-xs"
         ref={scrollRef}
       >
         {displayLogs.length === 0 ? (
@@ -157,9 +157,11 @@ export const LogsTab = () => {
               </span>{" "}
               <span className="text-purple-400">[{entry.source}]</span>{" "}
               <span
-                className={`break-words ${levelColors[entry.level] ?? "text-foreground"}`}
+                className={`break-all ${levelColors[entry.level] ?? "text-foreground"}`}
               >
-                {entry.content}
+                {entry.content.length > 500
+                  ? `${entry.content.slice(0, 500)}...`
+                  : entry.content}
               </span>
             </div>
           ))

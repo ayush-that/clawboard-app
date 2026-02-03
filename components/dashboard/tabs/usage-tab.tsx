@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -14,12 +13,6 @@ type CostDataPoint = {
   model: string;
 };
 
-type ModelBreakdown = {
-  model: string;
-  tokens: number;
-  cost: number;
-};
-
 type UsageBySession = {
   sessionKey: string;
   displayName: string;
@@ -27,6 +20,12 @@ type UsageBySession = {
   totalTokens: number;
   contextTokens: number;
   updatedAt: number;
+};
+
+type ModelBreakdown = {
+  model: string;
+  tokens: number;
+  cost: number;
 };
 
 type UsageSummary = {
@@ -115,8 +114,6 @@ export const UsageTab = () => {
     );
   }
 
-  const maxTokens = Math.max(...data.modelBreakdown.map((m) => m.tokens), 1);
-
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <h2 className="text-base font-semibold">Usage Analytics</h2>
@@ -146,31 +143,6 @@ export const UsageTab = () => {
           </CardContent>
         </Card>
       </div>
-
-      {/* Model breakdown */}
-      {data.modelBreakdown.length > 0 ? (
-        <Card>
-          <CardContent className="space-y-4 p-4">
-            <h3 className="text-sm font-medium">By Model</h3>
-            <Separator />
-            {data.modelBreakdown.map((m) => (
-              <div key={m.model}>
-                <div className="mb-1.5 flex items-center justify-between">
-                  <span className="text-sm">{m.model}</span>
-                  <div className="flex gap-3 text-xs text-muted-foreground">
-                    <span>{formatTokens(m.tokens)} tokens</span>
-                    <span>${m.cost.toFixed(4)}</span>
-                  </div>
-                </div>
-                <Progress
-                  className="h-2"
-                  value={(m.tokens / maxTokens) * 100}
-                />
-              </div>
-            ))}
-          </CardContent>
-        </Card>
-      ) : null}
 
       {/* Daily costs */}
       {data.dailyCosts.length > 0 ? (
