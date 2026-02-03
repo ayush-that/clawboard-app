@@ -30,20 +30,6 @@ const panels: Record<PanelName, () => JSX.Element> = {
   debug: DebugTab,
 };
 
-const panelLabels: Record<PanelName, string> = {
-  status: "Status",
-  tasks: "Tasks",
-  sessions: "Sessions",
-  logs: "Logs",
-  cron: "Cron Jobs",
-  memory: "Memory",
-  skills: "Skills",
-  usage: "Usage",
-  channels: "Channels",
-  config: "Config",
-  debug: "Debug",
-};
-
 export const DashboardPanelView = () => {
   const { activePanel } = useActiveView();
 
@@ -57,7 +43,6 @@ export const DashboardPanelView = () => {
     <div className="flex h-dvh flex-col bg-background">
       <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
         <SidebarToggle />
-        <span className="text-sm font-medium">{panelLabels[activePanel]}</span>
       </header>
       <div className="flex-1 overflow-y-auto">
         <PanelComponent />
