@@ -1,9 +1,7 @@
 import type {
-  AgentStatusData,
   ChannelConfig,
   CostDataPoint,
   CronJobData,
-  DebugInfo,
   ErrorData,
   ExecApprovalRequest,
   LogEntry,
@@ -90,53 +88,6 @@ const chatCompletions = async (
 };
 
 // --- Response Transformers ---
-
-type SessionStatusDetails = {
-  ok: boolean;
-  sessionKey: string;
-  statusText: string;
-};
-
-const parseStatusText = (details: SessionStatusDetails): AgentStatusData => {
-  const text = details.statusText ?? "";
-  const modelMatch = text.match(/Model:\s*(.+)/i);
-  const tokensMatch = text.match(/Tokens?.*?:\s*([\d,]+)/i);
-
-  const channels: string[] = [];
-  if (text.toLowerCase().includes("telegram")) {
-    channels.push("telegram");
-  }
-  if (text.toLowerCase().includes("webhook")) {
-    channels.push("webhook");
-  }
-  if (text.toLowerCase().includes("cron")) {
-    channels.push("cron");
-  }
-  if (channels.length === 0) {
-    channels.push("gateway");
-  }
-
-  return {
-    uptime: extractFromStatus(text, /uptime|time.*?:\s*(.+)/i) ?? "unknown",
-    model: modelMatch?.at(1)?.trim() ?? "unknown",
-    tokensToday: Number.parseInt(
-      (tokensMatch?.at(1) ?? "0").replace(/,/g, ""),
-      10
-    ),
-    costToday: 0,
-    activeChannels: channels,
-    lastActivity: new Date().toISOString(),
-    status: details.ok ? "online" : "degraded",
-  };
-};
-
-const extractFromStatus = (
-  text: string,
-  pattern: RegExp
-): string | undefined => {
-  const match = text.match(pattern);
-  return match?.at(1)?.trim();
-};
 
 type SessionsListDetails = {
   count: number;
@@ -270,26 +221,6 @@ const getPrimarySessionKey = async (): Promise<string> => {
 // --- Public API ---
 // Each function tries the real OpenClaw gateway via POST /tools/invoke.
 // If unreachable, returns empty/error state — no mock data.
-
-export const getAgentStatus = async (): Promise<AgentStatusData> => {
-  try {
-    const details = await invokeTool<SessionStatusDetails>(
-      "session_status",
-      {}
-    );
-    return parseStatusText(details);
-  } catch {
-    return {
-      uptime: "N/A",
-      model: "unknown",
-      tokensToday: 0,
-      costToday: 0,
-      activeChannels: [],
-      lastActivity: new Date().toISOString(),
-      status: "offline",
-    };
-  }
-};
 
 export const getRecentTasks = async (
   _timeRange: string
@@ -574,33 +505,6 @@ export const getUsageSummary = async (): Promise<UsageSummary> => {
       modelBreakdown: [],
       dailyCosts: [],
       sessions: [],
-    };
-  }
-};
-
-// --- Debug ---
-
-export const getDebugInfo = async (): Promise<DebugInfo> => {
-  const gatewayUrl = GATEWAY_URL;
-  try {
-    const [statusDetails, sessionsDetails] = await Promise.all([
-      invokeTool<SessionStatusDetails>("session_status", {}),
-      invokeTool<SessionsListDetails>("sessions_list", {}),
-    ]);
-    return {
-      gatewayUrl,
-      connected: statusDetails.ok,
-      statusText: statusDetails.statusText ?? "",
-      sessionCount: sessionsDetails.count ?? sessionsDetails.sessions.length,
-      timestamp: new Date().toISOString(),
-    };
-  } catch {
-    return {
-      gatewayUrl,
-      connected: false,
-      statusText: "Gateway unreachable",
-      sessionCount: 0,
-      timestamp: new Date().toISOString(),
     };
   }
 };

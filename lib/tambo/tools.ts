@@ -2,25 +2,6 @@ import { z } from "zod";
 
 export const tamboTools = [
   {
-    name: "getAgentStatus",
-    description:
-      "Get the current OpenClaw agent health status including uptime, model, token usage, cost, and active channels. Use when the user asks about agent status, health, or how the agent is doing.",
-    tool: async () => {
-      const res = await fetch("/api/openclaw/status");
-      return res.json();
-    },
-    inputSchema: z.object({}),
-    outputSchema: z.object({
-      uptime: z.string(),
-      model: z.string(),
-      tokensToday: z.number(),
-      costToday: z.number(),
-      activeChannels: z.array(z.string()),
-      lastActivity: z.string(),
-      status: z.enum(["online", "offline", "degraded"]),
-    }),
-  },
-  {
     name: "getRecentTasks",
     description:
       "Fetch recent task executions from OpenClaw session history. Use when the user asks about recent activity, what happened overnight, task history, or what the agent has been doing.",

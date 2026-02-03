@@ -1,6 +1,5 @@
 import type { TamboComponent } from "@tambo-ai/react";
 import { z } from "zod";
-import { AgentStatus } from "@/components/generative/agent-status";
 import { CodeBlock } from "@/components/generative/code-block";
 import { CostChart } from "@/components/generative/cost-chart";
 import { DataTable } from "@/components/generative/data-table";
@@ -16,39 +15,6 @@ import { WebhookLog } from "@/components/generative/webhook-log";
 
 export const tamboComponents: TamboComponent[] = [
   // ── Agent-specific components ──────────────────────────────────
-  {
-    name: "AgentStatus",
-    description:
-      "Displays the current health and status of the OpenClaw agent. Use when the user asks about agent status, health check, uptime, how the agent is doing, or wants an overview.",
-    component: AgentStatus,
-    propsSchema: z.object({
-      uptime: z
-        .string()
-        .describe("Human-readable uptime string like '3d 14h 22m'"),
-      model: z
-        .string()
-        .describe(
-          "The AI model the agent is currently using, e.g. 'claude-sonnet-4-5-20250929'"
-        ),
-      tokensToday: z
-        .number()
-        .describe("Total tokens consumed today as a number"),
-      costToday: z
-        .number()
-        .describe("Total API cost today in USD as a decimal number"),
-      activeChannels: z
-        .array(z.string())
-        .describe(
-          "List of active communication channels like 'telegram', 'slack', 'webhook'"
-        ),
-      lastActivity: z
-        .string()
-        .describe("ISO 8601 timestamp of the agent's most recent activity"),
-      status: z
-        .enum(["online", "offline", "degraded"])
-        .describe("Current agent status"),
-    }),
-  },
   {
     name: "TaskTimeline",
     description:

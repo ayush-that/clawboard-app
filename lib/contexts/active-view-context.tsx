@@ -10,7 +10,6 @@ import {
 } from "react";
 
 export type PanelName =
-  | "status"
   | "tasks"
   | "sessions"
   | "logs"
@@ -19,8 +18,7 @@ export type PanelName =
   | "skills"
   | "usage"
   | "channels"
-  | "config"
-  | "debug";
+  | "config";
 
 type ActiveView = { type: "chat" } | { type: "panel"; panel: PanelName };
 

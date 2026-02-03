@@ -1,13 +1,3 @@
-export type AgentStatusData = {
-  uptime: string;
-  model: string;
-  tokensToday: number;
-  costToday: number;
-  activeChannels: string[];
-  lastActivity: string;
-  status: "online" | "offline" | "degraded";
-};
-
 export type TaskStatus = "success" | "failed" | "running";
 
 export type TaskData = {
@@ -84,14 +74,6 @@ export type SessionMessage = {
     cost?: { total?: number };
   };
   timestamp: number;
-};
-
-export type DebugInfo = {
-  gatewayUrl: string;
-  connected: boolean;
-  statusText: string;
-  sessionCount: number;
-  timestamp: string;
 };
 
 export type CostDataPoint = {

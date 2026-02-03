@@ -6,7 +6,6 @@ import { useActiveView } from "@/lib/contexts/active-view-context";
 import {
   CheckCircleFillIcon,
   CodeIcon,
-  CpuIcon,
   LineChartIcon,
   LogsIcon,
   MessageIcon,
@@ -14,7 +13,6 @@ import {
   RouteIcon,
   SparklesIcon,
   TerminalIcon,
-  TerminalWindowIcon,
 } from "./icons";
 import {
   SidebarGroup,
@@ -26,7 +24,6 @@ import {
 } from "./ui/sidebar";
 
 const navItems: Array<{ name: PanelName; label: string; icon: ReactNode }> = [
-  { name: "status", label: "Status", icon: <CpuIcon size={16} /> },
   { name: "tasks", label: "Tasks", icon: <CheckCircleFillIcon size={16} /> },
   { name: "sessions", label: "Sessions", icon: <MessageIcon size={16} /> },
   { name: "logs", label: "Logs", icon: <LogsIcon size={16} /> },
@@ -36,7 +33,6 @@ const navItems: Array<{ name: PanelName; label: string; icon: ReactNode }> = [
   { name: "usage", label: "Usage", icon: <LineChartIcon size={16} /> },
   { name: "channels", label: "Channels", icon: <RouteIcon size={16} /> },
   { name: "config", label: "Config", icon: <PencilEditIcon size={16} /> },
-  { name: "debug", label: "Debug", icon: <TerminalWindowIcon size={16} /> },
 ];
 
 export const SidebarDashboardNav = () => {
