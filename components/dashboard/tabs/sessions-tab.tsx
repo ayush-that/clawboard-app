@@ -137,7 +137,17 @@ export const SessionsTab = () => {
             size="sm"
             variant="ghost"
           >
-            &larr; Back
+            <svg
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <title>Back</title>
+              <path d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
           </Button>
           <h2 className="text-base font-semibold">
             {session?.displayName ?? selectedKey}
@@ -266,7 +276,16 @@ export const SessionsTab = () => {
                     {session.channel || session.lastChannel}
                   </Badge>
                 </div>
-                <span className="text-xs text-muted-foreground">&rarr;</span>
+                <svg
+                  className="h-3 w-3 text-muted-foreground"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  viewBox="0 0 24 24"
+                >
+                  <title>View session</title>
+                  <path d="M9 5l7 7-7 7" />
+                </svg>
               </div>
               <div className="mt-1.5 flex gap-3 text-xs text-muted-foreground">
                 <span>{session.model}</span>
