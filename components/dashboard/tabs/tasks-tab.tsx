@@ -54,7 +54,7 @@ const formatTimeAgo = (isoDate: string): string => {
 };
 
 const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+  <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
     <div className="flex items-center justify-between">
       <Skeleton className="h-5 w-20" />
       <div className="flex gap-2">
@@ -99,7 +99,7 @@ export const TasksTab = () => {
 
   if (tasks.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <p className="text-sm text-muted-foreground">
@@ -116,7 +116,7 @@ export const TasksTab = () => {
   const runningCount = tasks.filter((t) => t.status === "running").length;
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold">Tasks</h2>
         <div className="flex gap-2">

@@ -64,7 +64,7 @@ const formatTimeAgo = (ts: number): string => {
 };
 
 const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+  <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
     <Skeleton className="h-5 w-36" />
     <div className="grid grid-cols-3 gap-4">
       {Array.from({ length: 3 }).map((_, i) => (
@@ -103,7 +103,7 @@ export const UsageTab = () => {
 
   if (!data) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <p className="text-sm text-muted-foreground">
@@ -118,7 +118,7 @@ export const UsageTab = () => {
   const maxTokens = Math.max(...data.modelBreakdown.map((m) => m.tokens), 1);
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <h2 className="text-base font-semibold">Usage Analytics</h2>
 
       {/* Summary cards */}

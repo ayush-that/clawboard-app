@@ -28,7 +28,7 @@ type NewJobForm = {
 const emptyForm: NewJobForm = { name: "", schedule: "", message: "" };
 
 const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+  <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
     <div className="flex items-center justify-between">
       <Skeleton className="h-5 w-24" />
       <Skeleton className="h-9 w-20 rounded-md" />
@@ -138,7 +138,7 @@ export const CronTab = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-4 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold">Cron Jobs</h2>

@@ -22,7 +22,7 @@ const sourceColors: Record<string, string> = {
 };
 
 const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+  <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
     <div className="flex items-center justify-between">
       <Skeleton className="h-5 w-16" />
       <Skeleton className="h-4 w-16" />
@@ -58,7 +58,7 @@ export const SkillsTab = () => {
 
   if (skills.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-3xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
         <Card>
           <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
             <p className="text-sm text-muted-foreground">No skills found</p>
@@ -93,7 +93,7 @@ export const SkillsTab = () => {
   }
 
   return (
-    <div className="mx-auto w-full max-w-3xl space-y-6 p-4 md:p-6">
+    <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold">Skills</h2>
         <span className="text-xs text-muted-foreground">
