@@ -68,23 +68,11 @@ export const LogsTab = () => {
 
   if (loading) {
     return (
-      <div className="mx-auto flex w-full max-w-4xl flex-col p-4 md:p-6">
-        <div className="flex items-center justify-between pb-3">
-          <Skeleton className="h-4 w-16" />
-          <div className="flex gap-1">
-            {Array.from({ length: 5 }).map((_, i) => (
-              <Skeleton
-                className="h-7 w-12 rounded-md"
-                key={`skel-${String(i)}`}
-              />
-            ))}
-          </div>
+      <div className="mx-auto flex h-[calc(100dvh-theme(spacing.14))] w-full max-w-4xl flex-col p-4 md:p-6">
+        <div className="pb-3">
+          <Skeleton className="h-7 w-full rounded-md" />
         </div>
-        <div className="flex-1 space-y-1">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <Skeleton className="h-4 w-full" key={`log-skel-${String(i)}`} />
-          ))}
-        </div>
+        <Skeleton className="min-h-0 flex-1 rounded-lg" />
       </div>
     );
   }

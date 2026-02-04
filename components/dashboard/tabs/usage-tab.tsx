@@ -192,14 +192,9 @@ export const UsageTab = () => {
                   className="flex items-center justify-between rounded-md p-2 hover:bg-muted/50"
                   key={s.sessionKey}
                 >
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm">
-                      {s.displayName || s.sessionKey}
-                    </span>
-                    <Badge className="text-xs" variant="outline">
-                      {s.channel}
-                    </Badge>
-                  </div>
+                  <span className="text-sm">
+                    {s.displayName || s.sessionKey}
+                  </span>
                   <div className="flex gap-3 text-xs text-muted-foreground">
                     <span>{formatTokens(s.totalTokens)} tokens</span>
                     <span>{formatTimeAgo(s.updatedAt)}</span>
