@@ -81,6 +81,7 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   className="size-6"
                   height={24}
                   src="/favicon-32x32.png"
+                  unoptimized
                   width={24}
                 />
                 <span
