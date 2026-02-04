@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { Textarea } from "@/components/ui/textarea";
 
 type ChannelItem = {
@@ -38,22 +38,11 @@ const channelColors: Record<string, string> = {
   slack: "text-pink-400",
 };
 
-const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-5 w-24" />
-      <Skeleton className="h-4 w-20" />
-    </div>
-    {Array.from({ length: 3 }).map((_, i) => (
-      <Skeleton className="h-20 w-full rounded-lg" key={`skel-${String(i)}`} />
-    ))}
-  </div>
-);
-
 export const ChannelsTab = () => {
   const [channels, setChannels] = useState<ChannelItem[]>([]);
   const [hash, setHash] = useState("");
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [editJson, setEditJson] = useState("");
   const [saving, setSaving] = useState(false);
@@ -68,8 +57,9 @@ export const ChannelsTab = () => {
       };
       setChannels(json.channels);
       setHash(json.hash);
+      setError(null);
     } catch {
-      setChannels([]);
+      setError("Failed to load channels. Check gateway connection.");
     } finally {
       setLoading(false);
     }
@@ -120,7 +110,25 @@ export const ChannelsTab = () => {
   };
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return null;
+  }
+
+  if (error && channels.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchChannels}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (channels.length === 0) {
@@ -152,6 +160,20 @@ export const ChannelsTab = () => {
           {channels.length} configured
         </span>
       </div>
+
+      {error ? (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchChannels}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       {channels.map((ch) => (
         <Card key={ch.name}>

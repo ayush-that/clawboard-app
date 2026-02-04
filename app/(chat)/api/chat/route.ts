@@ -70,6 +70,9 @@ export async function POST(request: Request) {
 
     const userType: UserType = session.user.type;
     const gwConfig = await getGatewayConfig(session.user.id);
+    if (!gwConfig.isConfigured) {
+      return new ChatSDKError("bad_request:openclaw_config").toResponse();
+    }
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
@@ -100,8 +103,11 @@ export async function POST(request: Request) {
         userId: session.user.id,
         title: chatTitle ?? "New chat",
         visibility: selectedVisibilityType,
+        openclawSessionKey: `webchat-${id}`,
       });
     }
+
+    const openclawSessionKey = chat?.openclawSessionKey ?? `webchat-${id}`;
 
     const uiMessages = isToolApprovalFlow
       ? (messages as ChatMessage[])
@@ -142,7 +148,11 @@ export async function POST(request: Request) {
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
       execute: async ({ writer: dataStream }) => {
         const result = streamText({
-          model: getLanguageModel(selectedChatModel, gwConfig),
+          model: getLanguageModel(
+            selectedChatModel,
+            gwConfig,
+            openclawSessionKey
+          ),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: modelMessages,
           stopWhen: stepCountIs(5),
@@ -220,8 +230,7 @@ export async function POST(request: Request) {
           });
         }
       },
-      onError: (error) => {
-        console.error("Stream error:", error);
+      onError: () => {
         return "Oops, an error occurred!";
       },
     });
@@ -248,8 +257,6 @@ export async function POST(request: Request) {
       },
     });
   } catch (error) {
-    const vercelId = request.headers.get("x-vercel-id");
-
     if (error instanceof ChatSDKError) {
       return error.toResponse();
     }
@@ -263,7 +270,6 @@ export async function POST(request: Request) {
       return new ChatSDKError("bad_request:activate_gateway").toResponse();
     }
 
-    console.error("Unhandled error in chat API:", error, { vercelId });
     return new ChatSDKError("offline:chat").toResponse();
   }
 }

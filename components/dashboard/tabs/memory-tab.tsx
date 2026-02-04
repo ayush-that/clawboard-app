@@ -17,6 +17,7 @@ export const MemoryTab = () => {
   const [query, setQuery] = useState("");
   const [memories, setMemories] = useState<MemoryItem[]>([]);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [searched, setSearched] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
   const [newMemory, setNewMemory] = useState("");
@@ -33,9 +34,11 @@ export const MemoryTab = () => {
       const res = await fetch(
         `/api/openclaw/memory?q=${encodeURIComponent(query)}`
       );
-      const json = (await res.json()) as MemoryItem[];
-      setMemories(json);
+      const json = await res.json();
+      setMemories(Array.isArray(json) ? json : []);
+      setError(null);
     } catch {
+      setError("Failed to search memory. Check gateway connection.");
       setMemories([]);
     } finally {
       setLoading(false);
@@ -137,6 +140,20 @@ export const MemoryTab = () => {
           {loading ? "..." : "Search"}
         </Button>
       </div>
+
+      {error ? (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={handleSearch}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       {!searched && memories.length === 0 ? (
         <Card>

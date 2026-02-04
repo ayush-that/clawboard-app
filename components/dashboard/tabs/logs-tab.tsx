@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type LogEntry = {
   timestamp: string;
@@ -19,13 +18,14 @@ const levelColors: Record<string, string> = {
   debug: "text-muted-foreground",
 };
 
-const LEVELS = ["all", "info", "warn", "error", "debug"] as const;
+const LEVELS = ["All", "Info", "Warn", "Error", "Debug"] as const;
 
 export const LogsTab = () => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [autoScroll, setAutoScroll] = useState(true);
-  const [filter, setFilter] = useState<string>("all");
+  const [filter, setFilter] = useState<string>("All");
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = useCallback(() => {
@@ -37,15 +37,16 @@ export const LogsTab = () => {
   const fetchLogs = useCallback(async () => {
     try {
       const res = await fetch("/api/openclaw/logs");
-      const json = (await res.json()) as LogEntry[];
-      setLogs(json);
+      const json = await res.json();
+      setLogs(Array.isArray(json) ? json : []);
+      setError(null);
       requestAnimationFrame(() => {
         if (autoScrollRef.current) {
           scrollToBottom();
         }
       });
     } catch {
-      // keep existing logs on error
+      setError("Failed to load logs. Check gateway connection.");
     } finally {
       setLoading(false);
     }
@@ -63,18 +64,13 @@ export const LogsTab = () => {
   }, [fetchLogs]);
 
   const filteredLogs =
-    filter === "all" ? logs : logs.filter((l) => l.level === filter);
+    filter === "All"
+      ? logs
+      : logs.filter((l) => l.level === filter.toLowerCase());
   const displayLogs = [...filteredLogs].reverse();
 
   if (loading) {
-    return (
-      <div className="mx-auto flex h-[calc(100dvh-theme(spacing.14))] w-full max-w-4xl flex-col p-4 md:p-6">
-        <div className="pb-3">
-          <Skeleton className="h-7 w-full rounded-md" />
-        </div>
-        <Skeleton className="min-h-0 flex-1 rounded-lg" />
-      </div>
-    );
+    return null;
   }
 
   return (
@@ -116,6 +112,20 @@ export const LogsTab = () => {
           </label>
         </div>
       </div>
+
+      {error ? (
+        <div className="mb-3 flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchLogs}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       {/* Log stream */}
       <div

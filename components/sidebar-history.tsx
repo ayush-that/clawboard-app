@@ -72,13 +72,13 @@ const groupChatsByDate = (chats: Chat[]): GroupedChats => {
       lastWeek: [],
       lastMonth: [],
       older: [],
-    } as GroupedChats,
+    } as GroupedChats
   );
 };
 
 export function getChatHistoryPaginationKey(
   pageIndex: number,
-  previousPageData: ChatHistory,
+  previousPageData: ChatHistory
 ) {
   if (previousPageData && previousPageData.hasMore === false) {
     return null;
@@ -142,7 +142,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
             return chatHistories.map((chatHistory) => ({
               ...chatHistory,
               chats: chatHistory.chats.filter(
-                (chat) => chat.id !== chatToDelete,
+                (chat) => chat.id !== chatToDelete
               ),
             }));
           }
@@ -172,32 +172,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
   }
 
   if (isLoading) {
-    return (
-      <SidebarGroup>
-        <div className="px-2 py-1 text-sidebar-foreground/50 text-xs">
-          Today
-        </div>
-        <SidebarGroupContent>
-          <div className="flex flex-col">
-            {[44, 32, 28, 64, 52].map((item) => (
-              <div
-                className="flex h-8 items-center gap-2 rounded-md px-2"
-                key={item}
-              >
-                <div
-                  className="h-4 max-w-(--skeleton-width) flex-1 rounded-md bg-sidebar-accent-foreground/10"
-                  style={
-                    {
-                      "--skeleton-width": `${item}%`,
-                    } as React.CSSProperties
-                  }
-                />
-              </div>
-            ))}
-          </div>
-        </SidebarGroupContent>
-      </SidebarGroup>
-    );
+    return null;
   }
 
   if (hasEmptyChatHistory) {
@@ -220,7 +195,7 @@ export function SidebarHistory({ user }: { user: User | undefined }) {
             {paginatedChatHistories &&
               (() => {
                 const chatsFromHistory = paginatedChatHistories.flatMap(
-                  (paginatedChatHistory) => paginatedChatHistory.chats,
+                  (paginatedChatHistory) => paginatedChatHistory.chats
                 );
 
                 const groupedChats = groupChatsByDate(chatsFromHistory);

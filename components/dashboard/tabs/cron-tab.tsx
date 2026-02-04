@@ -1,11 +1,21 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { Textarea } from "@/components/ui/textarea";
 
 type CronJob = {
@@ -27,18 +37,6 @@ type NewJobForm = {
 
 const emptyForm: NewJobForm = { name: "", schedule: "", message: "" };
 
-const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-5 w-24" />
-      <Skeleton className="h-9 w-20 rounded-md" />
-    </div>
-    {Array.from({ length: 3 }).map((_, i) => (
-      <Skeleton className="h-20 w-full rounded-lg" key={`skel-${String(i)}`} />
-    ))}
-  </div>
-);
-
 export const CronTab = () => {
   const [jobs, setJobs] = useState<CronJob[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,14 +45,17 @@ export const CronTab = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<NewJobForm>(emptyForm);
   const [saving, setSaving] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const fetchJobs = useCallback(async () => {
     try {
       const res = await fetch("/api/openclaw/cron");
-      const json = (await res.json()) as CronJob[];
-      setJobs(json);
+      const json = await res.json();
+      setJobs(Array.isArray(json) ? json : []);
+      setError(null);
     } catch {
-      setJobs([]);
+      setError("Failed to load cron jobs. Check gateway connection.");
     } finally {
       setLoading(false);
     }
@@ -70,14 +71,21 @@ export const CronTab = () => {
     }
     setSaving(true);
     try {
-      await fetch("/api/openclaw/cron", {
+      const res = await fetch("/api/openclaw/cron", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      if (!res.ok) {
+        setError("Failed to create cron job.");
+        return;
+      }
+      setError(null);
       setForm(emptyForm);
       setShowForm(false);
       await fetchJobs();
+    } catch {
+      setError("Failed to create cron job. Check gateway connection.");
     } finally {
       setSaving(false);
     }
@@ -85,27 +93,39 @@ export const CronTab = () => {
 
   const handleToggle = async (job: CronJob) => {
     try {
-      await fetch("/api/openclaw/cron", {
+      const res = await fetch("/api/openclaw/cron", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: job.id, enabled: !job.enabled }),
       });
+      if (!res.ok) {
+        setError("Failed to toggle cron job.");
+        return;
+      }
+      setError(null);
       await fetchJobs();
     } catch {
-      // silent fail
+      setError("Failed to toggle cron job. Check gateway connection.");
     }
   };
 
   const handleUpdate = async (id: string) => {
     setSaving(true);
     try {
-      await fetch("/api/openclaw/cron", {
+      const res = await fetch("/api/openclaw/cron", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id, ...editForm }),
       });
+      if (!res.ok) {
+        setError("Failed to update cron job.");
+        return;
+      }
+      setError(null);
       setEditingId(null);
       await fetchJobs();
+    } catch {
+      setError("Failed to update cron job. Check gateway connection.");
     } finally {
       setSaving(false);
     }
@@ -113,14 +133,21 @@ export const CronTab = () => {
 
   const handleDelete = async (id: string) => {
     try {
-      await fetch("/api/openclaw/cron", {
+      const res = await fetch("/api/openclaw/cron", {
         method: "DELETE",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id }),
       });
+      if (!res.ok) {
+        setError("Failed to delete cron job.");
+        return;
+      }
+      setError(null);
       await fetchJobs();
     } catch {
-      // silent fail
+      setError("Failed to delete cron job. Check gateway connection.");
+    } finally {
+      setDeleteTarget(null);
     }
   };
 
@@ -134,7 +161,7 @@ export const CronTab = () => {
   };
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return null;
   }
 
   return (
@@ -156,6 +183,20 @@ export const CronTab = () => {
           {showForm ? "Cancel" : "New Job"}
         </Button>
       </div>
+
+      {error ? (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchJobs}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       {showForm ? (
         <Card>
@@ -255,11 +296,13 @@ export const CronTab = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <button
-                      className={`h-5 w-9 rounded-full transition-colors ${job.enabled ? "bg-emerald-500" : "bg-muted"}`}
+                      aria-checked={job.enabled}
+                      aria-label={`${job.enabled ? "Disable" : "Enable"} ${job.name}`}
+                      className={`h-5 w-9 rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background ${job.enabled ? "bg-emerald-500" : "bg-muted"}`}
                       onClick={() => {
                         handleToggle(job);
                       }}
-                      title={job.enabled ? "Disable" : "Enable"}
+                      role="switch"
                       type="button"
                     >
                       <span
@@ -302,7 +345,7 @@ export const CronTab = () => {
                     <Button
                       className="h-7 w-7 hover:text-red-400"
                       onClick={() => {
-                        handleDelete(job.id);
+                        setDeleteTarget(job.id);
                       }}
                       size="icon-sm"
                       title="Delete"
@@ -354,6 +397,37 @@ export const CronTab = () => {
           </CardContent>
         </Card>
       ))}
+
+      <AlertDialog
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+          }
+        }}
+        open={deleteTarget !== null}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete cron job?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. The cron job will be permanently
+              removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (deleteTarget) {
+                  handleDelete(deleteTarget);
+                }
+              }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

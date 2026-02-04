@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type SessionInfo = {
   key: string;
@@ -69,39 +68,30 @@ const roleBadgeVariant = (
   return "outline";
 };
 
-const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-5 w-24" />
-      <Skeleton className="h-4 w-16" />
-    </div>
-    {Array.from({ length: 3 }).map((_, i) => (
-      <Skeleton className="h-20 w-full rounded-lg" key={`skel-${String(i)}`} />
-    ))}
-  </div>
-);
-
 export const SessionsTab = () => {
   const [sessions, setSessions] = useState<SessionInfo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [messages, setMessages] = useState<SessionMessage[]>([]);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
-  useEffect(() => {
-    const fetchSessions = async () => {
-      try {
-        const res = await fetch("/api/openclaw/sessions");
-        const json = (await res.json()) as SessionInfo[];
-        setSessions(json);
-      } catch {
-        setSessions([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSessions();
+  const fetchSessions = useCallback(async () => {
+    try {
+      const res = await fetch("/api/openclaw/sessions");
+      const json = await res.json();
+      setSessions(Array.isArray(json) ? json : []);
+      setError(null);
+    } catch {
+      setError("Failed to load sessions. Check gateway connection.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchSessions();
+  }, [fetchSessions]);
 
   const loadMessages = async (key: string) => {
     setSelectedKey(key);
@@ -110,9 +100,11 @@ export const SessionsTab = () => {
       const res = await fetch(
         `/api/openclaw/sessions/messages?key=${encodeURIComponent(key)}`
       );
-      const json = (await res.json()) as SessionMessage[];
-      setMessages(json);
+      const json = await res.json();
+      setMessages(Array.isArray(json) ? json : []);
+      setError(null);
     } catch {
+      setError("Failed to load messages. Check gateway connection.");
       setMessages([]);
     } finally {
       setLoadingMessages(false);
@@ -120,19 +112,20 @@ export const SessionsTab = () => {
   };
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return null;
   }
 
   // Message viewer
   if (selectedKey) {
     const session = sessions.find((s) => s.key === selectedKey);
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto flex h-[calc(100dvh-theme(spacing.14))] w-full max-w-4xl flex-col p-4 md:p-6">
         <div className="mb-4 flex items-center gap-3">
           <Button
             onClick={() => {
               setSelectedKey(null);
               setMessages([]);
+              setError(null);
             }}
             size="sm"
             variant="ghost"
@@ -152,83 +145,102 @@ export const SessionsTab = () => {
           <h2 className="text-base font-semibold">
             {session?.displayName ?? selectedKey}
           </h2>
-          {session ? (
-            <Badge className="text-xs" variant="outline">
-              {session.channel}
-            </Badge>
-          ) : null}
+          <Button
+            className="ml-auto"
+            onClick={() => {
+              loadMessages(selectedKey);
+            }}
+            size="sm"
+            variant="ghost"
+          >
+            Refresh
+          </Button>
         </div>
 
-        {loadingMessages ? (
-          <div className="space-y-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-              <Skeleton
-                className="h-24 w-full rounded-lg"
-                key={`msg-skel-${String(i)}`}
-              />
-            ))}
+        {error ? (
+          <div className="mb-3 flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+            <span>{error}</span>
+            <Button
+              className="ml-4 h-7 px-2.5 text-xs"
+              onClick={() => {
+                loadMessages(selectedKey);
+              }}
+              size="sm"
+              variant="ghost"
+            >
+              Retry
+            </Button>
           </div>
-        ) : messages.length === 0 ? (
-          <Card>
-            <CardContent className="flex items-center justify-center py-12">
-              <p className="text-sm text-muted-foreground">
-                No messages in this session
-              </p>
-            </CardContent>
-          </Card>
-        ) : (
-          <div className="space-y-3">
-            {messages.map((msg) => {
-              const textParts = msg.content
-                ?.filter((c) => c.type === "text" && c.text)
-                .map((c) => c.text)
-                .join("\n");
+        ) : null}
 
-              return (
-                <Card key={`${msg.role}-${msg.timestamp}`}>
-                  <CardContent className="p-4">
-                    <div className="mb-2 flex items-center gap-2">
-                      <Badge
-                        className="text-xs"
-                        variant={roleBadgeVariant(msg.role)}
-                      >
-                        {msg.role}
-                      </Badge>
-                      {msg.model ? (
-                        <span className="text-xs text-muted-foreground">
-                          {msg.model}
-                        </span>
-                      ) : null}
-                      {msg.timestamp ? (
-                        <span className="text-xs text-muted-foreground">
-                          {new Date(msg.timestamp).toLocaleTimeString("en-US", {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                            second: "2-digit",
-                            hour12: false,
-                          })}
-                        </span>
-                      ) : null}
-                      {msg.usage ? (
-                        <span className="text-xs text-muted-foreground">
-                          {formatTokens(msg.usage.totalTokens)} tokens
-                        </span>
-                      ) : null}
-                    </div>
-                    <Separator className="mb-2" />
-                    {textParts ? (
-                      <p className="whitespace-pre-wrap text-sm">{textParts}</p>
-                    ) : (
-                      <p className="text-xs text-muted-foreground italic">
-                        (no text content)
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        )}
+        <div className="min-h-0 flex-1 overflow-y-auto">
+          {loadingMessages ? null : messages.length === 0 ? (
+            <Card>
+              <CardContent className="flex items-center justify-center py-12">
+                <p className="text-sm text-muted-foreground">
+                  No messages in this session
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            <div className="space-y-3">
+              {messages.map((msg) => {
+                const textParts = msg.content
+                  ?.filter((c) => c.type === "text" && c.text)
+                  .map((c) => c.text)
+                  .join("\n");
+
+                return (
+                  <Card key={`${msg.role}-${msg.timestamp}`}>
+                    <CardContent className="p-4">
+                      <div className="mb-2 flex items-center gap-2">
+                        <Badge
+                          className="text-xs"
+                          variant={roleBadgeVariant(msg.role)}
+                        >
+                          {msg.role}
+                        </Badge>
+                        {msg.model ? (
+                          <span className="text-xs text-muted-foreground">
+                            {msg.model}
+                          </span>
+                        ) : null}
+                        {msg.timestamp ? (
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(msg.timestamp).toLocaleTimeString(
+                              "en-US",
+                              {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                                second: "2-digit",
+                                hour12: false,
+                              }
+                            )}
+                          </span>
+                        ) : null}
+                        {msg.usage ? (
+                          <span className="text-xs text-muted-foreground">
+                            {formatTokens(msg.usage.totalTokens)} tokens
+                          </span>
+                        ) : null}
+                      </div>
+                      <Separator className="mb-2" />
+                      {textParts ? (
+                        <p className="whitespace-pre-wrap text-sm">
+                          {textParts}
+                        </p>
+                      ) : (
+                        <p className="text-xs text-muted-foreground italic">
+                          (no text content)
+                        </p>
+                      )}
+                    </CardContent>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     );
   }
@@ -248,7 +260,27 @@ export const SessionsTab = () => {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
-      <h2 className="text-base font-semibold">Sessions</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold">Sessions</h2>
+        <Button onClick={fetchSessions} size="sm" variant="ghost">
+          Refresh
+        </Button>
+      </div>
+
+      {error ? (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchSessions}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
+
       <div className="space-y-2">
         {sessions.map((session) => (
           <Card

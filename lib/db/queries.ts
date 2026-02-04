@@ -16,8 +16,11 @@ import { drizzle } from "drizzle-orm/postgres-js";
 import postgres from "postgres";
 import type { ArtifactKind } from "@/components/artifact";
 import type { VisibilityType } from "@/components/visibility-selector";
+import {
+  decryptUserSettingValue,
+  encryptUserSettingValue,
+} from "@/lib/security/user-settings-crypto";
 import { ChatSDKError } from "../errors";
-import { generateUUID } from "../utils";
 import {
   type Chat,
   chat,
@@ -63,33 +66,18 @@ export async function createUser(email: string, password: string) {
   }
 }
 
-export async function createGuestUser() {
-  const email = `guest-${Date.now()}`;
-  const password = generateHashedPassword(generateUUID());
-
-  try {
-    return await db.insert(user).values({ email, password }).returning({
-      id: user.id,
-      email: user.email,
-    });
-  } catch (_error) {
-    throw new ChatSDKError(
-      "bad_request:database",
-      "Failed to create guest user"
-    );
-  }
-}
-
 export async function saveChat({
   id,
   userId,
   title,
   visibility,
+  openclawSessionKey,
 }: {
   id: string;
   userId: string;
   title: string;
   visibility: VisibilityType;
+  openclawSessionKey?: string | null;
 }) {
   try {
     return await db.insert(chat).values({
@@ -98,6 +86,7 @@ export async function saveChat({
       userId,
       title,
       visibility,
+      openclawSessionKey: openclawSessionKey ?? null,
     });
   } catch (_error) {
     throw new ChatSDKError("bad_request:database", "Failed to save chat");
@@ -525,8 +514,7 @@ export async function updateChatTitleById({
 }) {
   try {
     return await db.update(chat).set({ title }).where(eq(chat.id, chatId));
-  } catch (error) {
-    console.warn("Failed to update title for chat", chatId, error);
+  } catch {
     return;
   }
 }
@@ -608,7 +596,23 @@ export async function getUserSettings(userId: string) {
       .select()
       .from(userSettings)
       .where(eq(userSettings.userId, userId));
-    return settings ?? null;
+
+    if (!settings) {
+      return null;
+    }
+
+    const decryptedGatewayToken = settings.openclawGatewayToken
+      ? decryptUserSettingValue(settings.openclawGatewayToken).value
+      : null;
+    const decryptedTamboApiKey = settings.tamboApiKey
+      ? decryptUserSettingValue(settings.tamboApiKey).value
+      : null;
+
+    return {
+      ...settings,
+      openclawGatewayToken: decryptedGatewayToken,
+      tamboApiKey: decryptedTamboApiKey,
+    };
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",
@@ -628,18 +632,44 @@ export async function saveUserSettings(
   try {
     const existing = await getUserSettings(userId);
 
+    const nextGatewayUrl =
+      settings.openclawGatewayUrl === undefined
+        ? (existing?.openclawGatewayUrl ?? null)
+        : settings.openclawGatewayUrl;
+    const nextGatewayToken =
+      settings.openclawGatewayToken === undefined
+        ? (existing?.openclawGatewayToken ?? null)
+        : settings.openclawGatewayToken;
+    const nextTamboApiKey =
+      settings.tamboApiKey === undefined
+        ? (existing?.tamboApiKey ?? null)
+        : settings.tamboApiKey;
+
+    const valuesToPersist = {
+      openclawGatewayUrl: nextGatewayUrl,
+      openclawGatewayToken: nextGatewayToken
+        ? encryptUserSettingValue(nextGatewayToken)
+        : null,
+      tamboApiKey: nextTamboApiKey
+        ? encryptUserSettingValue(nextTamboApiKey)
+        : null,
+      updatedAt: new Date(),
+    };
+
     if (existing) {
-      return await db
+      await db
         .update(userSettings)
-        .set({ ...settings, updatedAt: new Date() })
+        .set(valuesToPersist)
         .where(eq(userSettings.userId, userId))
+        .returning();
+    } else {
+      await db
+        .insert(userSettings)
+        .values({ userId, ...valuesToPersist })
         .returning();
     }
 
-    return await db
-      .insert(userSettings)
-      .values({ userId, ...settings, updatedAt: new Date() })
-      .returning();
+    return await getUserSettings(userId);
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",

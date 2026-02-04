@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
+
 import { Textarea } from "@/components/ui/textarea";
 
 type ConfigData = {
@@ -17,42 +17,40 @@ type ConfigData = {
   hash: string;
 };
 
-const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-5 w-28" />
-      <Skeleton className="h-9 w-28 rounded-md" />
-    </div>
-    {Array.from({ length: 3 }).map((_, i) => (
-      <Skeleton className="h-24 w-full rounded-lg" key={`skel-${String(i)}`} />
-    ))}
-  </div>
-);
-
 export const ConfigTab = () => {
   const [config, setConfig] = useState<ConfigData | null>(null);
   const [loading, setLoading] = useState(true);
   const [model, setModel] = useState("");
   const [soulMd, setSoulMd] = useState("");
+  const [originalModel, setOriginalModel] = useState("");
+  const [originalSoulMd, setOriginalSoulMd] = useState("");
   const [saving, setSaving] = useState(false);
   const [saveResult, setSaveResult] = useState<string | null>(null);
   const [showRaw, setShowRaw] = useState(false);
+
+  const applyConfig = useCallback((json: ConfigData) => {
+    setConfig(json);
+    const m = json.agent?.model ?? "";
+    setModel(m);
+    setOriginalModel(m);
+
+    try {
+      const raw = JSON.parse(json.raw) as Record<string, unknown>;
+      const soul = (raw.soul as string | undefined) ?? "";
+      setSoulMd(soul);
+      setOriginalSoulMd(soul);
+    } catch {
+      setSoulMd("");
+      setOriginalSoulMd("");
+    }
+  }, []);
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
         const res = await fetch("/api/openclaw/config");
         const json = (await res.json()) as ConfigData;
-        setConfig(json);
-        setModel(json.agent?.model ?? "");
-
-        try {
-          const raw = JSON.parse(json.raw) as Record<string, unknown>;
-          const soul = raw.soul as string | undefined;
-          setSoulMd(soul ?? "");
-        } catch {
-          // no soul in config
-        }
+        applyConfig(json);
       } catch {
         setConfig(null);
       } finally {
@@ -60,10 +58,17 @@ export const ConfigTab = () => {
       }
     };
     fetchConfig();
-  }, []);
+  }, [applyConfig]);
+
+  const hasChanges = model !== originalModel || soulMd !== originalSoulMd;
 
   const handleSave = async () => {
     if (!config) {
+      return;
+    }
+    if (!hasChanges) {
+      setSaveResult("No changes to save");
+      setSaving(false);
       return;
     }
     setSaving(true);
@@ -71,18 +76,12 @@ export const ConfigTab = () => {
     try {
       const patch: Record<string, unknown> = {};
 
-      if (model && model !== config.agent?.model) {
+      if (model !== originalModel) {
         patch.agent = { model };
       }
 
-      if (soulMd) {
+      if (soulMd !== originalSoulMd) {
         patch.soul = soulMd;
-      }
-
-      if (Object.keys(patch).length === 0) {
-        setSaveResult("No changes to save");
-        setSaving(false);
-        return;
       }
 
       const res = await fetch("/api/openclaw/config", {
@@ -93,6 +92,14 @@ export const ConfigTab = () => {
       const json = (await res.json()) as { success: boolean; error?: string };
       if (json.success) {
         setSaveResult("Config saved successfully. Gateway may restart.");
+        // Re-fetch to get new hash and sync original values
+        try {
+          const refreshRes = await fetch("/api/openclaw/config");
+          const refreshJson = (await refreshRes.json()) as ConfigData;
+          applyConfig(refreshJson);
+        } catch {
+          // Refresh failed but save succeeded, keep going
+        }
       } else {
         setSaveResult(`Error: ${json.error ?? "Unknown error"}`);
       }
@@ -104,7 +111,7 @@ export const ConfigTab = () => {
   };
 
   if (loading) {
-    return <LoadingSkeleton />;
+    return null;
   }
 
   if (!config) {
@@ -130,7 +137,7 @@ export const ConfigTab = () => {
         <div className="flex items-center gap-3">
           {saveResult ? (
             <span
-              className={`text-xs ${saveResult.startsWith("Error") ? "text-red-400" : "text-emerald-400"}`}
+              className={`text-xs ${saveResult.startsWith("Error") ? "text-red-400" : saveResult === "No changes to save" ? "text-muted-foreground" : "text-emerald-400"}`}
             >
               {saveResult}
             </span>

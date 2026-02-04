@@ -21,20 +21,17 @@ export type GatewaySettings = {
   gatewayToken?: string;
 };
 
-const resolveUrl = (cfg?: GatewaySettings) =>
-  cfg?.gatewayUrl ||
-  process.env.OPENCLAW_GATEWAY_URL ||
-  "http://localhost:18789";
+const resolveUrl = (cfg?: GatewaySettings) => cfg?.gatewayUrl || "";
 
-const resolveToken = (cfg?: GatewaySettings) =>
-  cfg?.gatewayToken || process.env.OPENCLAW_GATEWAY_TOKEN || "";
+const resolveToken = (cfg?: GatewaySettings) => cfg?.gatewayToken || "";
 
 // --- Gateway Transport ---
 
 const invokeTool = async <T>(
   tool: string,
   args: Record<string, unknown>,
-  cfg?: GatewaySettings
+  cfg?: GatewaySettings,
+  sessionKey = "main"
 ): Promise<T> => {
   const url = resolveUrl(cfg);
   const token = resolveToken(cfg);
@@ -49,7 +46,7 @@ const invokeTool = async <T>(
   const response = await fetch(`${url}/tools/invoke`, {
     method: "POST",
     headers,
-    body: JSON.stringify({ tool, args, sessionKey: "main" }),
+    body: JSON.stringify({ tool, args, sessionKey }),
     signal: AbortSignal.timeout(8000),
   });
 
@@ -69,7 +66,8 @@ const invokeTool = async <T>(
 
 const chatCompletions = async (
   message: string,
-  cfg?: GatewaySettings
+  cfg?: GatewaySettings,
+  sessionKey = "main"
 ): Promise<{ success: boolean; response: string }> => {
   const url = resolveUrl(cfg);
   const token = resolveToken(cfg);
@@ -85,7 +83,7 @@ const chatCompletions = async (
     method: "POST",
     headers,
     body: JSON.stringify({
-      model: "openclaw:main",
+      model: `openclaw:${sessionKey}`,
       messages: [{ role: "user", content: message }],
       stream: false,
     }),
@@ -192,7 +190,7 @@ const memoryToView = (details: MemorySearchDetails): MemoryData[] =>
   details.results.map((r) => ({
     key: r.path ?? "memory",
     summary: r.text ?? "No content",
-    timestamp: new Date().toISOString(),
+    timestamp: (r.metadata?.timestamp as string) ?? "",
     relevance: r.score ?? 0.5,
   }));
 
@@ -315,10 +313,12 @@ export const getCronJobs = async (
 };
 
 // No dedicated error or webhook-event API on OpenClaw gateway.
-export const getErrors = (): Promise<ErrorData[]> => Promise.resolve([]);
-
-export const getWebhookEvents = (): Promise<WebhookEventData[]> =>
+export const getErrors = (_cfg?: GatewaySettings): Promise<ErrorData[]> =>
   Promise.resolve([]);
+
+export const getWebhookEvents = (
+  _cfg?: GatewaySettings
+): Promise<WebhookEventData[]> => Promise.resolve([]);
 
 export const getCostData = async (
   cfg?: GatewaySettings

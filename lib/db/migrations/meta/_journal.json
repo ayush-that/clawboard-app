@@ -71,6 +71,13 @@
       "when": 1770547564635,
       "tag": "0009_lumpy_zombie",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1770551929904,
+      "tag": "0010_broad_cerebro",
+      "breakpoints": true
     }
   ]
 }

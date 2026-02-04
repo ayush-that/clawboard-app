@@ -13,10 +13,12 @@ function PureChatHeader({
   chatId,
   selectedVisibilityType,
   isReadonly,
+  openclawSessionKey,
 }: {
   chatId: string;
   selectedVisibilityType: VisibilityType;
   isReadonly: boolean;
+  openclawSessionKey?: string | null;
 }) {
   const router = useRouter();
   const { open } = useSidebar();
@@ -48,6 +50,12 @@ function PureChatHeader({
           selectedVisibilityType={selectedVisibilityType}
         />
       )}
+
+      {openclawSessionKey ? (
+        <span className="order-3 truncate rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+          Session: {openclawSessionKey}
+        </span>
+      ) : null}
     </header>
   );
 }
@@ -56,6 +64,7 @@ export const ChatHeader = memo(PureChatHeader, (prevProps, nextProps) => {
   return (
     prevProps.chatId === nextProps.chatId &&
     prevProps.selectedVisibilityType === nextProps.selectedVisibilityType &&
-    prevProps.isReadonly === nextProps.isReadonly
+    prevProps.isReadonly === nextProps.isReadonly &&
+    prevProps.openclawSessionKey === nextProps.openclawSessionKey
   );
 });

@@ -1,6 +1,6 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
 import { useDataStream } from "./data-stream-provider";
@@ -31,6 +31,7 @@ const PurePreviewMessage = ({
   regenerate,
   isReadonly,
   requiresScrollPadding: _requiresScrollPadding,
+  tamboRenderedComponent,
 }: {
   addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];
   chatId: string;
@@ -40,6 +41,7 @@ const PurePreviewMessage = ({
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
   requiresScrollPadding: boolean;
+  tamboRenderedComponent?: ReactNode;
 }) => {
   const [mode, setMode] = useState<"view" | "edit">("view");
 
@@ -77,7 +79,8 @@ const PurePreviewMessage = ({
                 (message.parts?.some(
                   (p) => p.type === "text" && p.text?.trim()
                 ) ||
-                  message.parts?.some((p) => p.type.startsWith("tool-")))) ||
+                  message.parts?.some((p) => p.type.startsWith("tool-")) ||
+                  Boolean(tamboRenderedComponent))) ||
               mode === "edit",
             "max-w-[calc(100%-2.5rem)] sm:max-w-[min(fit-content,80%)]":
               message.role === "user" && mode !== "edit",
@@ -347,6 +350,12 @@ const PurePreviewMessage = ({
 
             return null;
           })}
+
+          {message.role === "assistant" && tamboRenderedComponent ? (
+            <div className="overflow-hidden rounded-xl border bg-card p-3">
+              {tamboRenderedComponent}
+            </div>
+          ) : null}
 
           {!isReadonly && (
             <MessageActions

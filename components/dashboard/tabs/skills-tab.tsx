@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type SkillItem = {
   name: string;
@@ -21,39 +21,48 @@ const sourceColors: Record<string, string> = {
   config: "text-yellow-400",
 };
 
-const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
-    <div className="flex items-center justify-between">
-      <Skeleton className="h-5 w-16" />
-      <Skeleton className="h-4 w-16" />
-    </div>
-    {Array.from({ length: 4 }).map((_, i) => (
-      <Skeleton className="h-16 w-full rounded-lg" key={`skel-${String(i)}`} />
-    ))}
-  </div>
-);
-
 export const SkillsTab = () => {
   const [skills, setSkills] = useState<SkillItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchSkills = async () => {
-      try {
-        const res = await fetch("/api/openclaw/skills");
-        const json = (await res.json()) as SkillItem[];
-        setSkills(json);
-      } catch {
-        setSkills([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchSkills();
+  const fetchSkills = useCallback(async () => {
+    try {
+      const res = await fetch("/api/openclaw/skills");
+      const json = await res.json();
+      setSkills(Array.isArray(json) ? json : []);
+      setError(null);
+    } catch {
+      setError("Failed to load skills. Check gateway connection.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchSkills();
+  }, [fetchSkills]);
+
   if (loading) {
-    return <LoadingSkeleton />;
+    return null;
+  }
+
+  if (error && skills.length === 0) {
+    return (
+      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchSkills}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (skills.length === 0) {
@@ -100,6 +109,20 @@ export const SkillsTab = () => {
           {skills.length} skills
         </span>
       </div>
+
+      {error ? (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchSkills}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       {[...grouped.entries()].map(([source, items]) => (
         <div key={source}>

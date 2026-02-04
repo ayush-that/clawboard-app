@@ -1,24 +1,37 @@
 "use client";
 
+import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, useCallback, useContext, useMemo } from "react";
 
-export type PanelName =
-  | "sessions"
-  | "logs"
-  | "cron"
-  | "memory"
-  | "skills"
-  | "usage"
-  | "channels"
-  | "config"
-  | "settings";
+const PANEL_NAMES = [
+  "sessions",
+  "logs",
+  "cron",
+  "memory",
+  "skills",
+  "usage",
+  "channels",
+  "config",
+  "settings",
+] as const;
+
+export type PanelName = (typeof PANEL_NAMES)[number];
+
+const isValidPanel = (value: string | null): value is PanelName =>
+  value !== null && PANEL_NAMES.includes(value as PanelName);
+
+export const panelLabels: Record<PanelName, string> = {
+  sessions: "Sessions",
+  logs: "Logs",
+  cron: "Cron",
+  memory: "Memory",
+  skills: "Skills",
+  usage: "Usage",
+  channels: "Channels",
+  config: "Config",
+  settings: "Settings",
+};
 
 type ActiveView = { type: "chat" } | { type: "panel"; panel: PanelName };
 
@@ -33,25 +46,41 @@ type ActiveViewContextValue = {
 const ActiveViewContext = createContext<ActiveViewContextValue | null>(null);
 
 export const ActiveViewProvider = ({ children }: { children: ReactNode }) => {
-  const [activeView, setActiveView] = useState<ActiveView>({ type: "chat" });
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const panelParam = searchParams.get("panel");
+  const validPanel = isValidPanel(panelParam) ? panelParam : null;
 
   const setChat = useCallback(() => {
-    setActiveView({ type: "chat" });
-  }, []);
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("panel");
+    const qs = params.toString();
+    router.replace(qs ? `?${qs}` : window.location.pathname, {
+      scroll: false,
+    });
+  }, [searchParams, router]);
 
-  const setPanel = useCallback((panel: PanelName) => {
-    setActiveView({ type: "panel", panel });
-  }, []);
+  const setPanel = useCallback(
+    (panel: PanelName) => {
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("panel", panel);
+      router.replace(`?${params.toString()}`, { scroll: false });
+    },
+    [searchParams, router]
+  );
 
   const value = useMemo(
     () => ({
-      activeView,
-      isDashboard: activeView.type === "panel",
-      activePanel: activeView.type === "panel" ? activeView.panel : null,
+      activeView: (validPanel
+        ? { type: "panel" as const, panel: validPanel }
+        : { type: "chat" as const }) satisfies ActiveView,
+      isDashboard: validPanel !== null,
+      activePanel: validPanel,
       setChat,
       setPanel,
     }),
-    [activeView, setChat, setPanel]
+    [validPanel, setChat, setPanel]
   );
 
   return (

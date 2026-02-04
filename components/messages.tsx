@@ -1,4 +1,5 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
+import type { ReactNode } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import { ArrowDownIcon } from "@/lib/hugeicons";
 import type { ChatMessage } from "@/lib/types";
@@ -16,6 +17,7 @@ type MessagesProps = {
   isReadonly: boolean;
   isArtifactVisible: boolean;
   selectedModelId: string;
+  tamboRenderedByUserMessageId: Record<string, ReactNode>;
 };
 
 function PureMessages({
@@ -27,6 +29,7 @@ function PureMessages({
   regenerate,
   isReadonly,
   selectedModelId: _selectedModelId,
+  tamboRenderedByUserMessageId,
 }: MessagesProps) {
   const {
     containerRef: messagesContainerRef,
@@ -64,6 +67,13 @@ function PureMessages({
                 hasSentMessage && index === messages.length - 1
               }
               setMessages={setMessages}
+              tamboRenderedComponent={
+                message.role === "assistant"
+                  ? tamboRenderedByUserMessageId[
+                      getNearestUserMessageId(messages, index) ?? ""
+                    ]
+                  : undefined
+              }
             />
           ))}
 
@@ -95,6 +105,19 @@ function PureMessages({
       </button>
     </div>
   );
+}
+
+function getNearestUserMessageId(
+  messages: ChatMessage[],
+  assistantIndex: number
+): string | null {
+  for (let i = assistantIndex - 1; i >= 0; i -= 1) {
+    if (messages[i]?.role === "user") {
+      return messages[i]?.id ?? null;
+    }
+  }
+
+  return null;
 }
 
 export const Messages = PureMessages;

@@ -5,33 +5,16 @@ import { getUserSettings } from "@/lib/db/queries";
 export type GatewayConfig = {
   gatewayUrl: string;
   gatewayToken: string;
+  isConfigured: boolean;
 };
 
-export async function getGatewayConfig(
-  userId?: string
-): Promise<GatewayConfig> {
-  if (userId) {
-    try {
-      const settings = await getUserSettings(userId);
-      if (settings) {
-        return {
-          gatewayUrl:
-            settings.openclawGatewayUrl ||
-            process.env.OPENCLAW_GATEWAY_URL ||
-            "http://localhost:18789",
-          gatewayToken:
-            settings.openclawGatewayToken ||
-            process.env.OPENCLAW_GATEWAY_TOKEN ||
-            "",
-        };
-      }
-    } catch {
-      // fall through to env vars
-    }
-  }
+export async function getGatewayConfig(userId: string): Promise<GatewayConfig> {
+  const settings = await getUserSettings(userId);
+  const gatewayUrl = settings?.openclawGatewayUrl?.trim() ?? "";
 
   return {
-    gatewayUrl: process.env.OPENCLAW_GATEWAY_URL || "http://localhost:18789",
-    gatewayToken: process.env.OPENCLAW_GATEWAY_TOKEN || "",
+    gatewayUrl,
+    gatewayToken: settings?.openclawGatewayToken ?? "",
+    isConfigured: gatewayUrl.length > 0,
   };
 }

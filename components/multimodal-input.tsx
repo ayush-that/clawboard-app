@@ -66,6 +66,8 @@ function PureMultimodalInput({
   const adjustHeight = useCallback(() => {
     if (textareaRef.current) {
       textareaRef.current.style.height = "44px";
+      const { scrollHeight } = textareaRef.current;
+      textareaRef.current.style.height = `${Math.min(scrollHeight, 200)}px`;
     }
   }, []);
 
@@ -115,6 +117,7 @@ function PureMultimodalInput({
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInput(event.target.value);
+    adjustHeight();
   };
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -203,8 +206,8 @@ function PureMultimodalInput({
           ...currentAttachments,
           ...successfullyUploadedAttachments,
         ]);
-      } catch (error) {
-        console.error("Error uploading files!", error);
+      } catch {
+        // upload failed
       } finally {
         setUploadQueue([]);
       }
@@ -250,8 +253,7 @@ function PureMultimodalInput({
           ...curr,
           ...(successfullyUploadedAttachments as Attachment[]),
         ]);
-      } catch (error) {
-        console.error("Error uploading pasted images:", error);
+      } catch {
         toast.error("Failed to upload pasted image(s)");
       } finally {
         setUploadQueue([]);
@@ -343,7 +345,7 @@ function PureMultimodalInput({
           <PromptInputTextarea
             className="grow resize-none border-0! border-none! bg-transparent p-2 text-base outline-none ring-0 [-ms-overflow-style:none] [scrollbar-width:none] placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-offset-0 [&::-webkit-scrollbar]:hidden"
             data-testid="multimodal-input"
-            disableAutoResize={true}
+            disableAutoResize
             maxHeight={200}
             minHeight={44}
             onChange={handleInput}

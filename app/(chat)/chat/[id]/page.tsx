@@ -10,7 +10,7 @@ import { convertToUIMessages } from "@/lib/utils";
 
 export default function Page(props: { params: Promise<{ id: string }> }) {
   return (
-    <Suspense fallback={<div className="flex h-dvh" />}>
+    <Suspense fallback={null}>
       <ChatPage params={props.params} />
     </Suspense>
   );
@@ -27,7 +27,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
 
   if (!session) {
-    redirect("/api/auth/guest");
+    redirect("/login");
   }
 
   if (chat.visibility === "private") {
@@ -55,6 +55,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
         isReadonly={session?.user?.id !== chat.userId}
+        openclawSessionKey={chat.openclawSessionKey}
       />
       <DataStreamHandler />
     </>

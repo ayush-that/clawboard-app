@@ -1,9 +1,17 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
+import { type TamboThreadMessage, useTamboThread } from "@tambo-ai/react";
 import { DefaultChatTransport } from "ai";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import {
+  type Dispatch,
+  type ReactNode,
+  type SetStateAction,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
 import { ChatHeader } from "@/components/chat-header";
@@ -11,13 +19,19 @@ import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { ChatSDKError } from "@/lib/errors";
+import { shouldRenderTamboForMessage } from "@/lib/tambo/intent-gate";
 import type { Attachment, ChatMessage } from "@/lib/types";
-import { fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+import {
+  fetchWithErrorHandlers,
+  generateUUID,
+  getTextFromMessage,
+} from "@/lib/utils";
 import { Artifact } from "./artifact";
 import { useDataStream } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
+import { useTamboRuntime } from "./tambo-wrapper";
 import { toast } from "./toast";
 import type { VisibilityType } from "./visibility-selector";
 
@@ -28,6 +42,7 @@ export function Chat({
   initialVisibilityType,
   isReadonly,
   autoResume,
+  openclawSessionKey,
 }: {
   id: string;
   initialMessages: ChatMessage[];
@@ -35,6 +50,7 @@ export function Chat({
   initialVisibilityType: VisibilityType;
   isReadonly: boolean;
   autoResume: boolean;
+  openclawSessionKey?: string | null;
 }) {
   const router = useRouter();
 
@@ -145,6 +161,8 @@ export function Chat({
   }, [query, sendMessage, hasAppendedQuery, id]);
 
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [tamboRenderedByUserMessageId, setTamboRenderedByUserMessageId] =
+    useState<Record<string, ReactNode>>({});
   const isArtifactVisible = useArtifactSelector((state) => state.isVisible);
 
   useAutoResume({
@@ -160,6 +178,7 @@ export function Chat({
         <ChatHeader
           chatId={id}
           isReadonly={isReadonly}
+          openclawSessionKey={openclawSessionKey}
           selectedVisibilityType={initialVisibilityType}
         />
 
@@ -173,10 +192,11 @@ export function Chat({
           selectedModelId={initialChatModel}
           setMessages={setMessages}
           status={status}
+          tamboRenderedByUserMessageId={tamboRenderedByUserMessageId}
         />
 
-        <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
-          {!isReadonly && (
+        {!isReadonly && (
+          <div className="sticky bottom-0 z-1 mx-auto flex w-full max-w-4xl gap-2 border-t-0 bg-background px-2 pb-3 md:px-4 md:pb-4">
             <MultimodalInput
               attachments={attachments}
               chatId={id}
@@ -191,8 +211,8 @@ export function Chat({
               status={status}
               stop={stop}
             />
-          )}
-        </div>
+          </div>
+        )}
       </div>
 
       <Artifact
@@ -212,6 +232,174 @@ export function Chat({
         status={status}
         stop={stop}
       />
+
+      <TamboInlineBridge
+        chatId={id}
+        messages={messages}
+        onRenderedComponentsChange={setTamboRenderedByUserMessageId}
+      />
     </>
   );
+}
+
+type TamboInlineBridgeProps = {
+  chatId: string;
+  messages: ChatMessage[];
+  onRenderedComponentsChange: Dispatch<
+    SetStateAction<Record<string, ReactNode>>
+  >;
+};
+
+function TamboInlineBridge({
+  chatId,
+  messages,
+  onRenderedComponentsChange,
+}: TamboInlineBridgeProps) {
+  const { enabled } = useTamboRuntime();
+
+  useEffect(() => {
+    if (!enabled) {
+      onRenderedComponentsChange((previous) =>
+        Object.keys(previous).length === 0 ? previous : {}
+      );
+    }
+  }, [enabled, onRenderedComponentsChange]);
+
+  if (!enabled) {
+    return null;
+  }
+
+  return (
+    <TamboInlineBridgeEnabled
+      chatId={chatId}
+      messages={messages}
+      onRenderedComponentsChange={onRenderedComponentsChange}
+    />
+  );
+}
+
+function TamboInlineBridgeEnabled({
+  chatId,
+  messages,
+  onRenderedComponentsChange,
+}: TamboInlineBridgeProps) {
+  const { thread, sendThreadMessage } = useTamboThread();
+  const initializedRef = useRef(false);
+  const handledUserMessageIdsRef = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (!initializedRef.current) {
+      for (const message of messages) {
+        if (message.role === "user") {
+          handledUserMessageIdsRef.current.add(message.id);
+        }
+      }
+      initializedRef.current = true;
+      return;
+    }
+
+    for (const message of messages) {
+      if (message.role !== "user") {
+        continue;
+      }
+
+      if (handledUserMessageIdsRef.current.has(message.id)) {
+        continue;
+      }
+
+      handledUserMessageIdsRef.current.add(message.id);
+
+      const text = getTextFromMessage(message).trim();
+
+      if (!text || !shouldRenderTamboForMessage(text)) {
+        continue;
+      }
+
+      sendThreadMessage(text, {
+        streamResponse: true,
+        contextKey: `openclaw-chat:${chatId}`,
+        additionalContext: {
+          openclawChatId: chatId,
+          openclawUserMessageId: message.id,
+        },
+      }).catch(Function.prototype as () => undefined);
+    }
+  }, [chatId, messages, sendThreadMessage]);
+
+  useEffect(() => {
+    const renderedComponentMap = buildRenderedComponentMap(
+      thread?.messages ?? [],
+      chatId
+    );
+    onRenderedComponentsChange((previous) =>
+      areRenderedMapsEqual(previous, renderedComponentMap)
+        ? previous
+        : renderedComponentMap
+    );
+  }, [chatId, onRenderedComponentsChange, thread?.messages]);
+
+  return null;
+}
+
+function buildRenderedComponentMap(
+  threadMessages: TamboThreadMessage[],
+  openClawChatId: string
+): Record<string, ReactNode> {
+  const renderedComponentMap: Record<string, ReactNode> = {};
+  let currentOpenClawUserMessageId: string | null = null;
+  let currentOpenClawChatContext: string | null = null;
+
+  for (const threadMessage of threadMessages) {
+    if (threadMessage.role === "user") {
+      currentOpenClawUserMessageId = getAdditionalContextString(
+        threadMessage,
+        "openclawUserMessageId"
+      );
+      currentOpenClawChatContext = getAdditionalContextString(
+        threadMessage,
+        "openclawChatId"
+      );
+      continue;
+    }
+
+    if (
+      threadMessage.role === "assistant" &&
+      threadMessage.renderedComponent &&
+      currentOpenClawUserMessageId &&
+      currentOpenClawChatContext === openClawChatId
+    ) {
+      renderedComponentMap[currentOpenClawUserMessageId] =
+        threadMessage.renderedComponent;
+    }
+  }
+
+  return renderedComponentMap;
+}
+
+function getAdditionalContextString(
+  threadMessage: TamboThreadMessage,
+  key: string
+): string | null {
+  const value = threadMessage.additionalContext?.[key];
+  return typeof value === "string" ? value : null;
+}
+
+function areRenderedMapsEqual(
+  previous: Record<string, ReactNode>,
+  next: Record<string, ReactNode>
+): boolean {
+  const previousKeys = Object.keys(previous);
+  const nextKeys = Object.keys(next);
+
+  if (previousKeys.length !== nextKeys.length) {
+    return false;
+  }
+
+  for (const key of previousKeys) {
+    if (previous[key] !== next[key]) {
+      return false;
+    }
+  }
+
+  return true;
 }

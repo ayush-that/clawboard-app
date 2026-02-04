@@ -7,13 +7,17 @@ export function AuthForm({
   action,
   children,
   defaultEmail = "",
+  mode = "login",
 }: {
   action: NonNullable<
     string | ((formData: FormData) => void | Promise<void>) | undefined
   >;
   children: React.ReactNode;
   defaultEmail?: string;
+  mode?: "login" | "register";
 }) {
+  const isRegister = mode === "register";
+
   return (
     <Form action={action} className="flex flex-col gap-4 px-4 sm:px-16">
       <div className="flex flex-col gap-2">
@@ -46,12 +50,20 @@ export function AuthForm({
         </Label>
 
         <Input
+          autoComplete={isRegister ? "new-password" : "current-password"}
           className="bg-muted text-md md:text-sm"
           id="password"
+          minLength={isRegister ? 6 : undefined}
           name="password"
           required
           type="password"
         />
+
+        {isRegister && (
+          <p className="text-muted-foreground text-xs">
+            Must be at least 6 characters
+          </p>
+        )}
       </div>
 
       {children}

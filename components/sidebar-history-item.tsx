@@ -56,6 +56,11 @@ const PureChatItem = ({
           }}
         >
           <span>{chat.title}</span>
+          {chat.openclawSessionKey ? (
+            <span className="ml-auto shrink-0 rounded bg-muted px-1 py-0.5 text-[10px] leading-none text-muted-foreground">
+              OC
+            </span>
+          ) : null}
         </Link>
       </SidebarMenuButton>
 
@@ -123,6 +128,9 @@ const PureChatItem = ({
 
 export const ChatItem = memo(PureChatItem, (prevProps, nextProps) => {
   if (prevProps.isActive !== nextProps.isActive) {
+    return false;
+  }
+  if (prevProps.chat.openclawSessionKey !== nextProps.chat.openclawSessionKey) {
     return false;
   }
   return true;

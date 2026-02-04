@@ -33,13 +33,17 @@ export const myProvider = isTestEnvironment
     })()
   : null;
 
-export function getLanguageModel(modelId: string, settings?: ProviderSettings) {
+export function getLanguageModel(
+  modelId: string,
+  settings?: ProviderSettings,
+  sessionKey?: string
+) {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel(modelId);
   }
 
   if (modelId === "openclaw") {
-    return getOpenClawChat(settings);
+    return getOpenClawChat(settings, sessionKey);
   }
 
   const isReasoningModel =
@@ -57,31 +61,38 @@ export function getLanguageModel(modelId: string, settings?: ProviderSettings) {
   return gateway.languageModel(modelId);
 }
 
-function getOpenClawChat(settings?: ProviderSettings) {
-  const url =
-    settings?.gatewayUrl ||
-    process.env.OPENCLAW_GATEWAY_URL ||
-    "http://localhost:18789";
-  const token =
-    settings?.gatewayToken || process.env.OPENCLAW_GATEWAY_TOKEN || "dummy";
+function getOpenClawChat(settings?: ProviderSettings, sessionKey?: string) {
+  const url = settings?.gatewayUrl?.trim() || "";
+
+  if (!url) {
+    throw new Error("OpenClaw gateway URL is not configured.");
+  }
+
+  const token = settings?.gatewayToken || "";
 
   const openclaw = createOpenAI({
     baseURL: `${url}/v1`,
     apiKey: token,
   });
-  return openclaw.chat("openclaw:main");
+  return openclaw.chat(`openclaw:${sessionKey ?? "main"}`);
 }
 
-export function getTitleModel(settings?: ProviderSettings) {
+export function getTitleModel(
+  settings?: ProviderSettings,
+  sessionKey?: string
+) {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("title-model");
   }
-  return getOpenClawChat(settings);
+  return getOpenClawChat(settings, sessionKey);
 }
 
-export function getArtifactModel(settings?: ProviderSettings) {
+export function getArtifactModel(
+  settings?: ProviderSettings,
+  sessionKey?: string
+) {
   if (isTestEnvironment && myProvider) {
     return myProvider.languageModel("artifact-model");
   }
-  return getOpenClawChat(settings);
+  return getOpenClawChat(settings, sessionKey);
 }

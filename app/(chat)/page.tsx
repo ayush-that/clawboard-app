@@ -7,7 +7,7 @@ import { generateUUID } from "@/lib/utils";
 
 export default function Page() {
   return (
-    <Suspense fallback={<div className="flex h-dvh" />}>
+    <Suspense fallback={null}>
       <NewChatPage />
     </Suspense>
   );

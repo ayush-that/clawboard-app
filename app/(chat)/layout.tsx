@@ -19,7 +19,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         strategy="beforeInteractive"
       />
       <DataStreamProvider>
-        <Suspense fallback={<div className="flex h-dvh" />}>
+        <Suspense fallback={null}>
           <SidebarWrapper>{children}</SidebarWrapper>
         </Suspense>
       </DataStreamProvider>
@@ -37,7 +37,7 @@ async function SidebarWrapper({ children }: { children: React.ReactNode }) {
       const settings = await getUserSettings(session.user.id);
       tamboApiKey = settings?.tamboApiKey ?? undefined;
     } catch {
-      // fall through to env var default
+      tamboApiKey = undefined;
     }
   }
 

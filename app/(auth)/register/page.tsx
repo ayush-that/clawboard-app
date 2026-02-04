@@ -1,16 +1,54 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useSession } from "next-auth/react";
-import { useActionState, useEffect, useState } from "react";
+import { Suspense, useActionState, useEffect, useMemo, useState } from "react";
 import { AuthForm } from "@/components/auth-form";
 import { SubmitButton } from "@/components/submit-button";
 import { toast } from "@/components/toast";
 import { type RegisterActionState, register } from "../actions";
 
-export default function Page() {
+function getSafeRedirectPath(redirectUrl: string | null): string | null {
+  if (!redirectUrl) {
+    return null;
+  }
+
+  let decoded: string;
+  try {
+    decoded = decodeURIComponent(redirectUrl);
+  } catch {
+    return null;
+  }
+
+  if (decoded.startsWith("/")) {
+    return decoded;
+  }
+
+  if (typeof window === "undefined") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(decoded);
+    if (parsed.origin !== window.location.origin) {
+      return null;
+    }
+
+    return `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  } catch {
+    return null;
+  }
+}
+
+function RegisterForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectUrl = searchParams.get("redirectUrl");
+  const redirectTarget = useMemo(
+    () => getSafeRedirectPath(redirectUrl),
+    [redirectUrl]
+  );
 
   const [email, setEmail] = useState("");
   const [isSuccessful, setIsSuccessful] = useState(false);
@@ -33,16 +71,21 @@ export default function Page() {
     } else if (state.status === "invalid_data") {
       toast({
         type: "error",
-        description: "Failed validating your submission!",
+        description:
+          "Please enter a valid email and a password with at least 6 characters.",
       });
     } else if (state.status === "success") {
       toast({ type: "success", description: "Account created successfully!" });
 
       setIsSuccessful(true);
       updateSession();
-      router.refresh();
+      if (redirectTarget) {
+        router.replace(redirectTarget);
+      } else {
+        router.refresh();
+      }
     }
-  }, [state.status]);
+  }, [redirectTarget, state.status]);
 
   const handleSubmit = (formData: FormData) => {
     setEmail(formData.get("email") as string);
@@ -58,7 +101,7 @@ export default function Page() {
             Create an account with your email and password
           </p>
         </div>
-        <AuthForm action={handleSubmit} defaultEmail={email}>
+        <AuthForm action={handleSubmit} defaultEmail={email} mode="register">
           <SubmitButton isSuccessful={isSuccessful}>Sign Up</SubmitButton>
           <p className="mt-4 text-center text-gray-600 text-sm dark:text-zinc-400">
             {"Already have an account? "}
@@ -73,5 +116,13 @@ export default function Page() {
         </AuthForm>
       </div>
     </div>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense>
+      <RegisterForm />
+    </Suspense>
   );
 }

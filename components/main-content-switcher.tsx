@@ -11,8 +11,9 @@ export const MainContentSwitcher = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const prevPathname = useRef(pathname);
 
-  // Auto-reset to chat mode only when the URL actually changes
-  // (e.g. browser back/forward navigates to a chat)
+  // Auto-reset to chat mode only when the URL path actually changes
+  // (e.g. browser back/forward navigates to a chat).
+  // The panel query param is handled by ActiveViewProvider.
   useEffect(() => {
     if (prevPathname.current !== pathname && isDashboard) {
       setChat();

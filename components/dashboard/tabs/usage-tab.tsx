@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 
 type CostDataPoint = {
   date: string;
@@ -62,42 +62,48 @@ const formatTimeAgo = (ts: number): string => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
-const LoadingSkeleton = () => (
-  <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
-    <Skeleton className="h-5 w-36" />
-    <div className="grid grid-cols-3 gap-4">
-      {Array.from({ length: 3 }).map((_, i) => (
-        <Skeleton
-          className="h-20 w-full rounded-lg"
-          key={`skel-${String(i)}`}
-        />
-      ))}
-    </div>
-    <Skeleton className="h-32 w-full rounded-lg" />
-  </div>
-);
-
 export const UsageTab = () => {
   const [data, setData] = useState<UsageSummary | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const fetchUsage = async () => {
-      try {
-        const res = await fetch("/api/openclaw/usage");
-        const json = (await res.json()) as UsageSummary;
-        setData(json);
-      } catch {
-        setData(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchUsage();
+  const fetchUsage = useCallback(async () => {
+    try {
+      const res = await fetch("/api/openclaw/usage");
+      const json = (await res.json()) as UsageSummary;
+      setData(json);
+      setError(null);
+    } catch {
+      setError("Failed to load usage data. Check gateway connection.");
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
+  useEffect(() => {
+    fetchUsage();
+  }, [fetchUsage]);
+
   if (loading) {
-    return <LoadingSkeleton />;
+    return null;
+  }
+
+  if (error && !data) {
+    return (
+      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchUsage}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      </div>
+    );
   }
 
   if (!data) {
@@ -116,10 +122,29 @@ export const UsageTab = () => {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
-      <h2 className="text-base font-semibold">Usage Analytics</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-base font-semibold">Usage Analytics</h2>
+        <Button onClick={fetchUsage} size="sm" variant="ghost">
+          Refresh
+        </Button>
+      </div>
+
+      {error ? (
+        <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
+          <span>{error}</span>
+          <Button
+            className="ml-4 h-7 px-2.5 text-xs"
+            onClick={fetchUsage}
+            size="sm"
+            variant="ghost"
+          >
+            Retry
+          </Button>
+        </div>
+      ) : null}
 
       {/* Summary cards */}
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="p-4">
             <p className="text-xs text-muted-foreground">Total Tokens</p>
@@ -162,7 +187,10 @@ export const UsageTab = () => {
                 </thead>
                 <tbody>
                   {data.dailyCosts.map((d) => (
-                    <tr className="border-b border-border/50" key={d.date}>
+                    <tr
+                      className="border-b border-border/50"
+                      key={`${d.date}-${d.model}`}
+                    >
                       <td className="py-2">{d.date}</td>
                       <td className="py-2">{formatTokens(d.tokens)}</td>
                       <td className="py-2">${d.cost.toFixed(4)}</td>
