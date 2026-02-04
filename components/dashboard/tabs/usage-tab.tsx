@@ -70,8 +70,14 @@ export const UsageTab = () => {
   const fetchUsage = useCallback(async () => {
     try {
       const res = await fetch("/api/openclaw/usage");
-      const json = (await res.json()) as UsageSummary;
-      setData(json);
+      const json = (await res.json()) as Partial<UsageSummary>;
+      setData({
+        totalTokens: json.totalTokens ?? 0,
+        totalCost: json.totalCost ?? 0,
+        modelBreakdown: Array.isArray(json.modelBreakdown) ? json.modelBreakdown : [],
+        dailyCosts: Array.isArray(json.dailyCosts) ? json.dailyCosts : [],
+        sessions: Array.isArray(json.sessions) ? json.sessions : [],
+      });
       setError(null);
     } catch {
       setError("Failed to load usage data. Check gateway connection.");
@@ -90,7 +96,8 @@ export const UsageTab = () => {
 
   if (error && !data) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Usage Analytics</h2>
         <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
           <span>{error}</span>
           <Button
@@ -108,7 +115,8 @@ export const UsageTab = () => {
 
   if (!data) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Usage Analytics</h2>
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <p className="text-sm text-muted-foreground">
@@ -123,7 +131,7 @@ export const UsageTab = () => {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Usage Analytics</h2>
+        <h2 className="text-xl font-semibold">Usage Analytics</h2>
         <Button onClick={fetchUsage} size="sm" variant="ghost">
           Refresh
         </Button>

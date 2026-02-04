@@ -13,6 +13,8 @@ export async function proxy(request: NextRequest) {
     return new Response("pong", { status: 200 });
   }
 
+  const authPages = ["/login", "/register"];
+
   if (pathname.startsWith("/api/auth")) {
     return NextResponse.next();
   }
@@ -24,19 +26,24 @@ export async function proxy(request: NextRequest) {
   });
 
   if (!token) {
+    // Let unauthenticated users access login/register pages
+    if (authPages.includes(pathname)) {
+      return NextResponse.next();
+    }
+
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const redirectPath = `${pathname}${request.nextUrl.search}`;
-    const redirectUrl = encodeURIComponent(redirectPath);
+    const redirectUrl = encodeURIComponent(pathname);
 
     return NextResponse.redirect(
       new URL(`/login?redirectUrl=${redirectUrl}`, request.url)
     );
   }
 
-  if (token && ["/login", "/register"].includes(pathname)) {
+  // Redirect authenticated users away from auth pages
+  if (authPages.includes(pathname)) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 

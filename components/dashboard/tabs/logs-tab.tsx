@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
 type LogEntry = {
@@ -77,12 +76,7 @@ export const LogsTab = () => {
     <div className="mx-auto flex h-[calc(100dvh-var(--spacing-14))] w-full max-w-4xl flex-col p-4 md:p-6">
       {/* Toolbar */}
       <div className="flex items-center justify-between pb-3">
-        <div className="flex items-center gap-2">
-          <h2 className="text-sm font-semibold">Logs</h2>
-          <Badge className="text-xs" variant="outline">
-            {filteredLogs.length}
-          </Badge>
-        </div>
+        <h2 className="text-xl font-semibold">Logs</h2>
         <div className="flex items-center gap-3">
           <div className="flex gap-1">
             {LEVELS.map((level) => (

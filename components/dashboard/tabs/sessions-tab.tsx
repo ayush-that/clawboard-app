@@ -142,7 +142,7 @@ export const SessionsTab = () => {
             </svg>
             Back
           </Button>
-          <h2 className="text-base font-semibold">
+          <h2 className="text-xl font-semibold">
             {session?.displayName ?? selectedKey}
           </h2>
           <Button
@@ -248,7 +248,8 @@ export const SessionsTab = () => {
   // Session list
   if (sessions.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Sessions</h2>
         <Card>
           <CardContent className="flex items-center justify-center py-12">
             <p className="text-sm text-muted-foreground">No sessions found</p>
@@ -261,7 +262,7 @@ export const SessionsTab = () => {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Sessions</h2>
+        <h2 className="text-xl font-semibold">Sessions</h2>
         <Button onClick={fetchSessions} size="sm" variant="ghost">
           Refresh
         </Button>

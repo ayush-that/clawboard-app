@@ -167,12 +167,7 @@ export const CronTab = () => {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold">Cron Jobs</h2>
-          <Badge className="text-xs" variant="outline">
-            {jobs.length}
-          </Badge>
-        </div>
+        <h2 className="text-xl font-semibold">Cron Jobs</h2>
         <Button
           onClick={() => {
             setShowForm(!showForm);

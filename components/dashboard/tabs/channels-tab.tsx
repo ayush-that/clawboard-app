@@ -55,8 +55,8 @@ export const ChannelsTab = () => {
         channels: ChannelItem[];
         hash: string;
       };
-      setChannels(json.channels);
-      setHash(json.hash);
+      setChannels(Array.isArray(json.channels) ? json.channels : []);
+      setHash(json.hash ?? "");
       setError(null);
     } catch {
       setError("Failed to load channels. Check gateway connection.");
@@ -115,7 +115,8 @@ export const ChannelsTab = () => {
 
   if (error && channels.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Channels</h2>
         <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
           <span>{error}</span>
           <Button
@@ -133,7 +134,8 @@ export const ChannelsTab = () => {
 
   if (channels.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Channels</h2>
         <Card>
           <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
             <p className="text-sm text-muted-foreground">
@@ -155,7 +157,7 @@ export const ChannelsTab = () => {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Channels</h2>
+        <h2 className="text-xl font-semibold">Channels</h2>
         <span className="text-xs text-muted-foreground">
           {channels.length} configured
         </span>

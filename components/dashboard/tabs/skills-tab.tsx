@@ -49,7 +49,8 @@ export const SkillsTab = () => {
 
   if (error && skills.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Skills</h2>
         <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
           <span>{error}</span>
           <Button
@@ -67,7 +68,8 @@ export const SkillsTab = () => {
 
   if (skills.length === 0) {
     return (
-      <div className="mx-auto w-full max-w-4xl p-4 md:p-6">
+      <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
+        <h2 className="text-xl font-semibold">Skills</h2>
         <Card>
           <CardContent className="flex flex-col items-center justify-center gap-3 py-12">
             <p className="text-sm text-muted-foreground">No skills found</p>
@@ -104,7 +106,7 @@ export const SkillsTab = () => {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Skills</h2>
+        <h2 className="text-xl font-semibold">Skills</h2>
         <span className="text-xs text-muted-foreground">
           {skills.length} skills
         </span>

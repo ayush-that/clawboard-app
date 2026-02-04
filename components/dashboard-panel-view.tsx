@@ -1,7 +1,7 @@
 "use client";
 
 import type { PanelName } from "@/lib/contexts/active-view-context";
-import { panelLabels, useActiveView } from "@/lib/contexts/active-view-context";
+import { useActiveView } from "@/lib/contexts/active-view-context";
 import { ChannelsTab } from "./dashboard/tabs/channels-tab";
 import { ConfigTab } from "./dashboard/tabs/config-tab";
 import { CronTab } from "./dashboard/tabs/cron-tab";
@@ -38,7 +38,6 @@ export const DashboardPanelView = () => {
     <div className="flex h-dvh flex-col bg-background">
       <header className="sticky top-0 flex items-center gap-2 bg-background px-2 py-1.5 md:px-2">
         <SidebarToggle />
-        <h1 className="text-lg font-semibold">{panelLabels[activePanel]}</h1>
       </header>
       <div className="flex-1 overflow-y-auto">
         <PanelComponent />
