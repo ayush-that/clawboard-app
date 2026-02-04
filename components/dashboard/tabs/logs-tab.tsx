@@ -74,7 +74,7 @@ export const LogsTab = () => {
   }
 
   return (
-    <div className="mx-auto flex h-[calc(100dvh-theme(spacing.14))] w-full max-w-4xl flex-col p-4 md:p-6">
+    <div className="mx-auto flex h-[calc(100dvh-var(--spacing-14))] w-full max-w-4xl flex-col p-4 md:p-6">
       {/* Toolbar */}
       <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { User } from "next-auth";
@@ -75,7 +76,17 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   setChat();
                 }}
               >
-                <span className="cursor-pointer rounded-md px-2 font-semibold text-lg hover:bg-muted">
+                <Image
+                  alt=""
+                  className="size-6"
+                  height={24}
+                  src="/favicon-32x32.png"
+                  width={24}
+                />
+                <span
+                  className="cursor-pointer rounded-md px-2 text-lg font-semibold hover:bg-muted"
+                  style={{ fontFamily: "var(--font-geist-pixel-square)" }}
+                >
                   ClawBoard
                 </span>
               </Link>
