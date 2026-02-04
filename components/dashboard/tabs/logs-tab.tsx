@@ -129,7 +129,7 @@ export const LogsTab = () => {
 
       {/* Log stream */}
       <div
-        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden rounded-lg border border-border bg-black/20 p-3 font-mono text-xs"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden rounded-lg border border-border bg-black/20 p-3 text-xs"
         ref={scrollRef}
       >
         {displayLogs.length === 0 ? (
