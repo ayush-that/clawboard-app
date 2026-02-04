@@ -87,7 +87,7 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
-          <Toaster position="top-center" />
+          <Toaster position="top-right" />
           <SessionProvider>{children}</SessionProvider>
         </ThemeProvider>
       </body>
