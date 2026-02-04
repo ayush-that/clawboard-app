@@ -248,12 +248,7 @@ export const SessionsTab = () => {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-base font-semibold">Sessions</h2>
-        <span className="text-xs text-muted-foreground">
-          {sessions.length} sessions
-        </span>
-      </div>
+      <h2 className="text-base font-semibold">Sessions</h2>
       <div className="space-y-2">
         {sessions.map((session) => (
           <Card
@@ -272,9 +267,6 @@ export const SessionsTab = () => {
                   <span className="truncate text-sm font-medium">
                     {session.displayName || session.key}
                   </span>
-                  <Badge className="shrink-0 text-xs" variant="outline">
-                    {session.channel || session.lastChannel}
-                  </Badge>
                 </div>
                 <svg
                   className="h-3 w-3 text-muted-foreground"
