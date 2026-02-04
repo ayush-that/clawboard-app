@@ -74,7 +74,9 @@ export const UsageTab = () => {
       setData({
         totalTokens: json.totalTokens ?? 0,
         totalCost: json.totalCost ?? 0,
-        modelBreakdown: Array.isArray(json.modelBreakdown) ? json.modelBreakdown : [],
+        modelBreakdown: Array.isArray(json.modelBreakdown)
+          ? json.modelBreakdown
+          : [],
         dailyCosts: Array.isArray(json.dailyCosts) ? json.dailyCosts : [],
         sessions: Array.isArray(json.sessions) ? json.sessions : [],
       });
@@ -104,7 +106,7 @@ export const UsageTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchUsage}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>
@@ -132,7 +134,7 @@ export const UsageTab = () => {
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Usage Analytics</h2>
-        <Button onClick={fetchUsage} size="sm" variant="ghost">
+        <Button onClick={fetchUsage} size="sm" variant="outline">
           Refresh
         </Button>
       </div>
@@ -144,7 +146,7 @@ export const UsageTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchUsage}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>

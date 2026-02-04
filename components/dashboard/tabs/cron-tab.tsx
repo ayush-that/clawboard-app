@@ -186,7 +186,7 @@ export const CronTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchJobs}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>
@@ -204,7 +204,6 @@ export const CronTab = () => {
               value={form.name}
             />
             <Input
-              className="font-mono"
               onChange={(e) => {
                 setForm({ ...form, schedule: e.target.value });
               }}
@@ -252,7 +251,6 @@ export const CronTab = () => {
                   value={editForm.name}
                 />
                 <Input
-                  className="font-mono"
                   onChange={(e) => {
                     setEditForm({ ...editForm, schedule: e.target.value });
                   }}
@@ -313,7 +311,7 @@ export const CronTab = () => {
                     </Badge>
                   </div>
                   <div className="flex items-center gap-1">
-                    <Badge className="font-mono text-xs" variant="outline">
+                    <Badge className="text-xs" variant="outline">
                       {job.schedule}
                     </Badge>
                     <Button

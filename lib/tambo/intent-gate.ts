@@ -7,6 +7,12 @@ const PRIMARY_PATTERNS: RegExp[] = [
   /\b(chart|graph|table|timeline|dashboard|report|breakdown|trend|metrics?)\b/i,
 ];
 
+const TAMBO_META_PATTERNS: RegExp[] = [
+  /\b(tambo)\b/i,
+  /\b(generative ui|component rendering|inline component)\b/i,
+  /\b(integrat(?:e|ed|ion)|wired up|working)\b.*\b(chat|ui|tambo)\b/i,
+];
+
 const ACTION_PATTERNS: RegExp[] = [
   /\b(show|display|visualize|plot|summarize|compare|analyze|list)\b/i,
 ];
@@ -23,6 +29,10 @@ export function shouldRenderTamboForMessage(message: string): boolean {
   }
 
   if (PRIMARY_PATTERNS.some((pattern) => pattern.test(normalized))) {
+    return true;
+  }
+
+  if (TAMBO_META_PATTERNS.some((pattern) => pattern.test(normalized))) {
     return true;
   }
 

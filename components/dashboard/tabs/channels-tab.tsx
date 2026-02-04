@@ -123,7 +123,7 @@ export const ChannelsTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchChannels}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>
@@ -170,7 +170,7 @@ export const ChannelsTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchChannels}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>

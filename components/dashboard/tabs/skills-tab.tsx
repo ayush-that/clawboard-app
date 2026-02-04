@@ -57,7 +57,7 @@ export const SkillsTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchSkills}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>
@@ -119,7 +119,7 @@ export const SkillsTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchSkills}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>

@@ -151,7 +151,7 @@ export const SessionsTab = () => {
               loadMessages(selectedKey);
             }}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Refresh
           </Button>
@@ -166,7 +166,7 @@ export const SessionsTab = () => {
                 loadMessages(selectedKey);
               }}
               size="sm"
-              variant="ghost"
+              variant="outline"
             >
               Retry
             </Button>
@@ -263,7 +263,7 @@ export const SessionsTab = () => {
     <div className="mx-auto w-full max-w-4xl space-y-4 p-4 md:p-6">
       <div className="flex items-center justify-between">
         <h2 className="text-xl font-semibold">Sessions</h2>
-        <Button onClick={fetchSessions} size="sm" variant="ghost">
+        <Button onClick={fetchSessions} size="sm" variant="outline">
           Refresh
         </Button>
       </div>
@@ -275,7 +275,7 @@ export const SessionsTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchSessions}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>

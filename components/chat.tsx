@@ -322,7 +322,14 @@ function TamboInlineBridgeEnabled({
           openclawChatId: chatId,
           openclawUserMessageId: message.id,
         },
-      }).catch(Function.prototype as () => undefined);
+      }).catch((error) => {
+        console.warn("Tambo component rendering failed", error);
+        toast({
+          type: "error",
+          description:
+            "Tambo component rendering failed for this message. OpenClaw text still works.",
+        });
+      });
     }
   }, [chatId, messages, sendThreadMessage]);
 

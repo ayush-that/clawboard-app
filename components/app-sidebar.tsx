@@ -65,11 +65,11 @@ export function AppSidebar({ user }: { user: User | undefined }) {
   return (
     <>
       <Sidebar className="group-data-[side=left]:border-r-0">
-        <SidebarHeader>
+        <SidebarHeader className="border-b border-sidebar-accent">
           <SidebarMenu>
-            <div className="flex flex-row items-center justify-between">
+            <div className="flex flex-row items-center justify-between py-1">
               <Link
-                className="flex flex-row items-center gap-3"
+                className="flex flex-row items-center gap-1.5"
                 href="/"
                 onClick={() => {
                   setOpenMobile(false);
@@ -85,19 +85,20 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                   width={24}
                 />
                 <span
-                  className="cursor-pointer rounded-md px-2 text-lg font-semibold hover:bg-muted"
+                  className="cursor-pointer rounded-md pr-2 text-lg font-semibold hover:bg-muted"
                   style={{ fontFamily: "var(--font-geist-pixel-square)" }}
                 >
                   ClawBoard
                 </span>
               </Link>
-              <div className="flex flex-row gap-1">
+              <div className="flex flex-row gap-0.5">
                 {user && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        className="h-8 p-1 md:h-fit md:p-2"
+                        className="size-8 rounded-lg bg-sidebar-accent/50 hover:bg-sidebar-accent"
                         onClick={() => setShowDeleteAllDialog(true)}
+                        size="icon"
                         type="button"
                         variant="ghost"
                       >
@@ -112,13 +113,14 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
-                      className="h-8 p-1 md:h-fit md:p-2"
+                      className="size-8 rounded-lg bg-sidebar-accent/50 hover:bg-sidebar-accent"
                       onClick={() => {
                         setOpenMobile(false);
                         setChat();
                         router.push("/");
                         router.refresh();
                       }}
+                      size="icon"
                       type="button"
                       variant="ghost"
                     >

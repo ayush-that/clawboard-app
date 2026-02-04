@@ -148,7 +148,7 @@ export const MemoryTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={handleSearch}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>

@@ -24,7 +24,7 @@ export function SidebarUserNav({ user }: { user: User }) {
   const { setTheme, resolvedTheme } = useTheme();
 
   return (
-    <SidebarMenu>
+    <SidebarMenu className="border-t border-sidebar-accent pt-2">
       <SidebarMenuItem>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

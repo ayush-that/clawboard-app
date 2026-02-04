@@ -1,5 +1,6 @@
 "use client";
 
+import type { ReactNode } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
@@ -8,6 +9,45 @@ type LogEntry = {
   level: "info" | "warn" | "error" | "debug";
   source: string;
   content: string;
+};
+
+const renderInlineMarkdown = (text: string): ReactNode => {
+  const parts: ReactNode[] = [];
+  const regex = /(\*\*(.+?)\*\*)|(`(.+?)`)/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null = null;
+  let key = 0;
+
+  match = regex.exec(text);
+  while (match !== null) {
+    if (match.index > lastIndex) {
+      parts.push(text.slice(lastIndex, match.index));
+    }
+    if (match[2]) {
+      parts.push(
+        <strong className="font-bold" key={key++}>
+          {match[2]}
+        </strong>,
+      );
+    } else if (match[4]) {
+      parts.push(
+        <code
+          className="rounded bg-white/10 px-1 py-0.5 font-mono text-[0.85em]"
+          key={key++}
+        >
+          {match[4]}
+        </code>,
+      );
+    }
+    lastIndex = match.index + match[0].length;
+    match = regex.exec(text);
+  }
+
+  if (lastIndex < text.length) {
+    parts.push(text.slice(lastIndex));
+  }
+
+  return parts.length > 0 ? parts : text;
 };
 
 const levelColors: Record<string, string> = {
@@ -114,7 +154,7 @@ export const LogsTab = () => {
             className="ml-4 h-7 px-2.5 text-xs"
             onClick={fetchLogs}
             size="sm"
-            variant="ghost"
+            variant="outline"
           >
             Retry
           </Button>
@@ -151,9 +191,11 @@ export const LogsTab = () => {
               <span
                 className={`break-all ${levelColors[entry.level] ?? "text-foreground"}`}
               >
-                {entry.content.length > 500
-                  ? `${entry.content.slice(0, 500)}...`
-                  : entry.content}
+                {renderInlineMarkdown(
+                  entry.content.length > 500
+                    ? `${entry.content.slice(0, 500)}...`
+                    : entry.content,
+                )}
               </span>
             </div>
           ))

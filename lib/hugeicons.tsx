@@ -1,164 +1,179 @@
-// Icon data imports from hugeicons free icons
+import type {
+  Icon,
+  IconProps as PhosphorIconProps,
+} from "@phosphor-icons/react";
 import {
-  Add01Icon,
-  ArrowDown01Icon,
-  ArrowDown02Icon,
-  ArrowLeft01Icon,
-  ArrowLeft02Icon,
-  ArrowRight01Icon,
-  ArrowRight02Icon,
-  ArrowTurnBackwardIcon,
-  ArrowUp01Icon,
-  Attachment01Icon,
-  Book02Icon,
-  Bookmark01Icon,
-  BrainIcon as BrainIconData,
-  Cancel01Icon,
-  CancelCircleIcon,
-  CheckmarkCircle02Icon,
-  Clock01Icon,
-  Comment01Icon,
-  Image01Icon,
-  LinkSquare02Icon,
-  Loading03Icon,
-  Mic01Icon,
-  RecordIcon,
-  Search01Icon,
-  SentIcon as SentIconData,
-  SidebarLeftIcon,
-  StopIcon as StopIconData,
-  Tick02Icon,
-  UnfoldMoreIcon,
-  Wrench01Icon,
-} from "@hugeicons/core-free-icons";
-import { HugeiconsIcon } from "@hugeicons/react";
-import type { ComponentProps } from "react";
+  ArrowBendDownLeft,
+  ArrowDown,
+  ArrowLeft,
+  ArrowRight,
+  ArrowSquareOut,
+  BookmarkSimple,
+  BookOpen,
+  Brain,
+  CaretDown,
+  CaretLeft,
+  CaretRight,
+  CaretUp,
+  CaretUpDown,
+  ChatCircle,
+  CheckCircle,
+  Circle,
+  Clock,
+  Image,
+  MagnifyingGlass,
+  Microphone,
+  Paperclip,
+  PaperPlaneTilt,
+  Check as PhosphorCheck,
+  Plus,
+  SidebarSimple,
+  SpinnerGap,
+  Square,
+  Wrench,
+  X,
+  XCircle,
+} from "@phosphor-icons/react";
+import type { ComponentType } from "react";
 
 // ---------------------------------------------------------------------------
 // Types — drop-in replacements for LucideIcon / LucideProps
 // ---------------------------------------------------------------------------
 
-type HugeIconWrapperProps = Omit<ComponentProps<typeof HugeiconsIcon>, "icon">;
-
 /** Replace `LucideIcon` with this type for icon-as-prop patterns */
-export type IconComponent = (props: HugeIconWrapperProps) => React.JSX.Element;
+export type IconComponent = ComponentType<PhosphorIconProps>;
 
 /** Replace `LucideProps` with this type */
-export type IconProps = HugeIconWrapperProps;
+export type IconProps = PhosphorIconProps;
 
 // ---------------------------------------------------------------------------
-// Factory — wraps hugeicon data into a component with the same API as Lucide
+// Helper — Phosphor defaults to size=256; we want size=16
 // ---------------------------------------------------------------------------
 
-const createIcon = (
-  iconData: ComponentProps<typeof HugeiconsIcon>["icon"],
-  displayName: string
-): IconComponent => {
-  const Icon = (props: HugeIconWrapperProps) => (
-    <HugeiconsIcon icon={iconData} {...props} />
+const withDefaultSize = (PhosphorIcon: Icon, displayName: string): Icon => {
+  const Wrapped = (props: PhosphorIconProps) => (
+    <PhosphorIcon size={16} {...props} />
   );
-  Icon.displayName = displayName;
-  return Icon;
+  Wrapped.displayName = displayName;
+  return Wrapped as unknown as Icon;
 };
 
 // ---------------------------------------------------------------------------
-// Exported icons — named to match Lucide imports for minimal diff
+// Exported icons — named to match existing imports for zero consumer changes
 // ---------------------------------------------------------------------------
 
 // Close / dismiss
-export const X = createIcon(Cancel01Icon, "X");
-export const XIcon = X;
+const WrappedX = withDefaultSize(X, "X");
+export { WrappedX as X, WrappedX as XIcon };
 
 // Search
-export const Search = createIcon(Search01Icon, "Search");
-export const SearchIcon = Search;
+const WrappedSearch = withDefaultSize(MagnifyingGlass, "Search");
+export { WrappedSearch as Search, WrappedSearch as SearchIcon };
 
 // Sidebar toggle
-export const PanelLeft = createIcon(SidebarLeftIcon, "PanelLeft");
+export const PanelLeft = withDefaultSize(SidebarSimple, "PanelLeft");
 
 // Checkmark
-export const Check = createIcon(Tick02Icon, "Check");
+export const Check = withDefaultSize(PhosphorCheck, "Check");
 
-// Chevrons → Arrows
-export const ChevronRight = createIcon(ArrowRight01Icon, "ChevronRight");
-export const ChevronRightIcon = ChevronRight;
-export const ChevronDown = createIcon(ArrowDown01Icon, "ChevronDown");
-export const ChevronDownIcon = ChevronDown;
-export const ChevronUp = createIcon(ArrowUp01Icon, "ChevronUp");
-export const ChevronLeft = createIcon(ArrowLeft01Icon, "ChevronLeft");
-export const ChevronLeftIcon = ChevronLeft;
-export const ChevronsUpDown = createIcon(UnfoldMoreIcon, "ChevronsUpDown");
-export const ChevronsUpDownIcon = ChevronsUpDown;
+// Chevrons
+const WrappedChevronRight = withDefaultSize(CaretRight, "ChevronRight");
+export {
+  WrappedChevronRight as ChevronRight,
+  WrappedChevronRight as ChevronRightIcon,
+};
+
+const WrappedChevronDown = withDefaultSize(CaretDown, "ChevronDown");
+export {
+  WrappedChevronDown as ChevronDown,
+  WrappedChevronDown as ChevronDownIcon,
+};
+
+export const ChevronUp = withDefaultSize(CaretUp, "ChevronUp");
+export const ChevronLeft = withDefaultSize(CaretLeft, "ChevronLeft");
+export { ChevronLeft as ChevronLeftIcon };
+
+const WrappedChevronsUpDown = withDefaultSize(CaretUpDown, "ChevronsUpDown");
+export {
+  WrappedChevronsUpDown as ChevronsUpDown,
+  WrappedChevronsUpDown as ChevronsUpDownIcon,
+};
 
 // Circle
-export const Circle = createIcon(RecordIcon, "Circle");
-export const CircleIcon = Circle;
+const WrappedCircle = withDefaultSize(Circle, "Circle");
+export { WrappedCircle as Circle, WrappedCircle as CircleIcon };
 
 // Full arrows
-export const ArrowLeft = createIcon(ArrowLeft02Icon, "ArrowLeft");
-export const ArrowLeftIcon = ArrowLeft;
-export const ArrowRight = createIcon(ArrowRight02Icon, "ArrowRight");
-export const ArrowRightIcon = ArrowRight;
-export const ArrowDown = createIcon(ArrowDown02Icon, "ArrowDown");
-export const ArrowDownIcon = ArrowDown;
+const WrappedArrowLeft = withDefaultSize(ArrowLeft, "ArrowLeft");
+export { WrappedArrowLeft as ArrowLeft, WrappedArrowLeft as ArrowLeftIcon };
+
+const WrappedArrowRight = withDefaultSize(ArrowRight, "ArrowRight");
+export { WrappedArrowRight as ArrowRight, WrappedArrowRight as ArrowRightIcon };
+
+const WrappedArrowDown = withDefaultSize(ArrowDown, "ArrowDown");
+export { WrappedArrowDown as ArrowDown, WrappedArrowDown as ArrowDownIcon };
 
 // Brain
-export const BrainIcon = createIcon(BrainIconData, "BrainIcon");
+export const BrainIcon = withDefaultSize(Brain, "BrainIcon");
 
 // Book
-export const BookIcon = createIcon(Book02Icon, "BookIcon");
+export const BookIcon = withDefaultSize(BookOpen, "BookIcon");
 
 // Clock
-export const ClockIcon = createIcon(Clock01Icon, "ClockIcon");
+export const ClockIcon = withDefaultSize(Clock, "ClockIcon");
 
 // Wrench
-export const WrenchIcon = createIcon(Wrench01Icon, "WrenchIcon");
+export const WrenchIcon = withDefaultSize(Wrench, "WrenchIcon");
 
 // Status circles
-export const CheckCircleIcon = createIcon(
-  CheckmarkCircle02Icon,
-  "CheckCircleIcon"
-);
-export const XCircleIcon = createIcon(CancelCircleIcon, "XCircleIcon");
+export const CheckCircleIcon = withDefaultSize(CheckCircle, "CheckCircleIcon");
+export const XCircleIcon = withDefaultSize(XCircle, "XCircleIcon");
 
 // Bookmark
-export const BookmarkIcon = createIcon(Bookmark01Icon, "BookmarkIcon");
+export const BookmarkIcon = withDefaultSize(BookmarkSimple, "BookmarkIcon");
 
-// Dot
-export const DotIcon = createIcon(RecordIcon, "DotIcon");
+// Dot — filled circle
+const DotComponent = (props: PhosphorIconProps) => (
+  <Circle size={16} weight="fill" {...props} />
+);
+DotComponent.displayName = "DotIcon";
+export const DotIcon = DotComponent as unknown as Icon;
 
 // Paperclip / Attachment
-export const PaperclipIcon = createIcon(Attachment01Icon, "PaperclipIcon");
+export const PaperclipIcon = withDefaultSize(Paperclip, "PaperclipIcon");
 
 // Submit / Enter
-export const CornerDownLeftIcon = createIcon(
-  ArrowTurnBackwardIcon,
+export const CornerDownLeftIcon = withDefaultSize(
+  ArrowBendDownLeft,
   "CornerDownLeftIcon"
 );
 
 // Image
-export const ImageIcon = createIcon(Image01Icon, "ImageIcon");
+export const ImageIcon = withDefaultSize(Image, "ImageIcon");
 
 // Microphone
-export const MicIcon = createIcon(Mic01Icon, "MicIcon");
+export const MicIcon = withDefaultSize(Microphone, "MicIcon");
 
 // Plus
-export const PlusIcon = createIcon(Add01Icon, "PlusIcon");
+export const PlusIcon = withDefaultSize(Plus, "PlusIcon");
 
 // Loader / spinner
-export const Loader2Icon = createIcon(Loading03Icon, "Loader2Icon");
+export const Loader2Icon = withDefaultSize(SpinnerGap, "Loader2Icon");
 
 // Square / Stop
-export const SquareIcon = createIcon(StopIconData, "SquareIcon");
+export const SquareIcon = withDefaultSize(Square, "SquareIcon");
 
 // Send
-export const SendIcon = createIcon(SentIconData, "SendIcon");
+export const SendIcon = withDefaultSize(PaperPlaneTilt, "SendIcon");
 
 // External link
-export const ExternalLinkIcon = createIcon(
-  LinkSquare02Icon,
+export const ExternalLinkIcon = withDefaultSize(
+  ArrowSquareOut,
   "ExternalLinkIcon"
 );
 
 // Message / Chat
-export const MessageCircleIcon = createIcon(Comment01Icon, "MessageCircleIcon");
+export const MessageCircleIcon = withDefaultSize(
+  ChatCircle,
+  "MessageCircleIcon"
+);
