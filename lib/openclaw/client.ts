@@ -16,24 +16,37 @@ import type {
   WebhookEventData,
 } from "./types";
 
-const GATEWAY_URL =
-  process.env.OPENCLAW_GATEWAY_URL ?? "http://localhost:18789";
-const GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN ?? "";
+export type GatewaySettings = {
+  gatewayUrl?: string;
+  gatewayToken?: string;
+};
+
+const resolveUrl = (cfg?: GatewaySettings) =>
+  cfg?.gatewayUrl ||
+  process.env.OPENCLAW_GATEWAY_URL ||
+  "http://localhost:18789";
+
+const resolveToken = (cfg?: GatewaySettings) =>
+  cfg?.gatewayToken || process.env.OPENCLAW_GATEWAY_TOKEN || "";
 
 // --- Gateway Transport ---
 
 const invokeTool = async <T>(
   tool: string,
-  args: Record<string, unknown>
+  args: Record<string, unknown>,
+  cfg?: GatewaySettings
 ): Promise<T> => {
+  const url = resolveUrl(cfg);
+  const token = resolveToken(cfg);
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (GATEWAY_TOKEN) {
-    headers.Authorization = `Bearer ${GATEWAY_TOKEN}`;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${GATEWAY_URL}/tools/invoke`, {
+  const response = await fetch(`${url}/tools/invoke`, {
     method: "POST",
     headers,
     body: JSON.stringify({ tool, args, sessionKey: "main" }),
@@ -55,16 +68,20 @@ const invokeTool = async <T>(
 };
 
 const chatCompletions = async (
-  message: string
+  message: string,
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean; response: string }> => {
+  const url = resolveUrl(cfg);
+  const token = resolveToken(cfg);
+
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
   };
-  if (GATEWAY_TOKEN) {
-    headers.Authorization = `Bearer ${GATEWAY_TOKEN}`;
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
   }
 
-  const response = await fetch(`${GATEWAY_URL}/v1/chat/completions`, {
+  const response = await fetch(`${url}/v1/chat/completions`, {
     method: "POST",
     headers,
     body: JSON.stringify({
@@ -207,11 +224,15 @@ const cronToJobs = (details: CronDetails): CronJobData[] =>
 
 let cachedSessionKey: string | undefined;
 
-const getPrimarySessionKey = async (): Promise<string> => {
+const getPrimarySessionKey = async (cfg?: GatewaySettings): Promise<string> => {
   if (cachedSessionKey) {
     return cachedSessionKey;
   }
-  const details = await invokeTool<SessionsListDetails>("sessions_list", {});
+  const details = await invokeTool<SessionsListDetails>(
+    "sessions_list",
+    {},
+    cfg
+  );
   if (details.sessions.length > 0) {
     cachedSessionKey = details.sessions.at(0)?.key;
   }
@@ -223,13 +244,15 @@ const getPrimarySessionKey = async (): Promise<string> => {
 // If unreachable, returns empty/error state — no mock data.
 
 export const getRecentTasks = async (
-  _timeRange: string
+  _timeRange: string,
+  cfg?: GatewaySettings
 ): Promise<TaskData[]> => {
   try {
-    const sessionKey = await getPrimarySessionKey();
+    const sessionKey = await getPrimarySessionKey(cfg);
     const details = await invokeTool<SessionHistoryDetails>(
       "sessions_history",
-      { sessionKey }
+      { sessionKey },
+      cfg
     );
     return historyToTasks(details);
   } catch {
@@ -238,20 +261,27 @@ export const getRecentTasks = async (
 };
 
 // Skills are extracted from the config object
-export const getInstalledSkills = async (): Promise<SkillData[]> => {
+export const getInstalledSkills = async (
+  cfg?: GatewaySettings
+): Promise<SkillData[]> => {
   try {
-    const config = await getConfig();
+    const config = await getConfig(cfg);
     return extractSkillsFromConfig(config);
   } catch {
     return [];
   }
 };
 
-export const queryMemory = async (query: string): Promise<MemoryData[]> => {
+export const queryMemory = async (
+  query: string,
+  cfg?: GatewaySettings
+): Promise<MemoryData[]> => {
   try {
-    const details = await invokeTool<MemorySearchDetails>("memory_search", {
-      query,
-    });
+    const details = await invokeTool<MemorySearchDetails>(
+      "memory_search",
+      { query },
+      cfg
+    );
     return memoryToView(details);
   } catch {
     return [];
@@ -259,18 +289,25 @@ export const queryMemory = async (query: string): Promise<MemoryData[]> => {
 };
 
 export const triggerWebhook = async (
-  message: string
+  message: string,
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean; response: string }> => {
   try {
-    return await chatCompletions(message);
+    return await chatCompletions(message, cfg);
   } catch {
     return { success: false, response: "Gateway unreachable" };
   }
 };
 
-export const getCronJobs = async (): Promise<CronJobData[]> => {
+export const getCronJobs = async (
+  cfg?: GatewaySettings
+): Promise<CronJobData[]> => {
   try {
-    const details = await invokeTool<CronDetails>("cron", { action: "list" });
+    const details = await invokeTool<CronDetails>(
+      "cron",
+      { action: "list" },
+      cfg
+    );
     return cronToJobs(details);
   } catch {
     return [];
@@ -283,12 +320,15 @@ export const getErrors = (): Promise<ErrorData[]> => Promise.resolve([]);
 export const getWebhookEvents = (): Promise<WebhookEventData[]> =>
   Promise.resolve([]);
 
-export const getCostData = async (): Promise<CostDataPoint[]> => {
+export const getCostData = async (
+  cfg?: GatewaySettings
+): Promise<CostDataPoint[]> => {
   try {
-    const sessionKey = await getPrimarySessionKey();
+    const sessionKey = await getPrimarySessionKey(cfg);
     const details = await invokeTool<SessionHistoryDetails>(
       "sessions_history",
-      { sessionKey }
+      { sessionKey },
+      cfg
     );
     return historyToCosts(details);
   } catch {
@@ -298,12 +338,15 @@ export const getCostData = async (): Promise<CostDataPoint[]> => {
 
 // --- Cron CRUD ---
 
-export const addCronJob = async (data: {
-  name: string;
-  schedule: string;
-  message?: string;
-}): Promise<{ success: boolean }> => {
-  await invokeTool("cron", { action: "add", ...data });
+export const addCronJob = async (
+  data: {
+    name: string;
+    schedule: string;
+    message?: string;
+  },
+  cfg?: GatewaySettings
+): Promise<{ success: boolean }> => {
+  await invokeTool("cron", { action: "add", ...data }, cfg);
   return { success: true };
 };
 
@@ -314,24 +357,32 @@ export const updateCronJob = async (
     schedule?: string;
     message?: string;
     enabled?: boolean;
-  }
+  },
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("cron", { action: "update", id, ...patch });
+  await invokeTool("cron", { action: "update", id, ...patch }, cfg);
   return { success: true };
 };
 
 export const removeCronJob = async (
-  id: string
+  id: string,
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("cron", { action: "remove", id });
+  await invokeTool("cron", { action: "remove", id }, cfg);
   return { success: true };
 };
 
 // --- Sessions ---
 
-export const getSessionsList = async (): Promise<SessionInfo[]> => {
+export const getSessionsList = async (
+  cfg?: GatewaySettings
+): Promise<SessionInfo[]> => {
   try {
-    const details = await invokeTool<SessionsListDetails>("sessions_list", {});
+    const details = await invokeTool<SessionsListDetails>(
+      "sessions_list",
+      {},
+      cfg
+    );
     return details.sessions.map((s) => ({
       key: s.key,
       channel: s.channel,
@@ -348,12 +399,14 @@ export const getSessionsList = async (): Promise<SessionInfo[]> => {
 };
 
 export const getSessionMessages = async (
-  sessionKey: string
+  sessionKey: string,
+  cfg?: GatewaySettings
 ): Promise<SessionMessage[]> => {
   try {
     const details = await invokeTool<SessionHistoryDetails>(
       "sessions_history",
-      { sessionKey }
+      { sessionKey },
+      cfg
     );
     return details.messages;
   } catch {
@@ -364,10 +417,11 @@ export const getSessionMessages = async (
 // --- Memory ---
 
 export const addMemory = async (
-  text: string
+  text: string,
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean; response: string }> => {
   try {
-    return await chatCompletions(`Remember this permanently: ${text}`);
+    return await chatCompletions(`Remember this permanently: ${text}`, cfg);
   } catch {
     return { success: false, response: "Failed to add memory" };
   }
@@ -380,17 +434,21 @@ type ConfigGetResult = {
   hash: string;
 };
 
-export const getConfig = async (): Promise<OpenClawConfig> => {
+export const getConfig = async (
+  cfg?: GatewaySettings
+): Promise<OpenClawConfig> => {
   try {
-    const result = await invokeTool<ConfigGetResult>("config_get", {
-      action: "json",
-    });
+    const result = await invokeTool<ConfigGetResult>(
+      "config_get",
+      { action: "json" },
+      cfg
+    );
     const raw = JSON.stringify(result.config ?? {}, null, 2);
-    const cfg = result.config ?? {};
+    const configObj = result.config ?? {};
     return {
-      agent: cfg.agent as OpenClawConfig["agent"],
-      gateway: cfg.gateway as OpenClawConfig["gateway"],
-      channels: cfg.channels as OpenClawConfig["channels"],
+      agent: configObj.agent as OpenClawConfig["agent"],
+      gateway: configObj.gateway as OpenClawConfig["gateway"],
+      channels: configObj.channels as OpenClawConfig["channels"],
       raw,
       hash: result.hash ?? "",
     };
@@ -401,9 +459,10 @@ export const getConfig = async (): Promise<OpenClawConfig> => {
 
 export const patchConfig = async (
   patch: Record<string, unknown>,
-  hash: string
+  hash: string,
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("config_patch", { patch, hash });
+  await invokeTool("config_patch", { patch, hash }, cfg);
   return { success: true };
 };
 
@@ -453,11 +512,13 @@ const extractSkillsFromConfig = (config: OpenClawConfig): SkillData[] => {
 
 // --- Usage ---
 
-export const getUsageSummary = async (): Promise<UsageSummary> => {
+export const getUsageSummary = async (
+  cfg?: GatewaySettings
+): Promise<UsageSummary> => {
   try {
     const [sessions, dailyCosts] = await Promise.all([
-      getSessionsList(),
-      getCostData(),
+      getSessionsList(cfg),
+      getCostData(cfg),
     ]);
 
     // Aggregate totals from sessions
@@ -511,12 +572,15 @@ export const getUsageSummary = async (): Promise<UsageSummary> => {
 
 // --- Logs ---
 
-export const getRecentLogs = async (): Promise<LogEntry[]> => {
+export const getRecentLogs = async (
+  cfg?: GatewaySettings
+): Promise<LogEntry[]> => {
   try {
-    const sessionKey = await getPrimarySessionKey();
+    const sessionKey = await getPrimarySessionKey(cfg);
     const details = await invokeTool<SessionHistoryDetails>(
       "sessions_history",
-      { sessionKey }
+      { sessionKey },
+      cfg
     );
 
     const logs: LogEntry[] = [];
@@ -579,9 +643,15 @@ type ExecPendingDetails = {
   }>;
 };
 
-export const getPendingApprovals = async (): Promise<ExecApprovalRequest[]> => {
+export const getPendingApprovals = async (
+  cfg?: GatewaySettings
+): Promise<ExecApprovalRequest[]> => {
   try {
-    const details = await invokeTool<ExecPendingDetails>("exec_pending", {});
+    const details = await invokeTool<ExecPendingDetails>(
+      "exec_pending",
+      {},
+      cfg
+    );
     return (details.approvals ?? []).map((a) => ({
       id: a.id,
       sessionKey: a.sessionKey,
@@ -596,10 +666,11 @@ export const getPendingApprovals = async (): Promise<ExecApprovalRequest[]> => {
 
 export const resolveApproval = async (
   id: string,
-  action: "allow-once" | "allow-always" | "deny"
+  action: "allow-once" | "allow-always" | "deny",
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
   try {
-    await invokeTool("exec_resolve", { id, action });
+    await invokeTool("exec_resolve", { id, action }, cfg);
     return { success: true };
   } catch {
     return { success: false };
@@ -608,9 +679,11 @@ export const resolveApproval = async (
 
 // --- Channels ---
 
-export const getChannels = async (): Promise<ChannelConfig[]> => {
+export const getChannels = async (
+  cfg?: GatewaySettings
+): Promise<ChannelConfig[]> => {
   try {
-    const config = await getConfig();
+    const config = await getConfig(cfg);
     return extractChannelsFromConfig(config);
   } catch {
     return [];
@@ -620,10 +693,11 @@ export const getChannels = async (): Promise<ChannelConfig[]> => {
 export const updateChannel = async (
   name: string,
   settings: Record<string, unknown>,
-  hash: string
+  hash: string,
+  cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
   try {
-    await patchConfig({ channels: { [name]: settings } }, hash);
+    await patchConfig({ channels: { [name]: settings } }, hash, cfg);
     return { success: true };
   } catch {
     return { success: false };

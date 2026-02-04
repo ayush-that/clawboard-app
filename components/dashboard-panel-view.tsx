@@ -8,6 +8,7 @@ import { CronTab } from "./dashboard/tabs/cron-tab";
 import { LogsTab } from "./dashboard/tabs/logs-tab";
 import { MemoryTab } from "./dashboard/tabs/memory-tab";
 import { SessionsTab } from "./dashboard/tabs/sessions-tab";
+import { SettingsTab } from "./dashboard/tabs/settings-tab";
 import { SkillsTab } from "./dashboard/tabs/skills-tab";
 import { UsageTab } from "./dashboard/tabs/usage-tab";
 import { SidebarToggle } from "./sidebar-toggle";
@@ -21,6 +22,7 @@ const panels: Record<PanelName, () => JSX.Element> = {
   usage: UsageTab,
   channels: ChannelsTab,
   config: ConfigTab,
+  settings: SettingsTab,
 };
 
 export const DashboardPanelView = () => {

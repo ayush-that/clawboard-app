@@ -30,6 +30,7 @@ import {
 } from "@/lib/db/queries";
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
+import { getGatewayConfig } from "@/lib/openclaw/settings";
 import type { ChatMessage } from "@/lib/types";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
@@ -68,6 +69,7 @@ export async function POST(request: Request) {
     }
 
     const userType: UserType = session.user.type;
+    const gwConfig = await getGatewayConfig(session.user.id);
 
     const messageCount = await getMessageCountByUserId({
       id: session.user.id,
@@ -140,7 +142,7 @@ export async function POST(request: Request) {
       originalMessages: isToolApprovalFlow ? uiMessages : undefined,
       execute: async ({ writer: dataStream }) => {
         const result = streamText({
-          model: getLanguageModel(selectedChatModel),
+          model: getLanguageModel(selectedChatModel, gwConfig),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages: modelMessages,
           stopWhen: stepCountIs(5),

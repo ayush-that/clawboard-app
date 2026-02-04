@@ -8,6 +8,7 @@ import { MainContentSwitcher } from "@/components/main-content-switcher";
 import { TamboWrapper } from "@/components/tambo-wrapper";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ActiveViewProvider } from "@/lib/contexts/active-view-context";
+import { getUserSettings } from "@/lib/db/queries";
 import { auth } from "../(auth)/auth";
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -17,13 +18,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
         strategy="beforeInteractive"
       />
-      <TamboWrapper>
-        <DataStreamProvider>
-          <Suspense fallback={<div className="flex h-dvh" />}>
-            <SidebarWrapper>{children}</SidebarWrapper>
-          </Suspense>
-        </DataStreamProvider>
-      </TamboWrapper>
+      <DataStreamProvider>
+        <Suspense fallback={<div className="flex h-dvh" />}>
+          <SidebarWrapper>{children}</SidebarWrapper>
+        </Suspense>
+      </DataStreamProvider>
     </>
   );
 }
@@ -32,15 +31,27 @@ async function SidebarWrapper({ children }: { children: React.ReactNode }) {
   const [session, cookieStore] = await Promise.all([auth(), cookies()]);
   const isCollapsed = cookieStore.get("sidebar_state")?.value !== "true";
 
+  let tamboApiKey: string | undefined;
+  if (session?.user?.id) {
+    try {
+      const settings = await getUserSettings(session.user.id);
+      tamboApiKey = settings?.tamboApiKey ?? undefined;
+    } catch {
+      // fall through to env var default
+    }
+  }
+
   return (
     <SidebarProvider defaultOpen={!isCollapsed}>
-      <ActiveViewProvider>
-        <AppSidebar user={session?.user} />
-        <SidebarInset>
-          <MainContentSwitcher>{children}</MainContentSwitcher>
-        </SidebarInset>
-        <ExecApprovalOverlay />
-      </ActiveViewProvider>
+      <TamboWrapper apiKey={tamboApiKey}>
+        <ActiveViewProvider>
+          <AppSidebar user={session?.user} />
+          <SidebarInset>
+            <MainContentSwitcher>{children}</MainContentSwitcher>
+          </SidebarInset>
+          <ExecApprovalOverlay />
+        </ActiveViewProvider>
+      </TamboWrapper>
     </SidebarProvider>
   );
 }

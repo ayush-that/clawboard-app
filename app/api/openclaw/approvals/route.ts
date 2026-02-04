@@ -1,7 +1,11 @@
+import { auth } from "@/app/(auth)/auth";
 import { getPendingApprovals, resolveApproval } from "@/lib/openclaw/client";
+import { getGatewayConfig } from "@/lib/openclaw/settings";
 
 export async function GET() {
-  const approvals = await getPendingApprovals();
+  const session = await auth();
+  const cfg = await getGatewayConfig(session?.user?.id);
+  const approvals = await getPendingApprovals(cfg);
   return Response.json(approvals);
 }
 
@@ -18,6 +22,8 @@ export async function POST(request: Request) {
     );
   }
 
-  const result = await resolveApproval(body.id, body.action);
+  const session = await auth();
+  const cfg = await getGatewayConfig(session?.user?.id);
+  const result = await resolveApproval(body.id, body.action, cfg);
   return Response.json(result);
 }

@@ -17,7 +17,8 @@ export type PanelName =
   | "skills"
   | "usage"
   | "channels"
-  | "config";
+  | "config"
+  | "settings";
 
 type ActiveView = { type: "chat" } | { type: "panel"; panel: PanelName };
 

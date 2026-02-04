@@ -64,6 +64,13 @@
       "when": 1768479010084,
       "tag": "0008_flat_forgotten_one",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1770547564635,
+      "tag": "0009_lumpy_zombie",
+      "breakpoints": true
     }
   ]
 }

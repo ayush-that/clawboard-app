@@ -29,6 +29,7 @@ import {
   suggestion,
   type User,
   user,
+  userSettings,
   vote,
 } from "./schema";
 import { generateHashedPassword } from "./utils";
@@ -597,6 +598,52 @@ export async function getStreamIdsByChatId({ chatId }: { chatId: string }) {
     throw new ChatSDKError(
       "bad_request:database",
       "Failed to get stream ids by chat id"
+    );
+  }
+}
+
+export async function getUserSettings(userId: string) {
+  try {
+    const [settings] = await db
+      .select()
+      .from(userSettings)
+      .where(eq(userSettings.userId, userId));
+    return settings ?? null;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to get user settings"
+    );
+  }
+}
+
+export async function saveUserSettings(
+  userId: string,
+  settings: {
+    openclawGatewayUrl?: string | null;
+    openclawGatewayToken?: string | null;
+    tamboApiKey?: string | null;
+  }
+) {
+  try {
+    const existing = await getUserSettings(userId);
+
+    if (existing) {
+      return await db
+        .update(userSettings)
+        .set({ ...settings, updatedAt: new Date() })
+        .where(eq(userSettings.userId, userId))
+        .returning();
+    }
+
+    return await db
+      .insert(userSettings)
+      .values({ userId, ...settings, updatedAt: new Date() })
+      .returning();
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to save user settings"
     );
   }
 }

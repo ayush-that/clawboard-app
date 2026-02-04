@@ -5,6 +5,7 @@ import type { PanelName } from "@/lib/contexts/active-view-context";
 import { useActiveView } from "@/lib/contexts/active-view-context";
 import {
   CodeIcon,
+  GearIcon,
   LineChartIcon,
   LogsIcon,
   MessageIcon,
@@ -31,6 +32,7 @@ const navItems: Array<{ name: PanelName; label: string; icon: ReactNode }> = [
   { name: "usage", label: "Usage", icon: <LineChartIcon size={16} /> },
   { name: "channels", label: "Channels", icon: <RouteIcon size={16} /> },
   { name: "config", label: "Config", icon: <PencilEditIcon size={16} /> },
+  { name: "settings", label: "Settings", icon: <GearIcon size={16} /> },
 ];
 
 export const SidebarDashboardNav = () => {

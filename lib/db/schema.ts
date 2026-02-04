@@ -168,3 +168,17 @@ export const stream = pgTable(
 );
 
 export type Stream = InferSelectModel<typeof stream>;
+
+export const userSettings = pgTable("UserSettings", {
+  id: uuid("id").primaryKey().notNull().defaultRandom(),
+  userId: uuid("userId")
+    .notNull()
+    .unique()
+    .references(() => user.id),
+  openclawGatewayUrl: text("openclawGatewayUrl"),
+  openclawGatewayToken: text("openclawGatewayToken"),
+  tamboApiKey: text("tamboApiKey"),
+  updatedAt: timestamp("updatedAt").notNull(),
+});
+
+export type UserSettings = InferSelectModel<typeof userSettings>;

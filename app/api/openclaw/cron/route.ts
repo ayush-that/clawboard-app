@@ -1,13 +1,17 @@
 import type { NextRequest } from "next/server";
+import { auth } from "@/app/(auth)/auth";
 import {
   addCronJob,
   getCronJobs,
   removeCronJob,
   updateCronJob,
 } from "@/lib/openclaw/client";
+import { getGatewayConfig } from "@/lib/openclaw/settings";
 
 export const GET = async () => {
-  const jobs = await getCronJobs();
+  const session = await auth();
+  const cfg = await getGatewayConfig(session?.user?.id);
+  const jobs = await getCronJobs(cfg);
   return Response.json(jobs);
 };
 
@@ -18,7 +22,9 @@ export const POST = async (request: NextRequest) => {
       schedule: string;
       message?: string;
     };
-    const result = await addCronJob(body);
+    const session = await auth();
+    const cfg = await getGatewayConfig(session?.user?.id);
+    const result = await addCronJob(body, cfg);
     return Response.json(result);
   } catch (error) {
     return Response.json(
@@ -38,7 +44,9 @@ export const PATCH = async (request: NextRequest) => {
       enabled?: boolean;
     };
     const { id, ...patch } = body;
-    const result = await updateCronJob(id, patch);
+    const session = await auth();
+    const cfg = await getGatewayConfig(session?.user?.id);
+    const result = await updateCronJob(id, patch, cfg);
     return Response.json(result);
   } catch (error) {
     return Response.json(
@@ -51,7 +59,9 @@ export const PATCH = async (request: NextRequest) => {
 export const DELETE = async (request: NextRequest) => {
   try {
     const body = (await request.json()) as { id: string };
-    const result = await removeCronJob(body.id);
+    const session = await auth();
+    const cfg = await getGatewayConfig(session?.user?.id);
+    const result = await removeCronJob(body.id, cfg);
     return Response.json(result);
   } catch (error) {
     return Response.json(
