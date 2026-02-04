@@ -68,8 +68,8 @@ export const LogsTab = () => {
 
   if (loading) {
     return (
-      <div className="flex h-full flex-col">
-        <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+      <div className="mx-auto flex w-full max-w-4xl flex-col p-4 md:p-6">
+        <div className="flex items-center justify-between pb-3">
           <Skeleton className="h-4 w-16" />
           <div className="flex gap-1">
             {Array.from({ length: 5 }).map((_, i) => (
@@ -80,7 +80,7 @@ export const LogsTab = () => {
             ))}
           </div>
         </div>
-        <div className="flex-1 space-y-1 p-3">
+        <div className="flex-1 space-y-1">
           {Array.from({ length: 8 }).map((_, i) => (
             <Skeleton className="h-4 w-full" key={`log-skel-${String(i)}`} />
           ))}
@@ -90,9 +90,9 @@ export const LogsTab = () => {
   }
 
   return (
-    <div className="flex h-full flex-col">
+    <div className="mx-auto flex h-[calc(100dvh-theme(spacing.14))] w-full max-w-4xl flex-col p-4 md:p-6">
       {/* Toolbar */}
-      <div className="flex items-center justify-between border-b border-border px-4 py-2.5">
+      <div className="flex items-center justify-between pb-3">
         <div className="flex items-center gap-2">
           <h2 className="text-sm font-semibold">Logs</h2>
           <Badge className="text-xs" variant="outline">
@@ -131,7 +131,7 @@ export const LogsTab = () => {
 
       {/* Log stream */}
       <div
-        className="flex-1 overflow-y-auto overflow-x-hidden bg-black/20 p-3 font-mono text-xs"
+        className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden rounded-lg border border-border bg-black/20 p-3 font-mono text-xs"
         ref={scrollRef}
       >
         {displayLogs.length === 0 ? (
