@@ -123,6 +123,14 @@ const PurePreviewMessage = ({
             }
 
             if (type === "text") {
+              if (
+                message.role === "assistant" &&
+                tamboRenderedComponent &&
+                mode === "view"
+              ) {
+                return null;
+              }
+
               if (mode === "view") {
                 return (
                   <div key={key}>
