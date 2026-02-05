@@ -42,14 +42,21 @@ export const ExecApprovalOverlay = () => {
     async (id: string, action: "allow-once" | "allow-always" | "deny") => {
       setResolving(id);
       try {
-        await fetch("/api/openclaw/approvals", {
+        const res = await fetch("/api/openclaw/approvals", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ id, action }),
         });
+        if (!res.ok) {
+          console.error(
+            "Failed to resolve approval:",
+            res.status,
+            await res.text().catch(() => "")
+          );
+        }
         setApprovals((prev) => prev.filter((a) => a.id !== id));
-      } catch {
-        // error resolving
+      } catch (error) {
+        console.error("Failed to resolve approval:", error);
       } finally {
         setResolving(null);
       }

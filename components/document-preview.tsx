@@ -23,8 +23,13 @@ import { Editor } from "./text-editor";
 
 type DocumentPreviewProps = {
   isReadonly: boolean;
-  result?: any;
-  args?: any;
+  result?: { id: string; title: string; kind: ArtifactKind };
+  args?: {
+    title?: string;
+    kind?: ArtifactKind;
+    id?: string;
+    isUpdate?: boolean;
+  };
 };
 
 export function DocumentPreview({
@@ -68,7 +73,7 @@ export function DocumentPreview({
       );
     }
 
-    if (args) {
+    if (args?.title && args?.kind) {
       return (
         <DocumentToolCall
           args={{ title: args.title, kind: args.kind }}
@@ -123,7 +128,7 @@ const PureHitboxLayer = ({
   setArtifact,
 }: {
   hitboxRef: React.RefObject<HTMLDivElement>;
-  result: any;
+  result: { id: string; title: string; kind: ArtifactKind } | undefined;
   setArtifact: (
     updaterFn: UIArtifact | ((currentArtifact: UIArtifact) => UIArtifact)
   ) => void;
@@ -133,7 +138,7 @@ const PureHitboxLayer = ({
       const boundingBox = event.currentTarget.getBoundingClientRect();
 
       setArtifact((artifact) =>
-        artifact.status === "streaming"
+        artifact.status === "streaming" || !result
           ? { ...artifact, isVisible: true }
           : {
               ...artifact,

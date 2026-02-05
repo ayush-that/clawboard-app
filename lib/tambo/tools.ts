@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const tamboTools = [
+export const tamboTools = Object.freeze([
   {
     name: "getInstalledSkills",
     description:
@@ -122,4 +122,4 @@ export const tamboTools = [
       })
     ),
   },
-];
+]);

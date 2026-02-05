@@ -87,7 +87,8 @@ export const UsageTab = () => {
         sessions: Array.isArray(json.sessions) ? json.sessions : [],
       });
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load usage data:", error);
       setError("Failed to load usage data. Check gateway connection.");
     } finally {
       setLoading(false);

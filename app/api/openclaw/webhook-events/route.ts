@@ -19,9 +19,7 @@ export const GET = async () => {
     const events = await getWebhookEvents(cfg);
     return Response.json(events);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("GET /api/openclaw/webhook-events failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 };

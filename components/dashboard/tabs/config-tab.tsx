@@ -104,8 +104,8 @@ export const ConfigTab = () => {
           const refreshRes = await fetch("/api/openclaw/config");
           const refreshJson = (await refreshRes.json()) as ConfigData;
           applyConfig(refreshJson);
-        } catch {
-          // Refresh failed but save succeeded, keep going
+        } catch (error) {
+          console.error("Config refresh after save failed:", error);
         }
       } else {
         setSaveResult(`Error: ${json.error ?? "Unknown error"}`);

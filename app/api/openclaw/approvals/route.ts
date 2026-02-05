@@ -18,10 +18,8 @@ export async function GET() {
     const approvals = await getPendingApprovals(cfg);
     return Response.json(approvals);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("GET /api/openclaw/approvals failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 }
 
@@ -52,9 +50,7 @@ export async function POST(request: Request) {
     const result = await resolveApproval(body.id, body.action, cfg);
     return Response.json(result);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("POST /api/openclaw/approvals failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 }

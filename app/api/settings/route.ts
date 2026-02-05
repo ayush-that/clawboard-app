@@ -28,10 +28,8 @@ export async function GET() {
       updatedAt: settings?.updatedAt?.toISOString() ?? null,
     });
   } catch (error) {
-    return Response.json(
-      { error: "Database error", message: String(error) },
-      { status: 500 }
-    );
+    console.error("GET /api/settings failed:", error);
+    return Response.json({ error: "Database error" }, { status: 500 });
   }
 }
 
@@ -106,9 +104,7 @@ export async function PATCH(request: Request) {
       },
     });
   } catch (error) {
-    return Response.json(
-      { error: "Database error", message: String(error) },
-      { status: 500 }
-    );
+    console.error("PATCH /api/settings failed:", error);
+    return Response.json({ error: "Database error" }, { status: 500 });
   }
 }

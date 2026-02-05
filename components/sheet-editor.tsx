@@ -16,6 +16,11 @@ type SheetEditorProps = {
   status: string;
 };
 
+type SheetRow = Record<string, string | number> & {
+  id: number;
+  rowNumber: number;
+};
+
 const MIN_ROWS = 50;
 const MIN_COLS = 26;
 
@@ -72,7 +77,7 @@ const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
 
   const initialRows = useMemo(() => {
     return parseData.map((row, rowIndex) => {
-      const rowData: any = {
+      const rowData: SheetRow = {
         id: rowIndex,
         rowNumber: rowIndex + 1,
       };
@@ -91,15 +96,15 @@ const PureSpreadsheetEditor = ({ content, saveContent }: SheetEditorProps) => {
     setLocalRows(initialRows);
   }, [initialRows]);
 
-  const generateCsv = (data: any[][]) => {
+  const generateCsv = (data: string[][]) => {
     return unparse(data);
   };
 
-  const handleRowsChange = (newRows: any[]) => {
+  const handleRowsChange = (newRows: SheetRow[]) => {
     setLocalRows(newRows);
 
     const updatedData = newRows.map((row) => {
-      return columns.slice(1).map((col) => row[col.key] || "");
+      return columns.slice(1).map((col) => String(row[col.key] || ""));
     });
 
     const newCsvContent = generateCsv(updatedData);

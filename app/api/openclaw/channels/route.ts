@@ -21,10 +21,8 @@ export async function GET() {
     ]);
     return Response.json({ channels, hash: config.hash });
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("GET /api/openclaw/channels failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 }
 
@@ -61,9 +59,7 @@ export async function PATCH(request: Request) {
     );
     return Response.json(result);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("PATCH /api/openclaw/channels failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 }

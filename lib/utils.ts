@@ -1,6 +1,4 @@
 import type {
-  AssistantModelMessage,
-  ToolModelMessage,
   UIMessage,
   UIMessagePart,
 } from 'ai';
@@ -48,27 +46,12 @@ export async function fetchWithErrorHandlers(
   }
 }
 
-export function getLocalStorage(key: string) {
-  if (typeof window !== 'undefined') {
-    return JSON.parse(localStorage.getItem(key) || '[]');
-  }
-  return [];
-}
-
 export function generateUUID(): string {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0;
     const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
-}
-
-type ResponseMessageWithoutId = ToolModelMessage | AssistantModelMessage;
-type ResponseMessage = ResponseMessageWithoutId & { id: string };
-
-export function getMostRecentUserMessage(messages: UIMessage[]) {
-  const userMessages = messages.filter((message) => message.role === 'user');
-  return userMessages.at(-1);
 }
 
 export function getDocumentTimestampByIndex(
@@ -79,18 +62,6 @@ export function getDocumentTimestampByIndex(
   if (index > documents.length) { return new Date(); }
 
   return documents[index].createdAt;
-}
-
-export function getTrailingMessageId({
-  messages,
-}: {
-  messages: ResponseMessage[];
-}): string | null {
-  const trailingMessage = messages.at(-1);
-
-  if (!trailingMessage) { return null; }
-
-  return trailingMessage.id;
 }
 
 export function sanitizeText(text: string) {

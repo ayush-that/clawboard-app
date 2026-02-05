@@ -63,7 +63,8 @@ export const ChannelsTab = () => {
       setChannels(Array.isArray(json.channels) ? json.channels : []);
       setHash(json.hash ?? "");
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load channels:", error);
       setError("Failed to load channels. Check gateway connection.");
     } finally {
       setLoading(false);

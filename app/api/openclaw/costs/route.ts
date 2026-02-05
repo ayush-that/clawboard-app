@@ -18,9 +18,7 @@ export const GET = async () => {
     const costs = await getCostData(cfg);
     return Response.json(costs);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("GET /api/openclaw/costs failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 };

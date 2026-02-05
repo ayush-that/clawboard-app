@@ -133,7 +133,7 @@ export const codeArtifact = new Artifact<"code", Metadata>({
         }));
 
         try {
-          // @ts-expect-error - loadPyodide is not defined
+          // @ts-expect-error - loadPyodide is injected at runtime via CDN script, no type declarations available
           const currentPyodideInstance = await globalThis.loadPyodide({
             indexURL: "https://cdn.jsdelivr.net/pyodide/v0.23.4/full/",
           });
@@ -193,14 +193,16 @@ export const codeArtifact = new Artifact<"code", Metadata>({
               },
             ],
           }));
-        } catch (error: any) {
+        } catch (error: unknown) {
+          const message =
+            error instanceof Error ? error.message : String(error);
           setMetadata((metadata) => ({
             ...metadata,
             outputs: [
               ...metadata.outputs.filter((output) => output.id !== runId),
               {
                 id: runId,
-                contents: [{ type: "text", value: error.message }],
+                contents: [{ type: "text", value: message }],
                 status: "failed",
               },
             ],

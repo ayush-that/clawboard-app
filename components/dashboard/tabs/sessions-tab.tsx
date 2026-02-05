@@ -85,7 +85,8 @@ export const SessionsTab = () => {
       }
       setSessions(Array.isArray(json) ? json : []);
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load sessions:", error);
       setError("Failed to load sessions. Check gateway connection.");
     } finally {
       setLoading(false);
@@ -109,7 +110,8 @@ export const SessionsTab = () => {
       }
       setMessages(Array.isArray(json) ? json : []);
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load messages:", error);
       setError("Failed to load messages. Check gateway connection.");
       setMessages([]);
     } finally {

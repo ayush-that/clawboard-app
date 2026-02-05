@@ -18,9 +18,7 @@ export const GET = async () => {
     const summary = await getUsageSummary(cfg);
     return Response.json(summary);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("GET /api/openclaw/usage failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 };

@@ -35,7 +35,8 @@ export const SkillsTab = () => {
       }
       setSkills(Array.isArray(json) ? json : []);
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load skills:", error);
       setError("Failed to load skills. Check gateway connection.");
     } finally {
       setLoading(false);

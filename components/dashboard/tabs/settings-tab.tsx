@@ -62,7 +62,8 @@ export const SettingsTab = () => {
         setGatewayUrl(json.openclawGatewayUrl ?? "");
         setHasGatewayToken(Boolean(json.hasOpenclawGatewayToken));
         setHasTamboKey(Boolean(json.hasTamboApiKey));
-      } catch {
+      } catch (error) {
+        console.error("Failed to load settings:", error);
         setSaveResult("Error: Failed to load settings.");
       } finally {
         setLoading(false);

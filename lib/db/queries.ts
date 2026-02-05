@@ -514,7 +514,8 @@ export async function updateChatTitleById({
 }) {
   try {
     return await db.update(chat).set({ title }).where(eq(chat.id, chatId));
-  } catch {
+  } catch (error) {
+    console.error("Failed to update chat title:", error);
     return;
   }
 }

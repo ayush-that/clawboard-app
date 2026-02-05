@@ -17,7 +17,6 @@
       "**/*.jsx",
       "!node_modules",
       "!.next",
-      "!ai-sdk",
       "!components/ui",
       "!lib/utils.ts",
       "!hooks/use-mobile.ts"

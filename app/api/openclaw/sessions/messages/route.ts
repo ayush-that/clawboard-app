@@ -23,9 +23,7 @@ export const GET = async (request: NextRequest) => {
     const messages = await getSessionMessages(key, cfg);
     return Response.json(messages);
   } catch (error) {
-    return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
-      { status: 502 }
-    );
+    console.error("GET /api/openclaw/sessions/messages failed:", error);
+    return Response.json({ error: "Gateway unreachable" }, { status: 502 });
   }
 };

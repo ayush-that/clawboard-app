@@ -18,8 +18,9 @@ export async function GET() {
     const logs = await getRecentLogs(cfg);
     return Response.json(logs);
   } catch (error) {
+    console.error("GET /api/openclaw/logs failed:", error);
     return Response.json(
-      { error: "Gateway unreachable", message: String(error) },
+      { error: "Gateway unreachable" },
       { status: 502 }
     );
   }

@@ -40,7 +40,8 @@ export const MemoryTab = () => {
       }
       setMemories(Array.isArray(json) ? json : []);
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to search memory:", error);
       setError("Failed to search memory. Check gateway connection.");
       setMemories([]);
     } finally {
@@ -69,7 +70,8 @@ export const MemoryTab = () => {
       if (json.success) {
         setNewMemory("");
       }
-    } catch {
+    } catch (error) {
+      console.error("Failed to add memory:", error);
       setSaveResult("Failed to add memory");
     } finally {
       setSaving(false);

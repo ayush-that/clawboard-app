@@ -25,6 +25,68 @@ const resolveUrl = (cfg?: GatewaySettings) => cfg?.gatewayUrl || "";
 
 const resolveToken = (cfg?: GatewaySettings) => cfg?.gatewayToken || "";
 
+// --- SSRF Protection ---
+
+const PRIVATE_IPV4_RANGES = [
+  { prefix: "10.", mask: null },
+  { prefix: "127.", mask: null },
+  { prefix: "0.", mask: null },
+  { prefix: "169.254.", mask: null },
+  { prefix: "192.168.", mask: null },
+] as const;
+
+const isPrivate172 = (ip: string): boolean => {
+  const parts = ip.split(".");
+  if (parts.at(0) !== "172") {
+    return false;
+  }
+  const second = Number.parseInt(parts.at(1) ?? "", 10);
+  return second >= 16 && second <= 31;
+};
+
+const isPrivateUrl = (url: string): boolean => {
+  let hostname: string;
+  try {
+    hostname = new URL(url).hostname;
+  } catch {
+    return true; // malformed URLs are blocked
+  }
+
+  // Block IPv6 loopback and private
+  if (hostname === "::1" || hostname === "[::1]") {
+    return true;
+  }
+  const bare = hostname.replace(/^\[|\]$/g, "");
+  if (bare.startsWith("fd") || bare.startsWith("fc") || bare === "::1") {
+    return true;
+  }
+
+  // Block 0.0.0.0
+  if (hostname === "0.0.0.0") {
+    return true;
+  }
+
+  // Block private IPv4 ranges
+  for (const range of PRIVATE_IPV4_RANGES) {
+    if (hostname.startsWith(range.prefix)) {
+      return true;
+    }
+  }
+
+  // 172.16.0.0/12
+  if (isPrivate172(hostname)) {
+    return true;
+  }
+
+  return false;
+};
+
+const assertNotPrivateUrl = (url: string): void => {
+  if (isPrivateUrl(url)) {
+    throw new Error("Gateway URL resolves to a private/internal address");
+  }
+};
+
 // --- Gateway Transport ---
 
 const invokeTool = async <T>(
@@ -34,6 +96,7 @@ const invokeTool = async <T>(
   sessionKey = "main"
 ): Promise<T> => {
   const url = resolveUrl(cfg);
+  assertNotPrivateUrl(url);
   const token = resolveToken(cfg);
 
   const headers: Record<string, string> = {
@@ -70,6 +133,7 @@ const chatCompletions = async (
   sessionKey = "main"
 ): Promise<{ success: boolean; response: string }> => {
   const url = resolveUrl(cfg);
+  assertNotPrivateUrl(url);
   const token = resolveToken(cfg);
 
   const headers: Record<string, string> = {

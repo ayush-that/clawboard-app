@@ -77,16 +77,6 @@ function getOpenClawChat(settings?: ProviderSettings, sessionKey?: string) {
   return openclaw.chat(`openclaw:${sessionKey ?? "main"}`);
 }
 
-export function getTitleModel(
-  settings?: ProviderSettings,
-  sessionKey?: string
-) {
-  if (isTestEnvironment && myProvider) {
-    return myProvider.languageModel("title-model");
-  }
-  return getOpenClawChat(settings, sessionKey);
-}
-
 export function getArtifactModel(
   settings?: ProviderSettings,
   sessionKey?: string

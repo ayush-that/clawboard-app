@@ -56,7 +56,8 @@ export const CronTab = () => {
       }
       setJobs(Array.isArray(json) ? json : []);
       setError(null);
-    } catch {
+    } catch (error) {
+      console.error("Failed to load cron jobs:", error);
       setError("Failed to load cron jobs. Check gateway connection.");
     } finally {
       setLoading(false);
@@ -86,7 +87,8 @@ export const CronTab = () => {
       setForm(emptyForm);
       setShowForm(false);
       await fetchJobs();
-    } catch {
+    } catch (error) {
+      console.error("Failed to create cron job:", error);
       setError("Failed to create cron job. Check gateway connection.");
     } finally {
       setSaving(false);
@@ -106,7 +108,8 @@ export const CronTab = () => {
       }
       setError(null);
       await fetchJobs();
-    } catch {
+    } catch (error) {
+      console.error("Failed to toggle cron job:", error);
       setError("Failed to toggle cron job. Check gateway connection.");
     }
   };
@@ -126,7 +129,8 @@ export const CronTab = () => {
       setError(null);
       setEditingId(null);
       await fetchJobs();
-    } catch {
+    } catch (error) {
+      console.error("Failed to update cron job:", error);
       setError("Failed to update cron job. Check gateway connection.");
     } finally {
       setSaving(false);
@@ -146,7 +150,8 @@ export const CronTab = () => {
       }
       setError(null);
       await fetchJobs();
-    } catch {
+    } catch (error) {
+      console.error("Failed to delete cron job:", error);
       setError("Failed to delete cron job. Check gateway connection.");
     } finally {
       setDeleteTarget(null);
