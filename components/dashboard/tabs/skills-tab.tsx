@@ -30,6 +30,9 @@ export const SkillsTab = () => {
     try {
       const res = await fetch("/api/openclaw/skills");
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setSkills(Array.isArray(json) ? json : []);
       setError(null);
     } catch {

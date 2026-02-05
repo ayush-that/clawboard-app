@@ -52,6 +52,9 @@ export const CronTab = () => {
     try {
       const res = await fetch("/api/openclaw/cron");
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setJobs(Array.isArray(json) ? json : []);
       setError(null);
     } catch {

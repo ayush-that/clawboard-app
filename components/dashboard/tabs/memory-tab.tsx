@@ -35,6 +35,9 @@ export const MemoryTab = () => {
         `/api/openclaw/memory?q=${encodeURIComponent(query)}`
       );
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setMemories(Array.isArray(json) ? json : []);
       setError(null);
     } catch {

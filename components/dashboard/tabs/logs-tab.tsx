@@ -27,7 +27,7 @@ const renderInlineMarkdown = (text: string): ReactNode => {
       parts.push(
         <strong className="font-bold" key={key++}>
           {match[2]}
-        </strong>,
+        </strong>
       );
     } else if (match[4]) {
       parts.push(
@@ -36,7 +36,7 @@ const renderInlineMarkdown = (text: string): ReactNode => {
           key={key++}
         >
           {match[4]}
-        </code>,
+        </code>
       );
     }
     lastIndex = match.index + match[0].length;
@@ -77,6 +77,9 @@ export const LogsTab = () => {
     try {
       const res = await fetch("/api/openclaw/logs");
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setLogs(Array.isArray(json) ? json : []);
       setError(null);
       requestAnimationFrame(() => {
@@ -194,7 +197,7 @@ export const LogsTab = () => {
                 {renderInlineMarkdown(
                   entry.content.length > 500
                     ? `${entry.content.slice(0, 500)}...`
-                    : entry.content,
+                    : entry.content
                 )}
               </span>
             </div>

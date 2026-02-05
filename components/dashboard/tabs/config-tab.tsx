@@ -49,9 +49,16 @@ export const ConfigTab = () => {
     const fetchConfig = async () => {
       try {
         const res = await fetch("/api/openclaw/config");
-        const json = (await res.json()) as ConfigData;
+        const json = (await res.json()) as ConfigData & {
+          message?: string;
+          error?: string;
+        };
+        if (!res.ok) {
+          throw new Error(json.message ?? json.error ?? "Request failed");
+        }
         applyConfig(json);
-      } catch {
+      } catch (err) {
+        console.error("Config fetch failed:", err);
         setConfig(null);
       } finally {
         setLoading(false);

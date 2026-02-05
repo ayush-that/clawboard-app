@@ -80,6 +80,9 @@ export const SessionsTab = () => {
     try {
       const res = await fetch("/api/openclaw/sessions");
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setSessions(Array.isArray(json) ? json : []);
       setError(null);
     } catch {
@@ -101,6 +104,9 @@ export const SessionsTab = () => {
         `/api/openclaw/sessions/messages?key=${encodeURIComponent(key)}`
       );
       const json = await res.json();
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setMessages(Array.isArray(json) ? json : []);
       setError(null);
     } catch {

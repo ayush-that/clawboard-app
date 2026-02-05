@@ -70,7 +70,13 @@ export const UsageTab = () => {
   const fetchUsage = useCallback(async () => {
     try {
       const res = await fetch("/api/openclaw/usage");
-      const json = (await res.json()) as Partial<UsageSummary>;
+      const json = (await res.json()) as Partial<UsageSummary> & {
+        message?: string;
+        error?: string;
+      };
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setData({
         totalTokens: json.totalTokens ?? 0,
         totalCost: json.totalCost ?? 0,

@@ -54,7 +54,12 @@ export const ChannelsTab = () => {
       const json = (await res.json()) as {
         channels: ChannelItem[];
         hash: string;
+        message?: string;
+        error?: string;
       };
+      if (!res.ok) {
+        throw new Error(json.message ?? json.error ?? "Request failed");
+      }
       setChannels(Array.isArray(json.channels) ? json.channels : []);
       setHash(json.hash ?? "");
       setError(null);
