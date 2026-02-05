@@ -2,8 +2,16 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { isDevelopmentEnvironment } from "./lib/constants";
 
-export async function proxy(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const origin = request.headers.get("origin");
+
+  // Handle CORS preflight for API routes
+  if (pathname.startsWith("/api/") && request.method === "OPTIONS") {
+    const response = new NextResponse(null, { status: 204 });
+    setCorsHeaders(response, request.nextUrl.origin, origin);
+    return response;
+  }
 
   /*
    * Playwright starts the dev server and requires a 200 status to
@@ -32,7 +40,12 @@ export async function proxy(request: NextRequest) {
     }
 
     if (pathname.startsWith("/api/")) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      const response = NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+      setCorsHeaders(response, request.nextUrl.origin, origin);
+      return response;
     }
 
     const redirectUrl = encodeURIComponent(pathname);
@@ -47,7 +60,37 @@ export async function proxy(request: NextRequest) {
     return NextResponse.redirect(new URL("/", request.url));
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+
+  // Add CORS headers to API responses
+  if (pathname.startsWith("/api/")) {
+    setCorsHeaders(response, request.nextUrl.origin, origin);
+  }
+
+  return response;
+}
+
+function setCorsHeaders(
+  response: NextResponse,
+  sameOrigin: string,
+  requestOrigin: string | null
+) {
+  // Only allow same-origin requests
+  if (requestOrigin && requestOrigin !== sameOrigin) {
+    return;
+  }
+
+  response.headers.set("Access-Control-Allow-Origin", sameOrigin);
+  response.headers.set(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, PATCH, DELETE, OPTIONS"
+  );
+  response.headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization"
+  );
+  response.headers.set("Access-Control-Max-Age", "86400");
+  response.headers.set("Vary", "Origin");
 }
 
 export const config = {

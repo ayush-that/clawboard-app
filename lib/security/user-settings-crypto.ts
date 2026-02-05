@@ -47,6 +47,9 @@ export function encryptUserSettingValue(value: string): string {
 
 export function decryptUserSettingValue(value: string): DecryptionResult {
   if (!value.startsWith(ENVELOPE_PREFIX)) {
+    console.warn(
+      "[Security] Plaintext setting value detected. Consider re-saving to encrypt."
+    );
     return {
       value,
       isLegacyPlaintext: true,

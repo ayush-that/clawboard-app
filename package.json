@@ -15,7 +15,8 @@
     "db:pull": "drizzle-kit pull",
     "db:check": "drizzle-kit check",
     "db:up": "drizzle-kit up",
-    "test": "echo 'No tests configured'"
+    "test": "echo 'No tests configured'",
+    "prepare": "husky"
   },
   "dependencies": {
     "@ai-sdk/gateway": "^3.0.15",
@@ -88,6 +89,7 @@
     "react-dom": "19.0.1",
     "react-resizable-panels": "^2.1.7",
     "recharts": "^3.7.0",
+    "redis": "^5.10.0",
     "resumable-stream": "^2.2.10",
     "server-only": "^0.0.1",
     "sonner": "^1.5.0",
@@ -110,11 +112,18 @@
     "@types/react-dom": "^18",
     "baseline-browser-mapping": "^2.9.19",
     "drizzle-kit": "^0.25.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "postcss": "^8",
     "tailwindcss": "^4.1.13",
     "tsx": "^4.19.1",
     "typescript": "^5.6.3",
     "ultracite": "^7.0.11"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx}": [
+      "pnpm format"
+    ]
   },
   "packageManager": "pnpm@9.12.3"
 }
