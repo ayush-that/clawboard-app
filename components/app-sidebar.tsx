@@ -116,7 +116,6 @@ export function AppSidebar({ user }: { user: User | undefined }) {
                       className="size-8 rounded-lg bg-sidebar-accent/50 hover:bg-sidebar-accent"
                       onClick={() => {
                         setOpenMobile(false);
-                        setChat();
                         router.push("/");
                         router.refresh();
                       }}
