@@ -1,4 +1,3 @@
-import { Robot } from "@phosphor-icons/react";
 import Link from "next/link";
 import { memo } from "react";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
@@ -57,11 +56,6 @@ const PureChatItem = ({
           }}
         >
           <span className="truncate">{chat.title}</span>
-          {chat.openclawSessionKey ? (
-            <span className="ml-auto shrink-0 text-muted-foreground">
-              <Robot size={14} weight="duotone" />
-            </span>
-          ) : null}
         </Link>
       </SidebarMenuButton>
 
