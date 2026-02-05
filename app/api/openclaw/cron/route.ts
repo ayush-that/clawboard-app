@@ -20,8 +20,15 @@ export const GET = async () => {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const jobs = await getCronJobs(cfg);
-  return Response.json(jobs);
+  try {
+    const jobs = await getCronJobs(cfg);
+    return Response.json(jobs);
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 };
 
 export const POST = async (request: NextRequest) => {
@@ -45,8 +52,8 @@ export const POST = async (request: NextRequest) => {
     return Response.json(result);
   } catch (error) {
     return Response.json(
-      { success: false, error: String(error) },
-      { status: 500 }
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
     );
   }
 };
@@ -75,8 +82,8 @@ export const PATCH = async (request: NextRequest) => {
     return Response.json(result);
   } catch (error) {
     return Response.json(
-      { success: false, error: String(error) },
-      { status: 500 }
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
     );
   }
 };
@@ -98,8 +105,8 @@ export const DELETE = async (request: NextRequest) => {
     return Response.json(result);
   } catch (error) {
     return Response.json(
-      { success: false, error: String(error) },
-      { status: 500 }
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
     );
   }
 };

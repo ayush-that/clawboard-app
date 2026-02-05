@@ -15,8 +15,15 @@ export const GET = async () => {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const config = await getConfig(cfg);
-  return Response.json(config);
+  try {
+    const config = await getConfig(cfg);
+    return Response.json(config);
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 };
 
 export const PATCH = async (request: NextRequest) => {
@@ -39,8 +46,8 @@ export const PATCH = async (request: NextRequest) => {
     return Response.json(result);
   } catch (error) {
     return Response.json(
-      { success: false, error: String(error) },
-      { status: 500 }
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
     );
   }
 };

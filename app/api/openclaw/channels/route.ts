@@ -14,11 +14,18 @@ export async function GET() {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const [channels, config] = await Promise.all([
-    getChannels(cfg),
-    getConfig(cfg),
-  ]);
-  return Response.json({ channels, hash: config.hash });
+  try {
+    const [channels, config] = await Promise.all([
+      getChannels(cfg),
+      getConfig(cfg),
+    ]);
+    return Response.json({ channels, hash: config.hash });
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 }
 
 export async function PATCH(request: Request) {
@@ -45,6 +52,18 @@ export async function PATCH(request: Request) {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const result = await updateChannel(body.name, body.settings, body.hash, cfg);
-  return Response.json(result);
+  try {
+    const result = await updateChannel(
+      body.name,
+      body.settings,
+      body.hash,
+      cfg
+    );
+    return Response.json(result);
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 }

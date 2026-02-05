@@ -14,8 +14,15 @@ export async function GET() {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const approvals = await getPendingApprovals(cfg);
-  return Response.json(approvals);
+  try {
+    const approvals = await getPendingApprovals(cfg);
+    return Response.json(approvals);
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
@@ -41,6 +48,13 @@ export async function POST(request: Request) {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const result = await resolveApproval(body.id, body.action, cfg);
-  return Response.json(result);
+  try {
+    const result = await resolveApproval(body.id, body.action, cfg);
+    return Response.json(result);
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 }

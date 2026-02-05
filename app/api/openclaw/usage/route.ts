@@ -17,10 +17,10 @@ export const GET = async () => {
 
     const summary = await getUsageSummary(cfg);
     return Response.json(summary);
-  } catch {
+  } catch (error) {
     return Response.json(
-      { error: "Failed to fetch usage data" },
-      { status: 500 }
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
     );
   }
 };

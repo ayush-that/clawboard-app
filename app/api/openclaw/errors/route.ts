@@ -15,6 +15,13 @@ export const GET = async () => {
     return new ChatSDKError("bad_request:openclaw_config").toResponse();
   }
 
-  const errors = await getErrors(cfg);
-  return Response.json(errors);
+  try {
+    const errors = await getErrors(cfg);
+    return Response.json(errors);
+  } catch (error) {
+    return Response.json(
+      { error: "Gateway unreachable", message: String(error) },
+      { status: 502 }
+    );
+  }
 };
