@@ -9,12 +9,16 @@ export type GatewayConfig = {
 };
 
 export async function getGatewayConfig(userId: string): Promise<GatewayConfig> {
-  const settings = await getUserSettings(userId);
-  const gatewayUrl = settings?.openclawGatewayUrl?.trim() ?? "";
+  try {
+    const settings = await getUserSettings(userId);
+    const gatewayUrl = settings?.openclawGatewayUrl?.trim() ?? "";
 
-  return {
-    gatewayUrl,
-    gatewayToken: settings?.openclawGatewayToken ?? "",
-    isConfigured: gatewayUrl.length > 0,
-  };
+    return {
+      gatewayUrl,
+      gatewayToken: settings?.openclawGatewayToken ?? "",
+      isConfigured: gatewayUrl.length > 0,
+    };
+  } catch {
+    return { gatewayUrl: "", gatewayToken: "", isConfigured: false };
+  }
 }

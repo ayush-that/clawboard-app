@@ -18,14 +18,21 @@ export async function GET() {
     return new ChatSDKError("unauthorized:auth").toResponse();
   }
 
-  const settings = await getUserSettings(session.user.id);
+  try {
+    const settings = await getUserSettings(session.user.id);
 
-  return Response.json({
-    openclawGatewayUrl: settings?.openclawGatewayUrl ?? "",
-    hasOpenclawGatewayToken: Boolean(settings?.openclawGatewayToken),
-    hasTamboApiKey: Boolean(settings?.tamboApiKey),
-    updatedAt: settings?.updatedAt?.toISOString() ?? null,
-  });
+    return Response.json({
+      openclawGatewayUrl: settings?.openclawGatewayUrl ?? "",
+      hasOpenclawGatewayToken: Boolean(settings?.openclawGatewayToken),
+      hasTamboApiKey: Boolean(settings?.tamboApiKey),
+      updatedAt: settings?.updatedAt?.toISOString() ?? null,
+    });
+  } catch (error) {
+    return Response.json(
+      { error: "Database error", message: String(error) },
+      { status: 500 }
+    );
+  }
 }
 
 export async function PATCH(request: Request) {
@@ -82,19 +89,26 @@ export async function PATCH(request: Request) {
     }
   }
 
-  const result = await saveUserSettings(session.user.id, {
-    openclawGatewayUrl: nextGatewayUrl,
-    openclawGatewayToken: nextGatewayToken,
-    tamboApiKey: nextTamboApiKey,
-  });
+  try {
+    const result = await saveUserSettings(session.user.id, {
+      openclawGatewayUrl: nextGatewayUrl,
+      openclawGatewayToken: nextGatewayToken,
+      tamboApiKey: nextTamboApiKey,
+    });
 
-  return Response.json({
-    success: true,
-    settings: {
-      openclawGatewayUrl: result?.openclawGatewayUrl ?? "",
-      hasOpenclawGatewayToken: Boolean(result?.openclawGatewayToken),
-      hasTamboApiKey: Boolean(result?.tamboApiKey),
-      updatedAt: result?.updatedAt?.toISOString() ?? null,
-    },
-  });
+    return Response.json({
+      success: true,
+      settings: {
+        openclawGatewayUrl: result?.openclawGatewayUrl ?? "",
+        hasOpenclawGatewayToken: Boolean(result?.openclawGatewayToken),
+        hasTamboApiKey: Boolean(result?.tamboApiKey),
+        updatedAt: result?.updatedAt?.toISOString() ?? null,
+      },
+    });
+  } catch (error) {
+    return Response.json(
+      { error: "Database error", message: String(error) },
+      { status: 500 }
+    );
+  }
 }
