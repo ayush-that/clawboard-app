@@ -2,12 +2,28 @@ import type { GatewaySettings } from "./core";
 import { chatConfigGet, chatConfigPatch } from "./core";
 import type { OpenClawConfig, SkillData } from "./types";
 
+// --- Config cache (LLM config generation takes ~45s, cache for 2 min) ---
+
+let cachedConfig: OpenClawConfig | null = null;
+let cacheTimestamp = 0;
+const CONFIG_CACHE_TTL = 120_000; // 2 minutes
+
+export const clearConfigCache = () => {
+  cachedConfig = null;
+  cacheTimestamp = 0;
+};
+
 export const getConfig = async (
   cfg?: GatewaySettings
 ): Promise<OpenClawConfig> => {
+  const now = Date.now();
+  if (cachedConfig && now - cacheTimestamp < CONFIG_CACHE_TTL) {
+    return cachedConfig;
+  }
+
   const configObj = await chatConfigGet(cfg);
   const raw = JSON.stringify(configObj, null, 2);
-  return {
+  const config: OpenClawConfig = {
     agent: configObj.agents as OpenClawConfig["agent"],
     gateway: configObj.gateway as OpenClawConfig["gateway"],
     channels: configObj.channels as OpenClawConfig["channels"],
@@ -16,6 +32,10 @@ export const getConfig = async (
       (configObj.meta as Record<string, unknown>)?.lastTouchedAt ?? ""
     ),
   };
+
+  cachedConfig = config;
+  cacheTimestamp = now;
+  return config;
 };
 
 export const patchConfig = async (
@@ -23,7 +43,10 @@ export const patchConfig = async (
   _hash: string,
   cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  return await chatConfigPatch(patch, cfg);
+  const result = await chatConfigPatch(patch, cfg);
+  // Invalidate cache after patching so next read gets fresh data
+  clearConfigCache();
+  return result;
 };
 
 export const extractSkillsFromConfig = (

@@ -6,7 +6,12 @@ export {
   getChannels,
   updateChannel,
 } from "./channels";
-export { extractSkillsFromConfig, getConfig, patchConfig } from "./config";
+export {
+  clearConfigCache,
+  extractSkillsFromConfig,
+  getConfig,
+  patchConfig,
+} from "./config";
 export type { GatewaySettings } from "./core";
 export {
   chatCompletions,
