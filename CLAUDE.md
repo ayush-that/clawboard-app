@@ -35,9 +35,20 @@ Dynamic route: `/chat/[id]` for existing conversations. New chats start at `/`.
 
 ### Key Directories
 
-- `components/` — React components. `components/ui/` contains shadcn/ui primitives (auto-generated, excluded from linting).
-- `lib/ai/` — LLM model definitions, provider config, system prompts, AI tools (createDocument, updateDocument, requestSuggestions, getWeather)
-- `lib/db/` — Drizzle ORM schema (`schema.ts`), queries (`queries.ts`), migrations. PostgreSQL via `postgres` driver.
+- `components/chat/` — Chat interface (chat, messages, message-*, multimodal-input, greeting, suggested-actions)
+- `components/artifact/` — Artifact/document system (artifact, document, document-preview, create-artifact)
+- `components/editor/` — Code/text/sheet/image editors (CodeMirror, ProseMirror wrappers, diffview)
+- `components/sidebar/` — Sidebar navigation (app-sidebar, sidebar-history, sidebar-toggle, sidebar-user-nav)
+- `components/dashboard/` — ClawBoard dashboard (panel-view, main-content-switcher, exec-approval-overlay, tabs/)
+- `components/ai-elements/` — AI-specific UI components (canvas, prompt-input, etc.)
+- `components/elements/` — Message part renderers (branch, conversation, tool, etc.)
+- `components/generative/` — AI-generated content renderers (memory-view, skill-card, cost-chart, etc.)
+- `components/ui/` — shadcn/ui primitives (auto-generated, excluded from linting)
+- `lib/icons.tsx` — All Phosphor icon wrappers (single source of truth)
+- `lib/format-utils.ts` — Shared formatting utilities (formatTimeAgo, formatTokens)
+- `lib/ai/` — LLM model definitions, provider config, system prompts, AI tools
+- `lib/db/` — Drizzle ORM schema (`schema.ts`), queries (`queries/`), migrations. DB connection at `queries/connection.ts`.
+- `lib/openclaw/` — OpenClaw gateway client (`client.ts` barrel, `core.ts`, `types.ts`, `settings.ts` with TTL cache, feature modules)
 - `lib/artifacts/` — Server-side artifact handlers for text, code, image, sheet types
 - `lib/errors.ts` — `ChatSDKError` with typed error codes (`ErrorType:Surface` pattern, e.g. `"rate_limit:chat"`)
 - `artifacts/` — Client-side artifact renderers (code, image, sheet, text)
