@@ -21,6 +21,23 @@ export async function getUser(email: string): Promise<User[]> {
   }
 }
 
+export async function getOrCreateUserByEmail(email: string): Promise<User> {
+  const existing = await getUser(email);
+  if (existing.length > 0) {
+    return existing.at(0) as User;
+  }
+
+  try {
+    const [newUser] = await db.insert(user).values({ email }).returning();
+    return newUser;
+  } catch (_error) {
+    throw new ChatSDKError(
+      "bad_request:database",
+      "Failed to create user from OAuth"
+    );
+  }
+}
+
 export async function createUser(email: string, password: string) {
   const hashedPassword = generateHashedPassword(password);
 

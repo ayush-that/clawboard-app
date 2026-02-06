@@ -2,8 +2,14 @@ import { compare } from "bcrypt-ts";
 import NextAuth, { type DefaultSession } from "next-auth";
 import type { DefaultJWT } from "next-auth/jwt";
 import Credentials from "next-auth/providers/credentials";
+import Google from "next-auth/providers/google";
 import { DUMMY_PASSWORD } from "@/lib/constants";
-import { getUser } from "@/lib/db/queries";
+import { getOrCreateUserByEmail, getUser } from "@/lib/db/queries";
+import {
+  getCounter,
+  incrementCounter,
+  resetCounter,
+} from "@/lib/redis/rate-limiter";
 import { authConfig } from "./auth.config";
 
 export type UserType = "regular";
@@ -11,45 +17,30 @@ export type UserType = "regular";
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
 
-const failedLoginAttempts = new Map<
-  string,
-  { count: number; lastAttempt: number }
->();
-
-function cleanupStaleEntries() {
-  const now = Date.now();
-  for (const [email, entry] of failedLoginAttempts) {
-    if (now - entry.lastAttempt > LOCKOUT_WINDOW_MS) {
-      failedLoginAttempts.delete(email);
-    }
-  }
-}
-
-function isLockedOut(email: string): boolean {
-  cleanupStaleEntries();
-  const entry = failedLoginAttempts.get(email);
-  if (!entry) {
+async function isLockedOut(email: string): Promise<boolean> {
+  try {
+    const count = await getCounter(`login:${email}`);
+    return count >= MAX_FAILED_ATTEMPTS;
+  } catch {
+    // Redis unavailable — allow login to avoid locking everyone out
     return false;
   }
-  return (
-    entry.count >= MAX_FAILED_ATTEMPTS &&
-    Date.now() - entry.lastAttempt < LOCKOUT_WINDOW_MS
-  );
 }
 
-function recordFailedAttempt(email: string) {
-  const entry = failedLoginAttempts.get(email);
-  const now = Date.now();
-  if (entry && now - entry.lastAttempt < LOCKOUT_WINDOW_MS) {
-    entry.count += 1;
-    entry.lastAttempt = now;
-  } else {
-    failedLoginAttempts.set(email, { count: 1, lastAttempt: now });
+async function recordFailedAttempt(email: string) {
+  try {
+    await incrementCounter(`login:${email}`, LOCKOUT_WINDOW_MS);
+  } catch {
+    // Redis unavailable — best-effort
   }
 }
 
-function clearFailedAttempts(email: string) {
-  failedLoginAttempts.delete(email);
+async function clearFailedAttempts(email: string) {
+  try {
+    await resetCounter(`login:${email}`);
+  } catch {
+    // Redis unavailable — best-effort
+  }
 }
 
 declare module "next-auth" {
@@ -88,7 +79,7 @@ export const {
         const email = credentials.email as string;
         const password = credentials.password as string;
 
-        if (isLockedOut(email)) {
+        if (await isLockedOut(email)) {
           console.warn(
             `[Security] Account locked out due to too many failed attempts: ${email}`
           );
@@ -99,7 +90,7 @@ export const {
 
         if (users.length === 0) {
           await compare(password, DUMMY_PASSWORD);
-          recordFailedAttempt(email);
+          await recordFailedAttempt(email);
           return null;
         }
 
@@ -107,27 +98,59 @@ export const {
 
         if (!user.password) {
           await compare(password, DUMMY_PASSWORD);
-          recordFailedAttempt(email);
+          await recordFailedAttempt(email);
           return null;
         }
 
         const passwordsMatch = await compare(password, user.password);
 
         if (!passwordsMatch) {
-          recordFailedAttempt(email);
+          await recordFailedAttempt(email);
           return null;
         }
 
-        clearFailedAttempts(email);
+        await clearFailedAttempts(email);
         return { ...user, type: "regular" };
+      },
+    }),
+    Google({
+      clientId: process.env.AUTH_GOOGLE_ID,
+      clientSecret: process.env.AUTH_GOOGLE_SECRET,
+      authorization: {
+        params: {
+          prompt: "select_account",
+        },
       },
     }),
   ],
   callbacks: {
-    jwt({ token, user }) {
+    async signIn({ user, account }) {
+      if (account?.provider === "google") {
+        const email = user.email;
+        if (!email) {
+          return false;
+        }
+
+        // Get or create DB user — links Google sign-in to existing
+        // email/password account if one exists
+        await getOrCreateUserByEmail(email);
+        return true;
+      }
+
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
-        token.id = user.id as string;
-        token.type = user.type;
+        if (account?.provider === "google") {
+          // Look up the DB user by email so the JWT holds the correct DB user ID
+          const email = token.email as string;
+          const dbUser = await getOrCreateUserByEmail(email);
+          token.id = dbUser.id;
+          token.type = "regular" as UserType;
+        } else {
+          token.id = user.id as string;
+          token.type = user.type;
+        }
       }
 
       return token;

@@ -82,3 +82,7 @@ export const register = async (
     return { status: "failed" };
   }
 };
+
+export const signInWithGoogle = async () => {
+  await signIn("google", { redirectTo: "/" });
+};
