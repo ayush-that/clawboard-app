@@ -2,7 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { getToken } from "next-auth/jwt";
 import { isDevelopmentEnvironment } from "./lib/constants";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const origin = request.headers.get("origin");
 
@@ -99,12 +99,5 @@ function setCorsHeaders(
 }
 
 export const config = {
-  matcher: [
-    "/",
-    "/chat/:id",
-    "/api/:path*",
-    "/login",
-    "/register",
-    "/dashboard/:path*",
-  ],
+  matcher: ["/", "/chat/:id", "/api/:path*", "/login", "/register", "/ping"],
 };
