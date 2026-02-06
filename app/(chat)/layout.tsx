@@ -1,7 +1,7 @@
+import dynamic from "next/dynamic";
 import { cookies } from "next/headers";
 import Script from "next/script";
 import { Suspense } from "react";
-import { ExecApprovalOverlay } from "@/components/dashboard/exec-approval-overlay";
 import { MainContentSwitcher } from "@/components/dashboard/main-content-switcher";
 import { DataStreamProvider } from "@/components/data-stream-provider";
 import { AppSidebar } from "@/components/sidebar/app-sidebar";
@@ -10,6 +10,12 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ActiveViewProvider } from "@/lib/contexts/active-view-context";
 import { getUserSettings } from "@/lib/db/queries";
 import { auth } from "../(auth)/auth";
+
+const ExecApprovalOverlay = dynamic(() =>
+  import("@/components/dashboard/exec-approval-overlay").then((m) => ({
+    default: m.ExecApprovalOverlay,
+  }))
+);
 
 function LayoutSkeleton() {
   return (

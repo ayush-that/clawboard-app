@@ -114,18 +114,13 @@ export async function saveUserSettings(
       updatedAt: new Date(),
     };
 
-    if (existing) {
-      await db
-        .update(userSettings)
-        .set(valuesToPersist)
-        .where(eq(userSettings.userId, userId))
-        .returning();
-    } else {
-      await db
-        .insert(userSettings)
-        .values({ userId, ...valuesToPersist })
-        .returning();
-    }
+    await db
+      .insert(userSettings)
+      .values({ userId, ...valuesToPersist })
+      .onConflictDoUpdate({
+        target: userSettings.userId,
+        set: valuesToPersist,
+      });
 
     return {
       userId,
