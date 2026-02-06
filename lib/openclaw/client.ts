@@ -6,6 +6,11 @@ export { extractSkillsFromConfig, getConfig, patchConfig } from "./config";
 export type { GatewaySettings } from "./core";
 export {
   chatCompletions,
+  chatConfigGet,
+  chatConfigPatch,
+  chatCronAdd,
+  chatCronList,
+  chatCronRemove,
   getPrimarySessionKey,
   invokeTool,
   isPrivateUrl,

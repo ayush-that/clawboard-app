@@ -34,6 +34,11 @@ export async function middleware(request: NextRequest) {
   });
 
   if (!token) {
+    // Allow unauthenticated access to public chat pages (page enforces visibility)
+    if (pathname.startsWith("/chat/")) {
+      return NextResponse.next();
+    }
+
     // Let unauthenticated users access login/register pages
     if (authPages.includes(pathname)) {
       return NextResponse.next();

@@ -183,6 +183,92 @@ export const getPrimarySessionKey = async (
   return cachedSessionKey ?? "agent:main:main";
 };
 
+// --- Chat-based config retrieval (config_get tool doesn't exist in gateway) ---
+
+export const chatConfigGet = async (
+  cfg?: GatewaySettings,
+  sessionKey = "main"
+): Promise<Record<string, unknown>> => {
+  const { response } = await chatCompletions(
+    "Output your full configuration as raw JSON. Include all top-level keys (meta, auth, models, agents, channels, gateway, skills, commands, messages, etc). Only output the JSON object, nothing else — no markdown fences, no explanation.",
+    cfg,
+    sessionKey
+  );
+  // Strip markdown code fences if the agent wrapped the output
+  const cleaned = response
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+  return JSON.parse(cleaned) as Record<string, unknown>;
+};
+
+export const chatConfigPatch = async (
+  patch: Record<string, unknown>,
+  cfg?: GatewaySettings,
+  sessionKey = "main"
+): Promise<{ success: boolean }> => {
+  const patchStr = JSON.stringify(patch, null, 2);
+  const { success } = await chatCompletions(
+    `Update your configuration by merging the following patch into your current config. Apply it and confirm with "done".\n\n${patchStr}`,
+    cfg,
+    sessionKey
+  );
+  return { success };
+};
+
+export const chatCronList = async (
+  cfg?: GatewaySettings,
+  sessionKey = "main"
+): Promise<
+  Array<{
+    id?: string;
+    name?: string;
+    schedule?: string;
+    enabled?: boolean;
+    message?: string;
+    lastRun?: string;
+    nextRun?: string;
+  }>
+> => {
+  const { response } = await chatCompletions(
+    "List all your scheduled/cron jobs as a JSON array. Each object should have: id, name, schedule (cron expression), enabled (boolean), message. If you have no cron jobs, return an empty array []. Output only the JSON array, no explanation.",
+    cfg,
+    sessionKey
+  );
+  const cleaned = response
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "")
+    .trim();
+  const parsed = JSON.parse(cleaned);
+  return Array.isArray(parsed) ? parsed : [];
+};
+
+export const chatCronAdd = async (
+  data: { name: string; schedule: string; message?: string },
+  cfg?: GatewaySettings,
+  sessionKey = "main"
+): Promise<{ success: boolean }> => {
+  const { success } = await chatCompletions(
+    `Create a new scheduled job with the following settings:\n- Name: ${data.name}\n- Schedule: ${data.schedule}\n- Message/Action: ${data.message ?? "default"}\nConfirm with "done" when created.`,
+    cfg,
+    sessionKey
+  );
+  return { success };
+};
+
+export const chatCronRemove = async (
+  id: string,
+  cfg?: GatewaySettings,
+  sessionKey = "main"
+): Promise<{ success: boolean }> => {
+  const { success } = await chatCompletions(
+    `Remove the scheduled/cron job with id or name "${id}". Confirm with "done" when removed.`,
+    cfg,
+    sessionKey
+  );
+  return { success };
+};
+
 export type SessionHistoryDetails = {
   sessionKey: string;
   messages: Array<{

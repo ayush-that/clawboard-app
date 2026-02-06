@@ -107,7 +107,11 @@ export type UsageSummary = {
 };
 
 export type OpenClawConfig = {
-  agent?: { model?: string };
+  agent?: {
+    defaults?: {
+      model?: { primary?: string };
+    };
+  };
   gateway?: { auth?: { mode?: string } };
   channels?: Record<string, unknown>;
   raw: string;

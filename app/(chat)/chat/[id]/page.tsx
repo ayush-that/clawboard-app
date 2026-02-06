@@ -1,8 +1,9 @@
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
 import { auth } from "@/app/(auth)/auth";
 import { Chat } from "@/components/chat/chat";
+import { PublicChatView } from "@/components/chat/public-chat-view";
 import { DataStreamHandler } from "@/components/data-stream-handler";
 import { DEFAULT_CHAT_MODEL } from "@/lib/ai/models";
 import { getChatById, getMessagesByChatId } from "@/lib/db/queries";
@@ -21,29 +22,29 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const chat = await getChatById({ id });
 
   if (!chat) {
-    redirect("/");
+    return notFound();
   }
 
   const session = await auth();
 
+  // Unauthenticated user viewing a public chat — read-only, no interactive components
   if (!session) {
-    redirect("/login");
-  }
-
-  if (chat.visibility === "private") {
-    if (!session.user) {
+    if (chat.visibility === "private") {
       return notFound();
     }
 
-    if (session.user.id !== chat.userId) {
-      return notFound();
-    }
+    const messagesFromDb = await getMessagesByChatId({ id });
+    const uiMessages = convertToUIMessages(messagesFromDb);
+
+    return <PublicChatView chatTitle={chat.title} messages={uiMessages} />;
   }
 
-  const messagesFromDb = await getMessagesByChatId({
-    id,
-  });
+  // Authenticated user viewing a private chat they don't own — 404
+  if (chat.visibility === "private" && session.user?.id !== chat.userId) {
+    return notFound();
+  }
 
+  const messagesFromDb = await getMessagesByChatId({ id });
   const uiMessages = convertToUIMessages(messagesFromDb);
 
   return (
@@ -54,7 +55,7 @@ async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
         initialChatModel={DEFAULT_CHAT_MODEL}
         initialMessages={uiMessages}
         initialVisibilityType={chat.visibility}
-        isReadonly={session?.user?.id !== chat.userId}
+        isReadonly={session.user?.id !== chat.userId}
         openclawSessionKey={chat.openclawSessionKey}
       />
       <DataStreamHandler />

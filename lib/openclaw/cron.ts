@@ -1,21 +1,17 @@
 import type { GatewaySettings } from "./core";
-import { invokeTool } from "./core";
+import {
+  chatCompletions,
+  chatCronAdd,
+  chatCronList,
+  chatCronRemove,
+} from "./core";
 import type { CronJobData } from "./types";
 
-type CronDetails = {
-  jobs: Array<{
-    id?: string;
-    name?: string;
-    schedule?: string;
-    enabled?: boolean;
-    lastRun?: string;
-    nextRun?: string;
-    message?: string;
-  }>;
-};
-
-const cronToJobs = (details: CronDetails): CronJobData[] =>
-  details.jobs.map((j) => ({
+export const getCronJobs = async (
+  cfg?: GatewaySettings
+): Promise<CronJobData[]> => {
+  const jobs = await chatCronList(cfg);
+  return jobs.map((j) => ({
     id: j.id ?? j.name ?? "unknown",
     name: j.name ?? j.id ?? "unnamed",
     schedule: j.schedule ?? "* * * * *",
@@ -25,20 +21,6 @@ const cronToJobs = (details: CronDetails): CronJobData[] =>
     message: j.message,
     skill: "cron",
   }));
-
-export const getCronJobs = async (
-  cfg?: GatewaySettings
-): Promise<CronJobData[]> => {
-  try {
-    const details = await invokeTool<CronDetails>(
-      "cron",
-      { action: "list" },
-      cfg
-    );
-    return cronToJobs(details);
-  } catch {
-    return [];
-  }
 };
 
 export const addCronJob = async (
@@ -49,8 +31,7 @@ export const addCronJob = async (
   },
   cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("cron", { action: "add", ...data }, cfg);
-  return { success: true };
+  return await chatCronAdd(data, cfg);
 };
 
 export const updateCronJob = async (
@@ -63,14 +44,17 @@ export const updateCronJob = async (
   },
   cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("cron", { action: "update", id, ...patch }, cfg);
-  return { success: true };
+  const patchStr = JSON.stringify(patch, null, 2);
+  const { success } = await chatCompletions(
+    `Update the scheduled/cron job "${id}" with the following changes:\n${patchStr}\nConfirm with "done" when updated.`,
+    cfg
+  );
+  return { success };
 };
 
 export const removeCronJob = async (
   id: string,
   cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("cron", { action: "remove", id }, cfg);
-  return { success: true };
+  return await chatCronRemove(id, cfg);
 };

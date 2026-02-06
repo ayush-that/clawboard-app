@@ -1,86 +1,70 @@
 import type { GatewaySettings } from "./core";
-import { invokeTool } from "./core";
+import { chatConfigGet, chatConfigPatch } from "./core";
 import type { OpenClawConfig, SkillData } from "./types";
-
-type ConfigGetResult = {
-  config: Record<string, unknown>;
-  hash: string;
-};
 
 export const getConfig = async (
   cfg?: GatewaySettings
 ): Promise<OpenClawConfig> => {
-  try {
-    const result = await invokeTool<ConfigGetResult>(
-      "config_get",
-      { action: "json" },
-      cfg
-    );
-    const raw = JSON.stringify(result.config ?? {}, null, 2);
-    const configObj = result.config ?? {};
-    return {
-      agent: configObj.agent as OpenClawConfig["agent"],
-      gateway: configObj.gateway as OpenClawConfig["gateway"],
-      channels: configObj.channels as OpenClawConfig["channels"],
-      raw,
-      hash: result.hash ?? "",
-    };
-  } catch {
-    return { raw: "{}", hash: "" };
-  }
+  const configObj = await chatConfigGet(cfg);
+  const raw = JSON.stringify(configObj, null, 2);
+  return {
+    agent: configObj.agents as OpenClawConfig["agent"],
+    gateway: configObj.gateway as OpenClawConfig["gateway"],
+    channels: configObj.channels as OpenClawConfig["channels"],
+    raw,
+    hash: String(
+      (configObj.meta as Record<string, unknown>)?.lastTouchedAt ?? ""
+    ),
+  };
 };
 
 export const patchConfig = async (
   patch: Record<string, unknown>,
-  hash: string,
+  _hash: string,
   cfg?: GatewaySettings
 ): Promise<{ success: boolean }> => {
-  await invokeTool("config_patch", { patch, hash }, cfg);
-  return { success: true };
+  return await chatConfigPatch(patch, cfg);
 };
 
 export const extractSkillsFromConfig = (
   config: OpenClawConfig
 ): SkillData[] => {
   const skills: SkillData[] = [];
-  try {
-    const raw = JSON.parse(config.raw) as Record<string, unknown>;
+  const raw = JSON.parse(config.raw) as Record<string, unknown>;
 
-    // Extract from skills section if present
-    const skillsSection = raw.skills as Record<string, unknown> | undefined;
-    if (skillsSection && typeof skillsSection === "object") {
-      for (const [name, value] of Object.entries(skillsSection)) {
-        const skill = value as Record<string, unknown>;
-        skills.push({
-          name,
-          description: (skill.description as string) ?? "",
-          enabled: (skill.enabled as boolean) ?? true,
-          source: (skill.source as string) ?? "installed",
-          path: skill.path as string | undefined,
-        });
-      }
-    }
+  // OpenClaw stores skills under skills.entries
+  const skillsSection = raw.skills as Record<string, unknown> | undefined;
+  const entries =
+    (skillsSection?.entries as Record<string, unknown> | undefined) ??
+    skillsSection;
 
-    // Extract from tools section as fallback
-    const toolsSection = raw.tools as Record<string, unknown> | undefined;
-    if (
-      toolsSection &&
-      typeof toolsSection === "object" &&
-      skills.length === 0
-    ) {
-      for (const [name, value] of Object.entries(toolsSection)) {
-        if (typeof value === "object" && value !== null) {
-          skills.push({
-            name,
-            description: "",
-            enabled: true,
-            source: "config",
-          });
-        }
-      }
-    }
-  } catch {
-    // parse error — return empty
+  if (!entries || typeof entries !== "object") {
+    return skills;
   }
+
+  for (const [name, value] of Object.entries(entries)) {
+    // Skip meta keys
+    if (name === "install" || name === "entries") {
+      continue;
+    }
+    if (typeof value === "object" && value !== null) {
+      const skill = value as Record<string, unknown>;
+      skills.push({
+        name,
+        description: (skill.description as string) ?? "",
+        enabled: (skill.enabled as boolean) ?? true,
+        source: (skill.source as string) ?? "installed",
+        path: skill.path as string | undefined,
+      });
+    } else {
+      skills.push({
+        name,
+        description: "",
+        enabled: true,
+        source: "config",
+      });
+    }
+  }
+
   return skills;
 };

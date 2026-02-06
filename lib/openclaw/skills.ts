@@ -5,10 +5,6 @@ import type { SkillData } from "./types";
 export const getInstalledSkills = async (
   cfg?: GatewaySettings
 ): Promise<SkillData[]> => {
-  try {
-    const config = await getConfig(cfg);
-    return extractSkillsFromConfig(config);
-  } catch {
-    return [];
-  }
+  const config = await getConfig(cfg);
+  return extractSkillsFromConfig(config);
 };

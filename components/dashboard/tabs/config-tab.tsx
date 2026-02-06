@@ -10,7 +10,11 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 
 type ConfigData = {
-  agent?: { model?: string };
+  agent?: {
+    defaults?: {
+      model?: { primary?: string };
+    };
+  };
   gateway?: { auth?: { mode?: string } };
   channels?: Record<string, unknown>;
   raw: string;
@@ -30,7 +34,7 @@ export const ConfigTab = () => {
 
   const applyConfig = useCallback((json: ConfigData) => {
     setConfig(json);
-    const m = json.agent?.model ?? "";
+    const m = json.agent?.defaults?.model?.primary ?? "";
     setModel(m);
     setOriginalModel(m);
 
@@ -84,7 +88,7 @@ export const ConfigTab = () => {
       const patch: Record<string, unknown> = {};
 
       if (model !== originalModel) {
-        patch.agent = { model };
+        patch.agents = { defaults: { model: { primary: model } } };
       }
 
       if (soulMd !== originalSoulMd) {
