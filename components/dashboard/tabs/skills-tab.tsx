@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 type SkillItem = {
   name: string;
@@ -109,12 +108,7 @@ export const SkillsTab = () => {
 
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 md:p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-semibold">Skills</h2>
-        <span className="text-xs text-muted-foreground">
-          {skills.length} skills
-        </span>
-      </div>
+      <h2 className="text-xl font-semibold">Skills</h2>
 
       {error ? (
         <div className="flex items-center justify-between rounded-lg border border-destructive/50 bg-destructive/10 px-4 py-2 text-sm text-destructive">
@@ -144,18 +138,20 @@ export const SkillsTab = () => {
                 <CardContent className="p-4">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{skill.name}</span>
-                    <Badge
-                      className={`text-xs ${sourceColors[source] ?? ""}`}
-                      variant="outline"
-                    >
-                      {source}
-                    </Badge>
-                    <Badge
-                      className="text-xs"
-                      variant={skill.enabled ? "default" : "secondary"}
-                    >
-                      {skill.enabled ? "enabled" : "disabled"}
-                    </Badge>
+                    <div className="ml-auto flex items-center gap-1.5">
+                      <Badge
+                        className={`text-xs ${sourceColors[source] ?? ""}`}
+                        variant="outline"
+                      >
+                        {source}
+                      </Badge>
+                      <Badge
+                        className="text-xs"
+                        variant={skill.enabled ? "default" : "secondary"}
+                      >
+                        {skill.enabled ? "enabled" : "disabled"}
+                      </Badge>
+                    </div>
                   </div>
                   {skill.description ? (
                     <p className="mt-1.5 text-xs text-muted-foreground">
@@ -173,19 +169,6 @@ export const SkillsTab = () => {
           </div>
         </div>
       ))}
-
-      <Separator />
-      <p className="text-xs text-muted-foreground">
-        Browse and install more skills from{" "}
-        <a
-          className="text-primary underline"
-          href="https://clawhub.com"
-          rel="noopener noreferrer"
-          target="_blank"
-        >
-          ClawHub
-        </a>
-      </p>
     </div>
   );
 };
