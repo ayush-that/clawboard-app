@@ -25,13 +25,14 @@ There's also a global **Exec Approval** overlay that polls for pending tool exec
 | Layer | Tech |
 |-------|------|
 | Framework | Next.js 16 (App Router) |
-| UI | React 19, Tailwind CSS, shadcn/ui (Radix), Phosphor Icons |
-| AI | Vercel AI SDK, AI Gateway (multi-provider) |
+| UI | React 19, Tailwind CSS, shadcn/ui (Radix), Phosphor Icons, Recharts |
+| AI | Vercel AI SDK, AI Gateway (multi-provider), Tambo (generative UI) |
+| Editor | CodeMirror |
 | Database | PostgreSQL via Drizzle ORM |
-| Cache | Redis (resumable streams) |
+| Cache | Redis (resumable streams, optional) |
 | Auth | NextAuth v5 (credentials + guest) |
 | Linting | Biome via Ultracite |
-| Package manager | pnpm 9.12.3 |
+| Package manager | pnpm 9.x |
 
 ## Setup
 
@@ -40,7 +41,6 @@ There's also a global **Exec Approval** overlay that polls for pending tool exec
 - Node.js 18+
 - pnpm 9.x
 - PostgreSQL database
-- Redis instance
 - An OpenClaw gateway running somewhere (defaults to `localhost:18789`)
 
 ### Environment
@@ -50,13 +50,18 @@ Copy `.env.example` to `.env.local` and fill in the values:
 ```
 AUTH_SECRET=                        # openssl rand -base64 32
 POSTGRES_URL=                       # PostgreSQL connection string
-REDIS_URL=                          # Redis connection string
 USER_SETTINGS_ENCRYPTION_KEY=       # openssl rand -base64 32
-BLOB_READ_WRITE_TOKEN=              # Vercel Blob (for file uploads)
-AI_GATEWAY_API_KEY=                 # Vercel AI Gateway key (not needed on Vercel deployments)
-OPENCLAW_GATEWAY_URL=               # defaults to http://localhost:18789
-OPENCLAW_GATEWAY_TOKEN=             # optional, if your gateway requires auth
 ```
+
+Optional:
+
+```
+REDIS_URL=                          # Redis (enables resumable streams)
+OPENCLAW_GATEWAY_URL=               # fallback if not set in Settings UI
+OPENCLAW_GATEWAY_TOKEN=             # fallback if not set in Settings UI
+```
+
+Gateway URL and token are typically configured per-user through the in-app **Settings** page, not as environment variables.
 
 ### Run
 
@@ -147,7 +152,12 @@ The chat side uses Vercel AI SDK's `streamText()` to stream responses from the a
 app/
 ├── (auth)/              # login, register, NextAuth routes
 ├── (chat)/              # chat UI, chat API, documents, history
-│   └── api/chat/        # streaming chat endpoint
+│   └── api/
+│       ├── chat/        # streaming chat endpoint
+│       ├── document/    # document CRUD
+│       ├── files/       # file uploads
+│       ├── history/     # chat history
+│       └── suggestions/ # AI suggestions
 └── api/
     ├── openclaw/        # 14 dashboard API routes
     └── settings/        # per-user encrypted settings
@@ -155,18 +165,22 @@ app/
 components/
 ├── dashboard/
 │   ├── tabs/            # 9 tab components (sessions, logs, cron, etc.)
-│   └── exec-approval-overlay.tsx
+│   ├── exec-approval-overlay.tsx
+│   └── event-feed.tsx   # SSE event feed
 ├── dashboard-panel-view.tsx    # tab router
 ├── sidebar-dashboard-nav.tsx   # nav links
 └── chat.tsx                    # chat interface
 
 lib/
 ├── openclaw/
-│   ├── client.ts        # gateway client (30+ functions)
+│   ├── client.ts        # barrel re-exports
+│   ├── core.ts          # invokeTool, chatCompletions
 │   ├── types.ts         # shared types
-│   └── settings.ts      # per-user gateway config
+│   ├── settings.ts      # per-user gateway config
+│   └── *.ts             # feature modules (sessions, logs, cron, etc.)
 ├── ai/                  # models, tools, prompts, providers
 ├── db/                  # Drizzle schema, queries, migrations
+├── security/            # encryption for user settings
 └── errors.ts            # typed error system
 ```
 
@@ -176,6 +190,7 @@ lib/
 |---------|-------------|
 | `pnpm dev` | Dev server (Turbo) |
 | `pnpm build` | Run migrations + production build |
+| `pnpm start` | Start production server |
 | `pnpm lint` | Check with Biome |
 | `pnpm format` | Auto-fix with Biome |
 | `pnpm db:migrate` | Apply database migrations |
@@ -185,17 +200,21 @@ lib/
 
 ## Gateway API
 
-The OpenClaw client (`lib/openclaw/client.ts`) exposes these functions, all of which call the gateway:
+The OpenClaw client (`lib/openclaw/client.ts`) re-exports functions from feature modules, all of which call the gateway:
 
 **Sessions**: `getSessionsList`, `getSessionMessages`
 **Memory**: `queryMemory`, `addMemory`
 **Cron**: `getCronJobs`, `addCronJob`, `updateCronJob`, `removeCronJob`
-**Config**: `getConfig`, `patchConfig`
+**Config**: `getConfig`, `patchConfig`, `extractSkillsFromConfig`
 **Usage**: `getUsageSummary`, `getCostData`
 **Logs**: `getRecentLogs`
+**Tasks**: `getRecentTasks`
 **Approvals**: `getPendingApprovals`, `resolveApproval`
 **Channels**: `getChannels`, `updateChannel`
 **Skills**: `getInstalledSkills`
+**Webhooks**: `getErrors`, `getWebhookEvents`, `triggerWebhook`
+
+Core utilities: `invokeTool`, `chatCompletions`, `getPrimarySessionKey`, `isPrivateUrl`
 
 All functions fail silently (return empty arrays/objects) when the gateway is unreachable. API routes return 502 with a message.
 
