@@ -367,16 +367,17 @@ function PureMultimodalInput({
             />
           </PromptInputTools>
 
-          {(status === "submitted" || status === "streaming") && (
+          {status === "submitted" || status === "streaming" ? (
             <StopButton setMessages={setMessages} stop={stop} />
+          ) : (
+            <PromptInputSubmit
+              className="size-8 rounded-full bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
+              data-testid="send-button"
+              disabled={!input.trim() || uploadQueue.length > 0}
+            >
+              <ArrowUpIcon size={14} />
+            </PromptInputSubmit>
           )}
-          <PromptInputSubmit
-            className="size-8 rounded-full bg-primary text-primary-foreground transition-colors duration-200 hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
-            data-testid="send-button"
-            disabled={!input.trim() || uploadQueue.length > 0}
-          >
-            <ArrowUpIcon size={14} />
-          </PromptInputSubmit>
         </PromptInputToolbar>
       </PromptInput>
     </div>
@@ -445,7 +446,7 @@ function PureStopButton({
 }) {
   return (
     <Button
-      className="size-7 rounded-full bg-foreground p-1 text-background transition-colors duration-200 hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
+      className="size-8 rounded-full bg-foreground p-1 text-background transition-colors duration-200 hover:bg-foreground/90 disabled:bg-muted disabled:text-muted-foreground"
       data-testid="stop-button"
       onClick={(event) => {
         event.preventDefault();
