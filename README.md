@@ -68,6 +68,62 @@ pnpm dev
 
 App runs on [localhost:3000](http://localhost:3000).
 
+## Connecting your gateway
+
+ClawBoard needs to reach your OpenClaw gateway over the internet. If your gateway runs on a local machine or private server, you can use [Tailscale Funnel](https://tailscale.com/kb/1223/funnel) to securely expose it with HTTPS — no port forwarding or public IP required.
+
+### 1. Install Tailscale on your gateway server
+
+```bash
+curl -fsSL https://tailscale.com/install.sh | sh
+tailscale up
+```
+
+### 2. Enable Funnel in your Tailscale ACL policy
+
+Go to your [Tailscale Access Controls](https://login.tailscale.com/admin/acls), switch to the **JSON editor**, and add the following `nodeAttrs` block:
+
+```json
+"nodeAttrs": [
+  {
+    "target": ["autogroup:member"],
+    "attr": ["funnel"]
+  }
+]
+```
+
+Save the policy.
+
+### 3. Start the funnel
+
+```bash
+# First-time setup: cycle the connection to trigger public DNS zone creation
+tailscale down && sleep 15 && tailscale up && sleep 10
+
+# Expose your gateway on HTTPS (runs in the background)
+tailscale funnel --bg 18789
+```
+
+Verify it's working:
+
+```bash
+dig +short <your-machine>.ts.net @8.8.8.8
+# Should return a Tailscale relay IP
+```
+
+### 4. Configure ClawBoard
+
+Open **Settings** in ClawBoard and enter:
+
+- **Gateway URL**: `https://<your-machine>.ts.net`
+- **Gateway Token**: your gateway's access token
+
+That's it — ClawBoard will connect to your agent through the secure tunnel.
+
+### Security
+
+The gateway URL is publicly reachable via Funnel, but all API endpoints are protected by your access token. Every request ClawBoard sends includes the token as an `Authorization: Bearer` header. Requests without a valid token are rejected by the gateway.
+
 ## How it works
 
 The dashboard lives in a sidebar panel alongside the chat. Each tab is a client component that fetches from `/api/openclaw/*` routes. Those routes authenticate via NextAuth, then call functions from `lib/openclaw/client.ts`, which talks to the OpenClaw gateway using its `/tools/invoke` endpoint.
