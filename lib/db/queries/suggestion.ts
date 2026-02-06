@@ -3,7 +3,7 @@ import "server-only";
 import { eq } from "drizzle-orm";
 import { ChatSDKError } from "../../errors";
 import { type Suggestion, suggestion } from "../schema";
-import { db } from "./shared";
+import { db } from "./connection";
 
 export async function saveSuggestions({
   suggestions,

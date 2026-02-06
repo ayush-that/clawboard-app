@@ -4,7 +4,7 @@ import { and, desc, eq, gt, inArray, lt, type SQL } from "drizzle-orm";
 import type { VisibilityType } from "@/components/visibility-selector";
 import { ChatSDKError } from "../../errors";
 import { type Chat, chat, message, stream, vote } from "../schema";
-import { db } from "./shared";
+import { db } from "./connection";
 
 export async function saveChat({
   id,

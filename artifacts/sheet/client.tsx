@@ -1,18 +1,18 @@
 import dynamic from "next/dynamic";
 import { parse, unparse } from "papaparse";
 import { toast } from "sonner";
-import { Artifact } from "@/components/create-artifact";
+import { Artifact } from "@/components/artifact/create-artifact";
 import {
   CopyIcon,
   LineChartIcon,
   RedoIcon,
   SparklesIcon,
   UndoIcon,
-} from "@/components/icons";
+} from "@/lib/icons";
 
 const SpreadsheetEditor = dynamic(
   () =>
-    import("@/components/sheet-editor").then((m) => ({
+    import("@/components/editor/sheet-editor").then((m) => ({
       default: m.SpreadsheetEditor,
     })),
   { ssr: false }

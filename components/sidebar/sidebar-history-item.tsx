@@ -10,7 +10,7 @@ import {
   MoreHorizontalIcon,
   ShareIcon,
   TrashIcon,
-} from "./icons";
+} from "@/lib/icons";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,12 +20,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "./ui/dropdown-menu";
+} from "../ui/dropdown-menu";
 import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 
 const PureChatItem = ({
   chat,

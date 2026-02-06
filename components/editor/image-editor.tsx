@@ -1,5 +1,5 @@
+import { LoaderIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
-import { LoaderIcon } from "./icons";
 
 type ImageEditorProps = {
   title: string;

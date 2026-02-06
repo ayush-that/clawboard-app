@@ -4,7 +4,7 @@ import { Fragment } from "react";
 import { Button } from "@/components/ui/button";
 import { DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { HoverCardTrigger } from "@/components/ui/hover-card";
-import { ImageIcon, PaperclipIcon, XIcon } from "@/lib/hugeicons";
+import { ImageIcon, PaperclipIcon, XIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { usePromptInputAttachments } from "./context";
 import {

@@ -13,7 +13,7 @@ import {
   PlusIcon,
   SquareIcon,
   XIcon,
-} from "@/lib/hugeicons";
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { PromptInputButton } from "./layout";
 import type {

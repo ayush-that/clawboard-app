@@ -14,7 +14,7 @@ import {
 } from "react";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { ChatHeader } from "@/components/chat-header";
+import { ChatHeader } from "@/components/chat/chat-header";
 import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
@@ -26,14 +26,14 @@ import {
   generateUUID,
   getTextFromMessage,
 } from "@/lib/utils";
-import { Artifact } from "./artifact";
-import { useDataStreamSetter } from "./data-stream-provider";
+import { Artifact } from "../artifact/artifact";
+import { useDataStreamSetter } from "../data-stream-provider";
+import { getChatHistoryPaginationKey } from "../sidebar/sidebar-history";
+import { useTamboRuntime } from "../tambo-wrapper";
+import { toast } from "../toast";
+import type { VisibilityType } from "../visibility-selector";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
-import { getChatHistoryPaginationKey } from "./sidebar-history";
-import { useTamboRuntime } from "./tambo-wrapper";
-import { toast } from "./toast";
-import type { VisibilityType } from "./visibility-selector";
 
 export function Chat({
   id,

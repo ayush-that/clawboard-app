@@ -12,14 +12,14 @@ import {
 import useSWR from "swr";
 import { useArtifact } from "@/hooks/use-artifact";
 import type { Document } from "@/lib/db/schema";
+import { FileIcon, FullscreenIcon, ImageIcon, LoaderIcon } from "@/lib/icons";
 import { cn, fetcher } from "@/lib/utils";
+import { CodeEditor } from "../editor/code-editor";
+import { ImageEditor } from "../editor/image-editor";
+import { SpreadsheetEditor } from "../editor/sheet-editor";
+import { Editor } from "../editor/text-editor";
 import type { ArtifactKind, UIArtifact } from "./artifact";
-import { CodeEditor } from "./code-editor";
 import { DocumentToolCall, DocumentToolResult } from "./document";
-import { FileIcon, FullscreenIcon, ImageIcon, LoaderIcon } from "./icons";
-import { ImageEditor } from "./image-editor";
-import { SpreadsheetEditor } from "./sheet-editor";
-import { Editor } from "./text-editor";
 
 type DocumentPreviewProps = {
   isReadonly: boolean;

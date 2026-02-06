@@ -1,7 +1,7 @@
 import { memo } from "react";
+import { PencilEditIcon } from "@/lib/icons";
 import type { ChatMessage } from "@/lib/types";
-import { Action, Actions } from "./elements/actions";
-import { PencilEditIcon } from "./icons";
+import { Action, Actions } from "../elements/actions";
 
 export function PureMessageActions({
   message,

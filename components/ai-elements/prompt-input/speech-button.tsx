@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MicIcon } from "@/lib/hugeicons";
+import { MicIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { PromptInputButton } from "./layout";
 import type { PromptInputSpeechButtonProps, SpeechRecognition } from "./types";

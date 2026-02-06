@@ -2,7 +2,7 @@ import "server-only";
 
 import { ChatSDKError } from "../../errors";
 import { stream } from "../schema";
-import { db } from "./shared";
+import { db } from "./connection";
 
 export async function createStreamId({
   streamId,

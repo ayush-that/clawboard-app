@@ -7,9 +7,9 @@ import {
   useState,
 } from "react";
 import { useArtifactSelector } from "@/hooks/use-artifact";
+import { CrossSmallIcon, TerminalWindowIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Loader } from "./elements/loader";
-import { CrossSmallIcon, TerminalWindowIcon } from "./icons";
 import { Button } from "./ui/button";
 
 export type ConsoleOutputContent = {

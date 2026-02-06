@@ -17,7 +17,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronsUpDownIcon } from "@/lib/hugeicons";
+import { ChevronsUpDownIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Shimmer } from "./shimmer";
 

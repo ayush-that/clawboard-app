@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { WarningIcon } from "../icons";
+import { WarningIcon } from "@/lib/icons";
 
 type ApprovalRequest = {
   id: string;

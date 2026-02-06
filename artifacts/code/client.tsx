@@ -1,11 +1,11 @@
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
+import { Artifact } from "@/components/artifact/create-artifact";
 import {
   Console,
   type ConsoleOutput,
   type ConsoleOutputContent,
 } from "@/components/console";
-import { Artifact } from "@/components/create-artifact";
 import {
   CopyIcon,
   LogsIcon,
@@ -13,12 +13,12 @@ import {
   PlayIcon,
   RedoIcon,
   UndoIcon,
-} from "@/components/icons";
+} from "@/lib/icons";
 import { generateUUID } from "@/lib/utils";
 
 const CodeEditor = dynamic(
   () =>
-    import("@/components/code-editor").then((m) => ({
+    import("@/components/editor/code-editor").then((m) => ({
       default: m.CodeEditor,
     })),
   { ssr: false }

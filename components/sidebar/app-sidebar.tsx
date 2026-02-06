@@ -8,13 +8,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useSWRConfig } from "swr";
 import { unstable_serialize } from "swr/infinite";
-import { PlusIcon, TrashIcon } from "@/components/icons";
-import { SidebarDashboardNav } from "@/components/sidebar-dashboard-nav";
+import { SidebarDashboardNav } from "@/components/sidebar/sidebar-dashboard-nav";
 import {
   getChatHistoryPaginationKey,
   SidebarHistory,
-} from "@/components/sidebar-history";
-import { SidebarUserNav } from "@/components/sidebar-user-nav";
+} from "@/components/sidebar/sidebar-history";
+import { SidebarUserNav } from "@/components/sidebar/sidebar-user-nav";
 import { Button } from "@/components/ui/button";
 import {
   Sidebar,
@@ -25,6 +24,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useActiveView } from "@/lib/contexts/active-view-context";
+import { PlusIcon, TrashIcon } from "@/lib/icons";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,8 +34,8 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "./ui/alert-dialog";
-import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+} from "../ui/alert-dialog";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 export function AppSidebar({ user }: { user: User | undefined }) {
   const router = useRouter();

@@ -14,7 +14,7 @@ import {
   ChevronDownIcon,
   ExternalLinkIcon,
   MessageCircleIcon,
-} from "@/lib/hugeicons";
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 const providers = {

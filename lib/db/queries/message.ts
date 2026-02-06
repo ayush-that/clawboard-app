@@ -3,7 +3,7 @@ import "server-only";
 import { and, asc, count, eq, gte, inArray } from "drizzle-orm";
 import { ChatSDKError } from "../../errors";
 import { chat, type DBMessage, message, vote } from "../schema";
-import { db } from "./shared";
+import { db } from "./connection";
 
 export async function saveMessages({ messages }: { messages: DBMessage[] }) {
   try {

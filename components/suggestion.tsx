@@ -5,9 +5,9 @@ import { useState } from "react";
 import { useWindowSize } from "usehooks-ts";
 
 import type { UISuggestion } from "@/lib/editor/suggestions";
+import { CrossIcon, MessageIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
-import type { ArtifactKind } from "./artifact";
-import { CrossIcon, MessageIcon } from "./icons";
+import type { ArtifactKind } from "./artifact/artifact";
 import { Button } from "./ui/button";
 
 export const Suggestion = ({

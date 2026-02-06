@@ -20,14 +20,14 @@ import { useArtifact } from "@/hooks/use-artifact";
 import type { Document } from "@/lib/db/schema";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { fetcher } from "@/lib/utils";
+import { MultimodalInput } from "../chat/multimodal-input";
+import { Toolbar } from "../toolbar";
+import { useSidebar } from "../ui/sidebar";
+import { VersionFooter } from "../version-footer";
+import type { VisibilityType } from "../visibility-selector";
 import { ArtifactActions } from "./artifact-actions";
 import { ArtifactCloseButton } from "./artifact-close-button";
 import { ArtifactMessages } from "./artifact-messages";
-import { MultimodalInput } from "./multimodal-input";
-import { Toolbar } from "./toolbar";
-import { useSidebar } from "./ui/sidebar";
-import { VersionFooter } from "./version-footer";
-import type { VisibilityType } from "./visibility-selector";
 
 export const artifactDefinitions = [
   textArtifact,

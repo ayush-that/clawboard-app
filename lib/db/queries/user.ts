@@ -8,7 +8,7 @@ import {
 import { ChatSDKError } from "../../errors";
 import { type User, user, userSettings } from "../schema";
 import { generateHashedPassword } from "../utils";
-import { db } from "./shared";
+import { db } from "./connection";
 
 export async function getUser(email: string): Promise<User[]> {
   try {

@@ -1,10 +1,10 @@
 import { cookies } from "next/headers";
 import Script from "next/script";
 import { Suspense } from "react";
-import { AppSidebar } from "@/components/app-sidebar";
 import { ExecApprovalOverlay } from "@/components/dashboard/exec-approval-overlay";
+import { MainContentSwitcher } from "@/components/dashboard/main-content-switcher";
 import { DataStreamProvider } from "@/components/data-stream-provider";
-import { MainContentSwitcher } from "@/components/main-content-switcher";
+import { AppSidebar } from "@/components/sidebar/app-sidebar";
 import { TamboWrapper } from "@/components/tambo-wrapper";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { ActiveViewProvider } from "@/lib/contexts/active-view-context";

@@ -16,7 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "@/lib/hugeicons";
+import { Loader2Icon, SendIcon, SquareIcon, XIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type PromptInputProps = HTMLAttributes<HTMLFormElement>;

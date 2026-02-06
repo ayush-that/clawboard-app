@@ -3,8 +3,8 @@ import { AnimatePresence, motion } from "motion/react";
 import { memo } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import type { ChatMessage } from "@/lib/types";
+import { PreviewMessage, ThinkingMessage } from "../chat/message";
 import type { UIArtifact } from "./artifact";
-import { PreviewMessage, ThinkingMessage } from "./message";
 
 type ArtifactMessagesProps = {
   addToolApprovalResponse: UseChatHelpers<ChatMessage>["addToolApprovalResponse"];

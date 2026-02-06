@@ -15,7 +15,7 @@ import {
 } from "react";
 import { toast } from "sonner";
 import { useLocalStorage, useWindowSize } from "usehooks-ts";
-
+import { ArrowUpIcon, PaperclipIcon, StopIcon } from "@/lib/icons";
 import type { Attachment, ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import {
@@ -24,12 +24,11 @@ import {
   PromptInputTextarea,
   PromptInputToolbar,
   PromptInputTools,
-} from "./elements/prompt-input";
-import { ArrowUpIcon, PaperclipIcon, StopIcon } from "./icons";
-import { PreviewAttachment } from "./preview-attachment";
+} from "../elements/prompt-input";
+import { PreviewAttachment } from "../preview-attachment";
+import { Button } from "../ui/button";
+import type { VisibilityType } from "../visibility-selector";
 import { SuggestedActions } from "./suggested-actions";
-import { Button } from "./ui/button";
-import type { VisibilityType } from "./visibility-selector";
 
 function PureMultimodalInput({
   chatId,

@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { ChevronDownIcon, SearchIcon } from "@/lib/hugeicons";
+import { ChevronDownIcon, SearchIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type TaskItemFileProps = ComponentProps<"div">;

@@ -23,11 +23,11 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ArrowUpIcon, StopIcon, SummarizeIcon } from "@/lib/icons";
 import type { ChatMessage } from "@/lib/types";
 import { cn } from "@/lib/utils";
-import { type ArtifactKind, artifactDefinitions } from "./artifact";
-import type { ArtifactToolbarItem } from "./create-artifact";
-import { ArrowUpIcon, StopIcon, SummarizeIcon } from "./icons";
+import { type ArtifactKind, artifactDefinitions } from "./artifact/artifact";
+import type { ArtifactToolbarItem } from "./artifact/create-artifact";
 
 type ToolProps = {
   description: string;

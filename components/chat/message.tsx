@@ -1,25 +1,25 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
 import { memo, type ReactNode, useState } from "react";
+import { SparklesIcon } from "@/lib/icons";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
-import { DocumentToolResult } from "./document";
-import { DocumentPreview } from "./document-preview";
-import { MessageContent } from "./elements/message";
-import { Response } from "./elements/response";
+import { DocumentToolResult } from "../artifact/document";
+import { DocumentPreview } from "../artifact/document-preview";
+import { MessageContent } from "../elements/message";
+import { Response } from "../elements/response";
 import {
   Tool,
   ToolContent,
   ToolHeader,
   ToolInput,
   ToolOutput,
-} from "./elements/tool";
-import { SparklesIcon } from "./icons";
+} from "../elements/tool";
+import { PreviewAttachment } from "../preview-attachment";
+import { Weather } from "../weather";
 import { MessageActions } from "./message-actions";
 import { MessageEditor } from "./message-editor";
 import { MessageReasoning } from "./message-reasoning";
-import { PreviewAttachment } from "./preview-attachment";
-import { Weather } from "./weather";
 
 const PurePreviewMessage = ({
   addToolApprovalResponse,
@@ -54,7 +54,11 @@ const PurePreviewMessage = ({
       data-role={message.role}
       data-testid={`message-${message.role}`}
     >
-      <div className="flex w-full items-start justify-start gap-2 md:gap-3">
+      <div
+        className={cn("flex w-full items-start gap-2 md:gap-3", {
+          "justify-end": message.role === "user" && mode !== "edit",
+        })}
+      >
         {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
             <SparklesIcon size={14} />

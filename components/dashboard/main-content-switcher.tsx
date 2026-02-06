@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
 import { useActiveView } from "@/lib/contexts/active-view-context";
-import { DashboardPanelView } from "./dashboard-panel-view";
+import { DashboardPanelView } from "./panel-view";
 
 export const MainContentSwitcher = ({ children }: { children: ReactNode }) => {
   const { isDashboard, setChat } = useActiveView();

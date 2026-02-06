@@ -1,10 +1,10 @@
 import "server-only";
 
 import { and, asc, desc, eq, gt } from "drizzle-orm";
-import type { ArtifactKind } from "@/components/artifact";
+import type { ArtifactKind } from "@/components/artifact/artifact";
 import { ChatSDKError } from "../../errors";
 import { document, suggestion } from "../schema";
-import { db } from "./shared";
+import { db } from "./connection";
 
 export async function saveDocument({
   id,

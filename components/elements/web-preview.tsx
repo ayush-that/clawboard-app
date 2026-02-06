@@ -15,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ChevronDownIcon } from "@/lib/hugeicons";
+import { ChevronDownIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type WebPreviewContextValue = {

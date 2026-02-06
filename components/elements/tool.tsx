@@ -15,7 +15,7 @@ import {
   ClockIcon,
   WrenchIcon,
   XCircleIcon,
-} from "@/lib/hugeicons";
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type ToolProps = ComponentProps<typeof Collapsible>;

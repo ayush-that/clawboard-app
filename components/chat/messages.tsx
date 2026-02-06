@@ -2,7 +2,7 @@ import type { UseChatHelpers } from "@ai-sdk/react";
 import equal from "fast-deep-equal";
 import { memo, type ReactNode } from "react";
 import { useMessages } from "@/hooks/use-messages";
-import { ArrowDownIcon } from "@/lib/hugeicons";
+import { ArrowDownIcon } from "@/lib/icons";
 import type { ChatMessage } from "@/lib/types";
 import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";

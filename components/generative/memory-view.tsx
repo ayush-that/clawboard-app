@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTimeAgo } from "@/lib/format-utils";
 
 type MemoryViewProps = {
   memories: Array<{
@@ -11,19 +12,6 @@ type MemoryViewProps = {
     relevance: number;
   }>;
   query: string;
-};
-
-const formatTimeAgo = (isoDate: string): string => {
-  const diff = Date.now() - new Date(isoDate).getTime();
-  const hours = Math.floor(diff / 3_600_000);
-  if (hours < 1) {
-    return "< 1h ago";
-  }
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
-  const days = Math.floor(hours / 24);
-  return `${days}d ago`;
 };
 
 const RelevanceBar = ({ value }: { value: number }) => (

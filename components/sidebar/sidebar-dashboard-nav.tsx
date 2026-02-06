@@ -21,7 +21,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "./ui/sidebar";
+} from "../ui/sidebar";
 
 const navItems: Array<{ name: PanelName; label: string; icon: Icon }> = [
   { name: "sessions", label: "Sessions", icon: ChatCircle },

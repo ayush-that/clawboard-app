@@ -8,7 +8,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { BrainIcon, ChevronDownIcon } from "@/lib/hugeicons";
+import { BrainIcon, ChevronDownIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 import { Response } from "./response";
 

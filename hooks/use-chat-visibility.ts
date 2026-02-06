@@ -7,7 +7,7 @@ import { updateChatVisibility } from "@/app/(chat)/actions";
 import {
   type ChatHistory,
   getChatHistoryPaginationKey,
-} from "@/components/sidebar-history";
+} from "@/components/sidebar/sidebar-history";
 import type { VisibilityType } from "@/components/visibility-selector";
 
 export function useChatVisibility({

@@ -8,7 +8,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { type IconComponent, XIcon } from "@/lib/hugeicons";
+import { type IconComponent, XIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type ArtifactProps = HTMLAttributes<HTMLDivElement>;

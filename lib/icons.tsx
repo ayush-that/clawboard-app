@@ -4,10 +4,14 @@ import type {
 } from "@phosphor-icons/react";
 import {
   ArrowBendDownLeft,
+  ArrowClockwise,
+  ArrowCounterClockwise,
   ArrowDown,
   ArrowLeft,
   ArrowRight,
   ArrowSquareOut,
+  ArrowsOut,
+  ArrowUp,
   BookmarkSimple,
   BookOpen,
   Brain,
@@ -16,20 +20,40 @@ import {
   CaretRight,
   CaretUp,
   CaretUpDown,
+  ChartLine,
   ChatCircle,
   CheckCircle,
   Circle,
   Clock,
+  ClockCounterClockwise,
+  Copy,
+  DotsThree,
+  File,
+  Globe,
   Image,
+  ListDashes,
+  Lock,
   MagnifyingGlass,
   Microphone,
   Paperclip,
   PaperPlaneTilt,
+  Path,
+  Pen,
+  PencilSimple,
   Check as PhosphorCheck,
+  Play,
   Plus,
+  ShareNetwork,
   SidebarSimple,
+  Sparkle,
   SpinnerGap,
   Square,
+  Stop,
+  Terminal,
+  TerminalWindow,
+  TextAlignLeft,
+  Trash,
+  Warning,
   Wrench,
   X,
   XCircle,
@@ -58,8 +82,79 @@ const withDefaultSize = (PhosphorIcon: Icon, displayName: string): Icon => {
   return Wrapped as unknown as Icon;
 };
 
+const withDefaultSizeAndWeight = (
+  PhosphorIcon: Icon,
+  weight: PhosphorIconProps["weight"],
+  displayName: string
+): Icon => {
+  const Wrapped = (props: PhosphorIconProps) => (
+    <PhosphorIcon size={16} weight={weight} {...props} />
+  );
+  Wrapped.displayName = displayName;
+  return Wrapped as unknown as Icon;
+};
+
 // ---------------------------------------------------------------------------
-// Exported icons — named to match existing imports for zero consumer changes
+// From components/icons.tsx — application-level icons
+// ---------------------------------------------------------------------------
+
+export const FileIcon = withDefaultSize(File, "FileIcon");
+export const LoaderIcon = withDefaultSize(SpinnerGap, "LoaderIcon");
+export const PencilEditIcon = withDefaultSize(PencilSimple, "PencilEditIcon");
+export const TrashIcon = withDefaultSize(Trash, "TrashIcon");
+export const ArrowUpIcon = withDefaultSize(ArrowUp, "ArrowUpIcon");
+export const StopIcon = withDefaultSizeAndWeight(Stop, "fill", "StopIcon");
+export const PaperclipIcon = withDefaultSize(Paperclip, "PaperclipIcon");
+export const MoreHorizontalIcon = withDefaultSize(
+  DotsThree,
+  "MoreHorizontalIcon"
+);
+export const MessageIcon = withDefaultSize(ChatCircle, "MessageIcon");
+export const CrossIcon = withDefaultSize(X, "CrossIcon");
+export const CrossSmallIcon = withDefaultSize(X, "CrossSmallIcon");
+export const UndoIcon = withDefaultSize(ArrowCounterClockwise, "UndoIcon");
+export const RedoIcon = withDefaultSize(ArrowClockwise, "RedoIcon");
+export const ChevronDownIcon = withDefaultSize(CaretDown, "ChevronDownIcon");
+export const PenIcon = withDefaultSize(Pen, "PenIcon");
+export const SummarizeIcon = withDefaultSize(TextAlignLeft, "SummarizeIcon");
+export const SidebarLeftIcon = withDefaultSize(
+  SidebarSimple,
+  "SidebarLeftIcon"
+);
+export const PlusIcon = withDefaultSize(Plus, "PlusIcon");
+export const CopyIcon = withDefaultSize(Copy, "CopyIcon");
+export const SparklesIcon = withDefaultSize(Sparkle, "SparklesIcon");
+export const CheckCircleFillIcon = withDefaultSizeAndWeight(
+  CheckCircle,
+  "fill",
+  "CheckCircleFillIcon"
+);
+export const GlobeIcon = withDefaultSize(Globe, "GlobeIcon");
+export const LockIcon = withDefaultSize(Lock, "LockIcon");
+export const ShareIcon = withDefaultSize(ShareNetwork, "ShareIcon");
+export const PlayIcon = withDefaultSizeAndWeight(Play, "fill", "PlayIcon");
+export const TerminalWindowIcon = withDefaultSize(
+  TerminalWindow,
+  "TerminalWindowIcon"
+);
+export const TerminalIcon = withDefaultSize(Terminal, "TerminalIcon");
+export const ClockRewind = withDefaultSize(
+  ClockCounterClockwise,
+  "ClockRewind"
+);
+export const LogsIcon = withDefaultSize(ListDashes, "LogsIcon");
+export const ImageIcon = withDefaultSize(Image, "ImageIcon");
+export const FullscreenIcon = withDefaultSize(ArrowsOut, "FullscreenIcon");
+export const LineChartIcon = withDefaultSize(ChartLine, "LineChartIcon");
+export const WarningIcon = withDefaultSizeAndWeight(
+  Warning,
+  "fill",
+  "WarningIcon"
+);
+export const RouteIcon = withDefaultSize(Path, "RouteIcon");
+
+// ---------------------------------------------------------------------------
+// From lib/hugeicons.tsx — UI-level icons
 // ---------------------------------------------------------------------------
 
 // Close / dismiss
@@ -84,10 +179,7 @@ export {
 };
 
 const WrappedChevronDown = withDefaultSize(CaretDown, "ChevronDown");
-export {
-  WrappedChevronDown as ChevronDown,
-  WrappedChevronDown as ChevronDownIcon,
-};
+export { WrappedChevronDown as ChevronDown };
 
 export const ChevronUp = withDefaultSize(CaretUp, "ChevronUp");
 export const ChevronLeft = withDefaultSize(CaretLeft, "ChevronLeft");
@@ -139,25 +231,16 @@ const DotComponent = (props: PhosphorIconProps) => (
 DotComponent.displayName = "DotIcon";
 export const DotIcon = DotComponent as unknown as Icon;
 
-// Paperclip / Attachment
-export const PaperclipIcon = withDefaultSize(Paperclip, "PaperclipIcon");
-
 // Submit / Enter
 export const CornerDownLeftIcon = withDefaultSize(
   ArrowBendDownLeft,
   "CornerDownLeftIcon"
 );
 
-// Image
-export const ImageIcon = withDefaultSize(Image, "ImageIcon");
-
 // Microphone
 export const MicIcon = withDefaultSize(Microphone, "MicIcon");
 
-// Plus
-export const PlusIcon = withDefaultSize(Plus, "PlusIcon");
-
-// Loader / spinner
+// Loader / spinner (alias)
 export const Loader2Icon = withDefaultSize(SpinnerGap, "Loader2Icon");
 
 // Square / Stop
@@ -172,7 +255,7 @@ export const ExternalLinkIcon = withDefaultSize(
   "ExternalLinkIcon"
 );
 
-// Message / Chat
+// Message / Chat (alias)
 export const MessageCircleIcon = withDefaultSize(
   ChatCircle,
   "MessageCircleIcon"

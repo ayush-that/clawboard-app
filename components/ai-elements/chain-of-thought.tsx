@@ -14,7 +14,7 @@ import {
   ChevronDownIcon,
   DotIcon,
   type IconComponent,
-} from "@/lib/hugeicons";
+} from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 type ChainOfThoughtContextValue = {

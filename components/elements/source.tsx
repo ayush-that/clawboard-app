@@ -6,7 +6,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { BookIcon, ChevronDownIcon } from "@/lib/hugeicons";
+import { BookIcon, ChevronDownIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type SourcesProps = ComponentProps<"div">;

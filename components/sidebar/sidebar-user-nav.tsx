@@ -16,8 +16,8 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
-import { ChevronUp } from "@/lib/hugeicons";
-import { toast } from "./toast";
+import { ChevronUp } from "@/lib/icons";
+import { toast } from "../toast";
 
 export function SidebarUserNav({ user }: { user: User }) {
   const { status } = useSession();

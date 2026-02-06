@@ -8,7 +8,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ChevronDownIcon, PaperclipIcon } from "@/lib/hugeicons";
+import { ChevronDownIcon, PaperclipIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type QueueMessagePart = {

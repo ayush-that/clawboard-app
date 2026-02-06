@@ -8,7 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { BookmarkIcon, type IconProps } from "@/lib/hugeicons";
+import { BookmarkIcon, type IconProps } from "@/lib/icons";
 import { cn } from "@/lib/utils";
 
 export type CheckpointProps = HTMLAttributes<HTMLDivElement>;

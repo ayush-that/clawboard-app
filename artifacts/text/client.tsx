@@ -1,6 +1,6 @@
 import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { Artifact } from "@/components/create-artifact";
+import { Artifact } from "@/components/artifact/create-artifact";
 import {
   ClockRewind,
   CopyIcon,
@@ -8,15 +8,21 @@ import {
   PenIcon,
   RedoIcon,
   UndoIcon,
-} from "@/components/icons";
+} from "@/lib/icons";
 
 const DiffView = dynamic(
-  () => import("@/components/diffview").then((m) => ({ default: m.DiffView })),
+  () =>
+    import("@/components/editor/diffview").then((m) => ({
+      default: m.DiffView,
+    })),
   { ssr: false }
 );
 
 const Editor = dynamic(
-  () => import("@/components/text-editor").then((m) => ({ default: m.Editor })),
+  () =>
+    import("@/components/editor/text-editor").then((m) => ({
+      default: m.Editor,
+    })),
   { ssr: false }
 );
 

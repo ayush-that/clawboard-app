@@ -2,18 +2,12 @@
 
 import type { ReactNode } from "react";
 import { useCallback, useEffect, useState } from "react";
-import {
-  GlobeIcon,
-  MessageIcon,
-  RouteIcon,
-  TerminalIcon,
-} from "@/components/icons";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-
 import { Textarea } from "@/components/ui/textarea";
+import { GlobeIcon, MessageIcon, RouteIcon, TerminalIcon } from "@/lib/icons";
 
 type ChannelItem = {
   name: string;

@@ -2,8 +2,8 @@
 
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { toast as sonnerToast } from "sonner";
+import { CheckCircleFillIcon, WarningIcon } from "@/lib/icons";
 import { cn } from "@/lib/utils";
-import { CheckCircleFillIcon, WarningIcon } from "./icons";
 
 const iconsByType: Record<"success" | "error", ReactNode> = {
   success: <CheckCircleFillIcon />,

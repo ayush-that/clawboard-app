@@ -2,6 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { formatTimeAgo } from "@/lib/format-utils";
 
 type ErrorReportProps = {
   errors: Array<{
@@ -20,22 +21,6 @@ const severityConfig: Record<string, { color: string; bg: string }> = {
     bg: "bg-yellow-500/20 border-yellow-500/30",
   },
   info: { color: "text-blue-400", bg: "bg-blue-500/20 border-blue-500/30" },
-};
-
-const formatTimeAgo = (isoDate: string): string => {
-  const diff = Date.now() - new Date(isoDate).getTime();
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) {
-    return "just now";
-  }
-  if (minutes < 60) {
-    return `${minutes}m ago`;
-  }
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) {
-    return `${hours}h ago`;
-  }
-  return `${Math.floor(hours / 24)}d ago`;
 };
 
 export const ErrorReport = ({ errors = [] }: ErrorReportProps) => {
