@@ -64,6 +64,23 @@ export function getDocumentTimestampByIndex(
   return documents[index].createdAt;
 }
 
+const MEDIA_MARKER_RE =
+  /(?:\*{0,2}MEDIA:?\*{0,2}|(?:image|file)\s+(?:has\s+been\s+)?saved\s+to:?)\s+`?(\.?\/[^\s`]+\.(?:png|jpe?g|gif|webp|svg))`?/gi;
+
+export function extractMediaPaths(text: string): string[] {
+  const paths: string[] = [];
+  let match: RegExpExecArray | null = null;
+  const re = new RegExp(MEDIA_MARKER_RE.source, MEDIA_MARKER_RE.flags);
+  while ((match = re.exec(text)) !== null) {
+    paths.push(match[1]);
+  }
+  return paths;
+}
+
+export function stripMediaMarkers(text: string): string {
+  return text.replace(MEDIA_MARKER_RE, '').replace(/\n{3,}/g, '\n\n');
+}
+
 export function sanitizeText(text: string) {
   return text.replace('<has_function_call>', '');
 }

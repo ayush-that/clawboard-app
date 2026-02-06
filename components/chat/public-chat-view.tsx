@@ -3,7 +3,12 @@
 import { memo } from "react";
 import { SparklesIcon } from "@/lib/icons";
 import type { ChatMessage } from "@/lib/types";
-import { cn, sanitizeText } from "@/lib/utils";
+import {
+  cn,
+  extractMediaPaths,
+  sanitizeText,
+  stripMediaMarkers,
+} from "@/lib/utils";
 import { MessageContent } from "../elements/message";
 import { Response } from "../elements/response";
 
@@ -76,7 +81,20 @@ function PurePublicMessage({
                     {sanitizeText(part.text)}
                   </span>
                 ) : (
-                  <Response>{sanitizeText(part.text)}</Response>
+                  <>
+                    <Response>
+                      {stripMediaMarkers(sanitizeText(part.text))}
+                    </Response>
+                    {extractMediaPaths(part.text).map((filePath) => (
+                      // biome-ignore lint/performance/noImgElement: proxied binary from gateway, not optimizable
+                      <img
+                        alt="AI generated content"
+                        className="mt-3 max-w-full rounded-lg"
+                        key={filePath}
+                        src={`/api/openclaw/media?path=${encodeURIComponent(filePath)}`}
+                      />
+                    ))}
+                  </>
                 )}
               </MessageContent>
             </div>
