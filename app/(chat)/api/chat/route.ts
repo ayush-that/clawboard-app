@@ -22,7 +22,6 @@ import {
   createStreamId,
   deleteChatById,
   getChatById,
-  getMessageCountByUserId,
   getMessagesByChatId,
   saveChat,
   saveMessages,
@@ -31,6 +30,7 @@ import {
 import type { DBMessage } from "@/lib/db/schema";
 import { ChatSDKError } from "@/lib/errors";
 import { getGatewayConfig } from "@/lib/openclaw/settings";
+import { checkRateLimit } from "@/lib/redis/rate-limiter";
 import type { ChatMessage } from "@/lib/types";
 import { convertToUIMessages, generateUUID } from "@/lib/utils";
 import { generateTitleFromUserMessage } from "../../actions";
@@ -70,12 +70,13 @@ export async function POST(request: Request) {
 
     const userType: UserType = session.user.type;
 
-    const [gwConfig, messageCount, existingChat] = await Promise.all([
+    const [gwConfig, rateLimitResult, existingChat] = await Promise.all([
       getGatewayConfig(session.user.id),
-      getMessageCountByUserId({
-        id: session.user.id,
-        differenceInHours: 24,
-      }),
+      checkRateLimit({
+        key: `chat:${session.user.id}`,
+        limit: entitlementsByUserType[userType].maxMessagesPerDay,
+        windowMs: 24 * 60 * 60 * 1000,
+      }).catch(() => ({ allowed: true, remaining: 1, resetMs: 0 })),
       getChatById({ id }),
     ]);
 
@@ -83,7 +84,7 @@ export async function POST(request: Request) {
       return new ChatSDKError("bad_request:openclaw_config").toResponse();
     }
 
-    if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
+    if (!rateLimitResult.allowed) {
       return new ChatSDKError("rate_limit:chat").toResponse();
     }
 
