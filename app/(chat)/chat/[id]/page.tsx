@@ -19,13 +19,13 @@ export default function Page(props: { params: Promise<{ id: string }> }) {
 
 async function ChatPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const chat = await getChatById({ id });
+
+  // Parallelize independent fetches — chat lookup and auth don't depend on each other
+  const [chat, session] = await Promise.all([getChatById({ id }), auth()]);
 
   if (!chat) {
     return notFound();
   }
-
-  const session = await auth();
 
   // Unauthenticated user viewing a public chat — read-only, no interactive components
   if (!session) {

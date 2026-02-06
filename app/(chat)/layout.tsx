@@ -11,15 +11,33 @@ import { ActiveViewProvider } from "@/lib/contexts/active-view-context";
 import { getUserSettings } from "@/lib/db/queries";
 import { auth } from "../(auth)/auth";
 
+function LayoutSkeleton() {
+  return (
+    <div className="flex h-dvh">
+      <div className="hidden w-[var(--sidebar-width)] shrink-0 border-r border-border bg-sidebar md:block">
+        <div className="flex flex-col gap-4 p-4">
+          <div className="h-8 w-32 animate-pulse rounded-md bg-muted" />
+          <div className="space-y-2">
+            <div className="h-6 w-full animate-pulse rounded bg-muted" />
+            <div className="h-6 w-3/4 animate-pulse rounded bg-muted" />
+            <div className="h-6 w-5/6 animate-pulse rounded bg-muted" />
+          </div>
+        </div>
+      </div>
+      <div className="flex-1" />
+    </div>
+  );
+}
+
 export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Script
         src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"
-        strategy="beforeInteractive"
+        strategy="lazyOnload"
       />
       <DataStreamProvider>
-        <Suspense fallback={null}>
+        <Suspense fallback={<LayoutSkeleton />}>
           <SidebarWrapper>{children}</SidebarWrapper>
         </Suspense>
       </DataStreamProvider>

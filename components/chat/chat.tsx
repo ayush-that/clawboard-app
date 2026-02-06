@@ -1,9 +1,9 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { type TamboThreadMessage, useTamboThread } from "@tambo-ai/react";
 import { DefaultChatTransport } from "ai";
-import { useRouter, useSearchParams } from "next/navigation";
+import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import {
   type Dispatch,
   type ReactNode,
@@ -19,14 +19,14 @@ import { useArtifactSelector } from "@/hooks/use-artifact";
 import { useAutoResume } from "@/hooks/use-auto-resume";
 import { useChatVisibility } from "@/hooks/use-chat-visibility";
 import { ChatSDKError } from "@/lib/errors";
-import { shouldRenderTamboForMessage } from "@/lib/tambo/intent-gate";
 import type { Attachment, ChatMessage } from "@/lib/types";
-import {
-  fetchWithErrorHandlers,
-  generateUUID,
-  getTextFromMessage,
-} from "@/lib/utils";
-import { Artifact } from "../artifact/artifact";
+import { fetchWithErrorHandlers, generateUUID } from "@/lib/utils";
+
+const Artifact = dynamic(
+  () => import("../artifact/artifact").then((m) => ({ default: m.Artifact })),
+  { ssr: false }
+);
+
 import { useDataStreamSetter } from "../data-stream-provider";
 import { getChatHistoryPaginationKey } from "../sidebar/sidebar-history";
 import { useTamboRuntime } from "../tambo-wrapper";
@@ -34,6 +34,14 @@ import { toast } from "../toast";
 import type { VisibilityType } from "../visibility-selector";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
+
+const LazyTamboInlineBridgeEnabled = dynamic(
+  () =>
+    import("./tambo-inline-bridge").then((m) => ({
+      default: m.TamboInlineBridgeEnabled,
+    })),
+  { ssr: false }
+);
 
 export function Chat({
   id,
@@ -52,23 +60,12 @@ export function Chat({
   autoResume: boolean;
   openclawSessionKey?: string | null;
 }) {
-  const router = useRouter();
-
   const { visibilityType } = useChatVisibility({
     chatId: id,
     initialVisibilityType,
   });
 
   const { mutate } = useSWRConfig();
-
-  useEffect(() => {
-    const handlePopState = () => {
-      router.refresh();
-    };
-
-    window.addEventListener("popstate", handlePopState);
-    return () => window.removeEventListener("popstate", handlePopState);
-  }, [router]);
 
   const setDataStream = useDataStreamSetter();
 
@@ -242,19 +239,17 @@ export function Chat({
   );
 }
 
-type TamboInlineBridgeProps = {
+function TamboInlineBridge({
+  chatId,
+  messages,
+  onRenderedComponentsChange,
+}: {
   chatId: string;
   messages: ChatMessage[];
   onRenderedComponentsChange: Dispatch<
     SetStateAction<Record<string, ReactNode>>
   >;
-};
-
-function TamboInlineBridge({
-  chatId,
-  messages,
-  onRenderedComponentsChange,
-}: TamboInlineBridgeProps) {
+}) {
   const { enabled } = useTamboRuntime();
 
   useEffect(() => {
@@ -270,143 +265,10 @@ function TamboInlineBridge({
   }
 
   return (
-    <TamboInlineBridgeEnabled
+    <LazyTamboInlineBridgeEnabled
       chatId={chatId}
       messages={messages}
       onRenderedComponentsChange={onRenderedComponentsChange}
     />
   );
-}
-
-function TamboInlineBridgeEnabled({
-  chatId,
-  messages,
-  onRenderedComponentsChange,
-}: TamboInlineBridgeProps) {
-  const { thread, sendThreadMessage } = useTamboThread();
-  const initializedRef = useRef(false);
-  const handledUserMessageIdsRef = useRef<Set<string>>(new Set());
-
-  useEffect(() => {
-    if (!initializedRef.current) {
-      for (const message of messages) {
-        if (message.role === "user") {
-          handledUserMessageIdsRef.current.add(message.id);
-        }
-      }
-      initializedRef.current = true;
-      return;
-    }
-
-    for (const message of messages) {
-      if (message.role !== "user") {
-        continue;
-      }
-
-      if (handledUserMessageIdsRef.current.has(message.id)) {
-        continue;
-      }
-
-      handledUserMessageIdsRef.current.add(message.id);
-
-      const text = getTextFromMessage(message).trim();
-
-      if (!text || !shouldRenderTamboForMessage(text)) {
-        continue;
-      }
-
-      sendThreadMessage(text, {
-        streamResponse: true,
-        contextKey: `openclaw-chat:${chatId}`,
-        additionalContext: {
-          openclawChatId: chatId,
-          openclawUserMessageId: message.id,
-        },
-      }).catch((error) => {
-        console.warn("Tambo component rendering failed", error);
-        toast({
-          type: "error",
-          description:
-            "Tambo component rendering failed for this message. OpenClaw text still works.",
-        });
-      });
-    }
-  }, [chatId, messages, sendThreadMessage]);
-
-  useEffect(() => {
-    const renderedComponentMap = buildRenderedComponentMap(
-      thread?.messages ?? [],
-      chatId
-    );
-    onRenderedComponentsChange((previous) =>
-      areRenderedMapsEqual(previous, renderedComponentMap)
-        ? previous
-        : renderedComponentMap
-    );
-  }, [chatId, onRenderedComponentsChange, thread?.messages]);
-
-  return null;
-}
-
-function buildRenderedComponentMap(
-  threadMessages: TamboThreadMessage[],
-  openClawChatId: string
-): Record<string, ReactNode> {
-  const renderedComponentMap: Record<string, ReactNode> = {};
-  let currentOpenClawUserMessageId: string | null = null;
-  let currentOpenClawChatContext: string | null = null;
-
-  for (const threadMessage of threadMessages) {
-    if (threadMessage.role === "user") {
-      currentOpenClawUserMessageId = getAdditionalContextString(
-        threadMessage,
-        "openclawUserMessageId"
-      );
-      currentOpenClawChatContext = getAdditionalContextString(
-        threadMessage,
-        "openclawChatId"
-      );
-      continue;
-    }
-
-    if (
-      threadMessage.role === "assistant" &&
-      threadMessage.renderedComponent &&
-      currentOpenClawUserMessageId &&
-      currentOpenClawChatContext === openClawChatId
-    ) {
-      renderedComponentMap[currentOpenClawUserMessageId] =
-        threadMessage.renderedComponent;
-    }
-  }
-
-  return renderedComponentMap;
-}
-
-function getAdditionalContextString(
-  threadMessage: TamboThreadMessage,
-  key: string
-): string | null {
-  const value = threadMessage.additionalContext?.[key];
-  return typeof value === "string" ? value : null;
-}
-
-function areRenderedMapsEqual(
-  previous: Record<string, ReactNode>,
-  next: Record<string, ReactNode>
-): boolean {
-  const previousKeys = Object.keys(previous);
-  const nextKeys = Object.keys(next);
-
-  if (previousKeys.length !== nextKeys.length) {
-    return false;
-  }
-
-  for (const key of previousKeys) {
-    if (previous[key] !== next[key]) {
-      return false;
-    }
-  }
-
-  return true;
 }
