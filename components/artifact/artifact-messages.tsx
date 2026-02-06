@@ -45,6 +45,9 @@ function PureArtifactMessages({
         <PreviewMessage
           addToolApprovalResponse={addToolApprovalResponse}
           chatId={chatId}
+          isGroupedWithPrevious={
+            index > 0 && messages[index - 1].role === message.role
+          }
           isLoading={status === "streaming" && index === messages.length - 1}
           isReadonly={isReadonly}
           key={message.id}

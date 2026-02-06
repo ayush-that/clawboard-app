@@ -26,6 +26,7 @@ const PurePreviewMessage = ({
   chatId,
   message,
   isLoading,
+  isGroupedWithPrevious,
   setMessages,
   regenerate,
   isReadonly,
@@ -36,6 +37,7 @@ const PurePreviewMessage = ({
   chatId: string;
   message: ChatMessage;
   isLoading: boolean;
+  isGroupedWithPrevious: boolean;
   setMessages: UseChatHelpers<ChatMessage>["setMessages"];
   regenerate: UseChatHelpers<ChatMessage>["regenerate"];
   isReadonly: boolean;
@@ -50,7 +52,10 @@ const PurePreviewMessage = ({
 
   return (
     <div
-      className="group/message fade-in w-full animate-in duration-200"
+      className={cn(
+        "group/message fade-in w-full animate-in duration-200",
+        isGroupedWithPrevious && "-mt-3 md:-mt-5"
+      )}
       data-role={message.role}
       data-testid={`message-${message.role}`}
     >
@@ -60,8 +65,15 @@ const PurePreviewMessage = ({
         })}
       >
         {message.role === "assistant" && (
-          <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
-            <SparklesIcon size={14} />
+          <div
+            className={cn(
+              "-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full",
+              isGroupedWithPrevious
+                ? "bg-transparent"
+                : "bg-background ring-1 ring-border"
+            )}
+          >
+            {!isGroupedWithPrevious && <SparklesIcon size={14} />}
           </div>
         )}
 
@@ -357,13 +369,20 @@ const PurePreviewMessage = ({
           ) : null}
 
           {!isReadonly && (
-            <MessageActions
-              chatId={chatId}
-              isLoading={isLoading}
-              key={`action-${message.id}`}
-              message={message}
-              setMode={setMode}
-            />
+            <div
+              className={
+                message.role === "user"
+                  ? "pointer-events-none h-0 overflow-visible group-hover/message:pointer-events-auto"
+                  : undefined
+              }
+            >
+              <MessageActions
+                chatId={chatId}
+                isLoading={isLoading}
+                message={message}
+                setMode={setMode}
+              />
+            </div>
           )}
         </div>
       </div>
@@ -379,6 +398,9 @@ export const PreviewMessage = memo(PurePreviewMessage, (prev, next) => {
     return false;
   }
   if (prev.isReadonly !== next.isReadonly) {
+    return false;
+  }
+  if (prev.isGroupedWithPrevious !== next.isGroupedWithPrevious) {
     return false;
   }
   if (prev.message.parts !== next.message.parts) {
