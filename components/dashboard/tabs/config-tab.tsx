@@ -160,7 +160,6 @@ export const ConfigTab = () => {
         </div>
       </div>
 
-      {/* Model */}
       <Card>
         <CardContent className="p-4">
           <p className="mb-2 text-xs text-muted-foreground">Model</p>
@@ -174,7 +173,6 @@ export const ConfigTab = () => {
         </CardContent>
       </Card>
 
-      {/* Gateway Auth */}
       <Card>
         <CardContent className="p-4">
           <p className="mb-2 text-xs text-muted-foreground">Gateway Auth</p>
@@ -184,7 +182,6 @@ export const ConfigTab = () => {
         </CardContent>
       </Card>
 
-      {/* Channels */}
       {channelNames.length > 0 ? (
         <Card>
           <CardContent className="p-4">
@@ -202,7 +199,6 @@ export const ConfigTab = () => {
         </Card>
       ) : null}
 
-      {/* SOUL.md */}
       <Card>
         <CardContent className="p-4">
           <p className="mb-2 text-xs text-muted-foreground">
@@ -219,7 +215,6 @@ export const ConfigTab = () => {
         </CardContent>
       </Card>
 
-      {/* Raw config */}
       <Card>
         <CardContent className="p-4">
           <button

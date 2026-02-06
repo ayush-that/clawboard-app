@@ -149,7 +149,6 @@ export const LogsTab = () => {
 
   return (
     <div className="mx-auto flex h-[calc(100dvh-var(--spacing-14))] w-full max-w-4xl flex-col p-4 md:p-6">
-      {/* Toolbar */}
       <div className="flex items-center justify-between pb-3">
         <h2 className="text-xl font-semibold">Logs</h2>
         <div className="flex items-center gap-3">
@@ -196,7 +195,6 @@ export const LogsTab = () => {
         </div>
       ) : null}
 
-      {/* Log stream */}
       <div
         className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden rounded-lg border border-border bg-black/20 p-3 text-xs"
         ref={scrollRef}

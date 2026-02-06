@@ -179,7 +179,6 @@ export const ChannelsTab = () => {
 
       {channels.map((ch) => (
         <Card key={ch.name}>
-          {/* Channel header */}
           <button
             className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-muted/30"
             onClick={() => {
@@ -215,7 +214,6 @@ export const ChannelsTab = () => {
             </span>
           </button>
 
-          {/* Expanded editor */}
           {expanded === ch.name ? (
             <div className="px-4 pb-4">
               <Separator className="mb-4" />

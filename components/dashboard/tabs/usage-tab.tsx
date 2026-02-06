@@ -135,7 +135,6 @@ export const UsageTab = () => {
         </div>
       ) : null}
 
-      {/* Summary cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card>
           <CardContent className="p-4">
@@ -161,7 +160,6 @@ export const UsageTab = () => {
         </Card>
       </div>
 
-      {/* Daily costs */}
       {data.dailyCosts.length > 0 ? (
         <Card>
           <CardContent className="p-4">
@@ -200,7 +198,6 @@ export const UsageTab = () => {
         </Card>
       ) : null}
 
-      {/* Sessions */}
       {data.sessions.length > 0 ? (
         <Card>
           <CardContent className="p-4">

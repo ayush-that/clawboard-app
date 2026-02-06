@@ -28,7 +28,6 @@ export const ProConList = ({
       </CardHeader>
       <CardContent>
         <div className="grid gap-4 sm:grid-cols-2">
-          {/* Pros */}
           <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/5 p-4">
             <h4 className="mb-3 flex items-center gap-2 font-semibold text-sm text-emerald-400">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500/20 text-xs">
@@ -50,7 +49,6 @@ export const ProConList = ({
             </ul>
           </div>
 
-          {/* Cons */}
           <div className="rounded-lg border border-red-500/20 bg-red-500/5 p-4">
             <h4 className="mb-3 flex items-center gap-2 font-semibold text-sm text-red-400">
               <span className="flex h-5 w-5 items-center justify-center rounded-full bg-red-500/20 text-xs">
