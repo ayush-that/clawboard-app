@@ -2,7 +2,9 @@ import { getConfig, patchConfig } from "./config";
 import type { GatewaySettings } from "./core";
 import type { ChannelConfig, OpenClawConfig } from "./types";
 
-const extractChannelsFromConfig = (config: OpenClawConfig): ChannelConfig[] => {
+export const extractChannelsFromConfig = (
+  config: OpenClawConfig
+): ChannelConfig[] => {
   const channels: ChannelConfig[] = [];
   const raw = JSON.parse(config.raw) as Record<string, unknown>;
   const channelsSection = raw.channels as Record<string, unknown> | undefined;

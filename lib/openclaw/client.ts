@@ -1,7 +1,11 @@
 // Barrel re-export — all existing imports from '@/lib/openclaw/client' continue to work.
 
 export { getPendingApprovals, resolveApproval } from "./approvals";
-export { getChannels, updateChannel } from "./channels";
+export {
+  extractChannelsFromConfig,
+  getChannels,
+  updateChannel,
+} from "./channels";
 export { extractSkillsFromConfig, getConfig, patchConfig } from "./config";
 export type { GatewaySettings } from "./core";
 export {

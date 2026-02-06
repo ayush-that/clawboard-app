@@ -133,7 +133,7 @@ export const chatCompletions = async (
       messages: [{ role: "user", content: message }],
       stream: false,
     }),
-    signal: AbortSignal.timeout(30_000),
+    signal: AbortSignal.timeout(60_000),
   });
 
   if (!response.ok) {

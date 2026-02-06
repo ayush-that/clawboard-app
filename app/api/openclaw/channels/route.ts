@@ -1,6 +1,10 @@
 import { auth } from "@/app/(auth)/auth";
 import { ChatSDKError } from "@/lib/errors";
-import { getChannels, getConfig, updateChannel } from "@/lib/openclaw/client";
+import {
+  extractChannelsFromConfig,
+  getConfig,
+  updateChannel,
+} from "@/lib/openclaw/client";
 import { getGatewayConfig } from "@/lib/openclaw/settings";
 
 export async function GET() {
@@ -15,10 +19,8 @@ export async function GET() {
   }
 
   try {
-    const [channels, config] = await Promise.all([
-      getChannels(cfg),
-      getConfig(cfg),
-    ]);
+    const config = await getConfig(cfg);
+    const channels = extractChannelsFromConfig(config);
     return Response.json({ channels, hash: config.hash });
   } catch (error) {
     console.error("GET /api/openclaw/channels failed:", error);
