@@ -41,6 +41,17 @@ function PureMessages({
     status,
   });
 
+  const lastMessageId = messages.at(-1)?.id;
+  const visibleMessages = messages.filter((msg, idx) => {
+    if (msg.role !== "assistant") {
+      return true;
+    }
+    if (status === "streaming" && idx === messages.length - 1) {
+      return true;
+    }
+    return hasVisibleContent(msg);
+  });
+
   return (
     <div className="relative flex-1">
       <div
@@ -50,28 +61,26 @@ function PureMessages({
         <div className="mx-auto flex min-w-0 max-w-4xl flex-col gap-4 px-2 py-4 md:gap-6 md:px-4">
           {messages.length === 0 && <Greeting />}
 
-          {messages.map((message, index) => (
+          {visibleMessages.map((message, index) => (
             <PreviewMessage
               addToolApprovalResponse={addToolApprovalResponse}
               chatId={chatId}
               isGroupedWithPrevious={
-                index > 0 && messages[index - 1].role === message.role
+                index > 0 && visibleMessages[index - 1].role === message.role
               }
-              isLoading={
-                status === "streaming" && messages.length - 1 === index
-              }
+              isLoading={status === "streaming" && message.id === lastMessageId}
               isReadonly={isReadonly}
               key={message.id}
               message={message}
               regenerate={regenerate}
               requiresScrollPadding={
-                hasSentMessage && index === messages.length - 1
+                hasSentMessage && index === visibleMessages.length - 1
               }
               setMessages={setMessages}
               tamboRenderedComponent={
                 message.role === "assistant"
                   ? tamboRenderedByUserMessageId[
-                      getNearestUserMessageId(messages, index) ?? ""
+                      getNearestUserMessageId(visibleMessages, index) ?? ""
                     ]
                   : undefined
               }
@@ -105,6 +114,20 @@ function PureMessages({
         <ArrowDownIcon className="size-4" />
       </button>
     </div>
+  );
+}
+
+function hasVisibleContent(msg: ChatMessage): boolean {
+  return (
+    msg.parts?.some((p) => {
+      if (p.type === "text") {
+        return p.text?.trim().length > 0;
+      }
+      if (p.type === "reasoning") {
+        return p.text?.trim().length > 0;
+      }
+      return p.type.startsWith("tool-") || p.type === "file";
+    }) ?? false
   );
 }
 

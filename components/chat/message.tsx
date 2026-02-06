@@ -78,7 +78,7 @@ const PurePreviewMessage = ({
         )}
 
         <div
-          className={cn("flex min-w-0 flex-col", {
+          className={cn("relative flex min-w-0 flex-col", {
             "gap-2 md:gap-4": message.parts?.some(
               (p) => p.type === "text" && p.text?.trim()
             ),
@@ -368,14 +368,8 @@ const PurePreviewMessage = ({
             </div>
           ) : null}
 
-          {!isReadonly && (
-            <div
-              className={
-                message.role === "user"
-                  ? "pointer-events-none h-0 overflow-visible group-hover/message:pointer-events-auto"
-                  : undefined
-              }
-            >
+          {!isReadonly && message.role === "user" && mode !== "edit" && (
+            <div className="absolute right-full top-1/2 mr-1 -translate-y-1/2 opacity-0 transition-opacity group-hover/message:opacity-100">
               <MessageActions
                 chatId={chatId}
                 isLoading={isLoading}
@@ -383,6 +377,14 @@ const PurePreviewMessage = ({
                 setMode={setMode}
               />
             </div>
+          )}
+          {!isReadonly && message.role !== "user" && (
+            <MessageActions
+              chatId={chatId}
+              isLoading={isLoading}
+              message={message}
+              setMode={setMode}
+            />
           )}
         </div>
       </div>
