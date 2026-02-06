@@ -185,21 +185,50 @@ export const getPrimarySessionKey = async (
 
 // --- Chat-based config retrieval (config_get tool doesn't exist in gateway) ---
 
-export const chatConfigGet = async (
-  cfg?: GatewaySettings,
-  sessionKey = "main"
-): Promise<Record<string, unknown>> => {
-  const { response } = await chatCompletions(
-    "Output your full configuration as raw JSON. Include all top-level keys (meta, auth, models, agents, channels, gateway, skills, commands, messages, etc). Only output the JSON object, nothing else — no markdown fences, no explanation.",
-    cfg,
-    sessionKey
-  );
-  // Strip markdown code fences if the agent wrapped the output
-  const cleaned = response
+const extractJson = (text: string): Record<string, unknown> => {
+  // Strip markdown fences
+  let cleaned = text
     .replace(/^```(?:json)?\s*/i, "")
     .replace(/\s*```$/i, "")
     .trim();
-  return JSON.parse(cleaned) as Record<string, unknown>;
+
+  // Try direct parse first
+  try {
+    return JSON.parse(cleaned) as Record<string, unknown>;
+  } catch {
+    // LLM sometimes wraps JSON in explanation — find the first { ... } block
+    const start = cleaned.indexOf("{");
+    const end = cleaned.lastIndexOf("}");
+    if (start !== -1 && end > start) {
+      cleaned = cleaned.slice(start, end + 1);
+      return JSON.parse(cleaned) as Record<string, unknown>;
+    }
+    throw new Error("No valid JSON object found in LLM response");
+  }
+};
+
+export const chatConfigGet = async (
+  cfg?: GatewaySettings,
+  sessionKey = "main",
+  retries = 1
+): Promise<Record<string, unknown>> => {
+  const prompt =
+    "Output your full configuration as a single raw JSON object. All top-level keys: meta, auth, models, agents, channels, gateway, skills, commands, messages, plugins. JSON only, nothing else.";
+
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const { response } = await chatCompletions(prompt, cfg, sessionKey);
+      return extractJson(response);
+    } catch (error) {
+      if (attempt === retries) {
+        throw error;
+      }
+      // Brief pause before retry
+      await new Promise((r) => setTimeout(r, 2000));
+    }
+  }
+
+  throw new Error("chatConfigGet: unreachable");
 };
 
 export const chatConfigPatch = async (

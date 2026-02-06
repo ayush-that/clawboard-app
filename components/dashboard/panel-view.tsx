@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type React from "react";
+import { useEffect } from "react";
 import type { PanelName } from "@/lib/contexts/active-view-context";
 import { useActiveView } from "@/lib/contexts/active-view-context";
 import { SidebarToggle } from "../sidebar/sidebar-toggle";
@@ -87,6 +88,14 @@ const panels: Record<PanelName, React.ComponentType> = {
 
 export const DashboardPanelView = () => {
   const { activePanel } = useActiveView();
+
+  // Warm the server-side config cache on mount so config-dependent tabs
+  // (skills, channels, cron, config) don't each trigger a ~45s LLM call
+  useEffect(() => {
+    fetch("/api/openclaw/config").catch(() => {
+      // Prefetch failure is non-critical — tabs will retry on their own
+    });
+  }, []);
 
   if (!activePanel) {
     return null;
