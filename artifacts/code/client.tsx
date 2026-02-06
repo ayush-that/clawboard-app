@@ -1,5 +1,5 @@
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
-import { CodeEditor } from "@/components/code-editor";
 import {
   Console,
   type ConsoleOutput,
@@ -15,6 +15,14 @@ import {
   UndoIcon,
 } from "@/components/icons";
 import { generateUUID } from "@/lib/utils";
+
+const CodeEditor = dynamic(
+  () =>
+    import("@/components/code-editor").then((m) => ({
+      default: m.CodeEditor,
+    })),
+  { ssr: false }
+);
 
 const OUTPUT_HANDLERS = {
   matplotlib: `

@@ -111,8 +111,13 @@ function PureMultimodalInput({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [adjustHeight, localStorageInput, setInput]);
 
+  const localStorageTimerRef = useRef<ReturnType<typeof setTimeout>>();
   useEffect(() => {
-    setLocalStorageInput(input);
+    clearTimeout(localStorageTimerRef.current);
+    localStorageTimerRef.current = setTimeout(() => {
+      setLocalStorageInput(input);
+    }, 300);
+    return () => clearTimeout(localStorageTimerRef.current);
   }, [input, setLocalStorageInput]);
 
   const handleInput = (event: React.ChangeEvent<HTMLTextAreaElement>) => {

@@ -2,6 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   cacheComponents: true,
+  experimental: {
+    optimizePackageImports: [
+      "@phosphor-icons/react",
+      "recharts",
+      "date-fns",
+      "motion",
+      "@xyflow/react",
+      "radix-ui",
+      "usehooks-ts",
+    ],
+  },
   images: {
     remotePatterns: [
       {

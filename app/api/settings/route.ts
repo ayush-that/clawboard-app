@@ -1,6 +1,7 @@
 import { auth } from "@/app/(auth)/auth";
 import { getUserSettings, saveUserSettings } from "@/lib/db/queries";
 import { ChatSDKError } from "@/lib/errors";
+import { clearGatewayConfigCache } from "@/lib/openclaw/settings";
 
 function normalizeNullableString(value: unknown): string | null {
   if (typeof value !== "string") {
@@ -93,6 +94,7 @@ export async function PATCH(request: Request) {
       openclawGatewayToken: nextGatewayToken,
       tamboApiKey: nextTamboApiKey,
     });
+    clearGatewayConfigCache(session.user.id);
 
     return Response.json({
       success: true,

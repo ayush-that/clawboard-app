@@ -2,7 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import type { ReactNode } from "react";
-import { createContext, useCallback, useContext, useMemo } from "react";
+import { createContext, useCallback, useContext, useMemo, useRef } from "react";
 
 const PANEL_NAMES = [
   "sessions",
@@ -52,22 +52,25 @@ export const ActiveViewProvider = ({ children }: { children: ReactNode }) => {
   const panelParam = searchParams.get("panel");
   const validPanel = isValidPanel(panelParam) ? panelParam : null;
 
+  const searchParamsRef = useRef(searchParams);
+  searchParamsRef.current = searchParams;
+
   const setChat = useCallback(() => {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams(searchParamsRef.current.toString());
     params.delete("panel");
     const qs = params.toString();
     router.replace(qs ? `?${qs}` : window.location.pathname, {
       scroll: false,
     });
-  }, [searchParams, router]);
+  }, [router]);
 
   const setPanel = useCallback(
     (panel: PanelName) => {
-      const params = new URLSearchParams(searchParams.toString());
+      const params = new URLSearchParams(searchParamsRef.current.toString());
       params.set("panel", panel);
       router.replace(`?${params.toString()}`, { scroll: false });
     },
-    [searchParams, router]
+    [router]
   );
 
   const value = useMemo(

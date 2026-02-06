@@ -1,9 +1,8 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
-import { type ReactNode, useState } from "react";
+import { memo, type ReactNode, useState } from "react";
 import type { ChatMessage } from "@/lib/types";
 import { cn, sanitizeText } from "@/lib/utils";
-import { useDataStream } from "./data-stream-provider";
 import { DocumentToolResult } from "./document";
 import { DocumentPreview } from "./document-preview";
 import { MessageContent } from "./elements/message";
@@ -49,20 +48,13 @@ const PurePreviewMessage = ({
     (part) => part.type === "file"
   );
 
-  useDataStream();
-
   return (
     <div
       className="group/message fade-in w-full animate-in duration-200"
       data-role={message.role}
       data-testid={`message-${message.role}`}
     >
-      <div
-        className={cn("flex w-full items-start gap-2 md:gap-3", {
-          "justify-end": message.role === "user" && mode !== "edit",
-          "justify-start": message.role === "assistant",
-        })}
-      >
+      <div className="flex w-full items-start justify-start gap-2 md:gap-3">
         {message.role === "assistant" && (
           <div className="-mt-1 flex size-8 shrink-0 items-center justify-center rounded-full bg-background ring-1 ring-border">
             <SparklesIcon size={14} />
@@ -136,7 +128,7 @@ const PurePreviewMessage = ({
                   <div key={key}>
                     <MessageContent
                       className={cn({
-                        "wrap-break-word w-fit rounded-2xl bg-primary px-3 py-2 text-right text-primary-foreground":
+                        "wrap-break-word w-fit rounded-2xl bg-primary px-3 py-2 text-left text-primary-foreground":
                           message.role === "user",
                         "bg-transparent px-0 py-0 text-left":
                           message.role === "assistant",
@@ -375,7 +367,21 @@ const PurePreviewMessage = ({
   );
 };
 
-export const PreviewMessage = PurePreviewMessage;
+export const PreviewMessage = memo(PurePreviewMessage, (prev, next) => {
+  if (prev.message.id !== next.message.id) {
+    return false;
+  }
+  if (prev.isLoading !== next.isLoading) {
+    return false;
+  }
+  if (prev.isReadonly !== next.isReadonly) {
+    return false;
+  }
+  if (prev.message.parts !== next.message.parts) {
+    return false;
+  }
+  return true;
+});
 
 export const ThinkingMessage = () => {
   return (

@@ -69,15 +69,19 @@ export async function POST(request: Request) {
     }
 
     const userType: UserType = session.user.type;
-    const gwConfig = await getGatewayConfig(session.user.id);
+
+    const [gwConfig, messageCount, existingChat] = await Promise.all([
+      getGatewayConfig(session.user.id),
+      getMessageCountByUserId({
+        id: session.user.id,
+        differenceInHours: 24,
+      }),
+      getChatById({ id }),
+    ]);
+
     if (!gwConfig.isConfigured) {
       return new ChatSDKError("bad_request:openclaw_config").toResponse();
     }
-
-    const messageCount = await getMessageCountByUserId({
-      id: session.user.id,
-      differenceInHours: 24,
-    });
 
     if (messageCount > entitlementsByUserType[userType].maxMessagesPerDay) {
       return new ChatSDKError("rate_limit:chat").toResponse();
@@ -85,7 +89,7 @@ export async function POST(request: Request) {
 
     const isToolApprovalFlow = Boolean(messages);
 
-    const chat = await getChatById({ id });
+    const chat = existingChat;
     let messagesFromDb: DBMessage[] = [];
     let chatTitle: string | null = null;
 

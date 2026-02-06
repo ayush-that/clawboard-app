@@ -27,7 +27,7 @@ import {
   getTextFromMessage,
 } from "@/lib/utils";
 import { Artifact } from "./artifact";
-import { useDataStream } from "./data-stream-provider";
+import { useDataStreamSetter } from "./data-stream-provider";
 import { Messages } from "./messages";
 import { MultimodalInput } from "./multimodal-input";
 import { getChatHistoryPaginationKey } from "./sidebar-history";
@@ -70,7 +70,7 @@ export function Chat({
     return () => window.removeEventListener("popstate", handlePopState);
   }, [router]);
 
-  const { setDataStream } = useDataStream();
+  const setDataStream = useDataStreamSetter();
 
   const [input, setInput] = useState<string>("");
   const currentModelIdRef = useRef(initialChatModel);

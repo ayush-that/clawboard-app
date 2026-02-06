@@ -1,10 +1,15 @@
 "use client";
 
-import { TamboProvider } from "@tambo-ai/react";
+import dynamic from "next/dynamic";
 import { createContext, type ReactNode, useContext } from "react";
 import { tamboComponents } from "@/lib/tambo/components";
 import { tamboContextHelpers } from "@/lib/tambo/context";
 import { tamboTools } from "@/lib/tambo/tools";
+
+const LazyTamboProvider = dynamic(
+  () => import("@tambo-ai/react").then((m) => ({ default: m.TamboProvider })),
+  { ssr: false }
+);
 
 type TamboRuntimeContextValue = {
   enabled: boolean;
@@ -36,14 +41,14 @@ export const TamboWrapper = ({
 
   return (
     <TamboRuntimeContext.Provider value={{ enabled: true }}>
-      <TamboProvider
+      <LazyTamboProvider
         apiKey={resolvedKey}
         components={tamboComponents}
         contextHelpers={tamboContextHelpers}
         tools={tamboTools}
       >
         {children}
-      </TamboProvider>
+      </LazyTamboProvider>
     </TamboRuntimeContext.Provider>
   );
 };

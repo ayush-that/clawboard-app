@@ -110,7 +110,13 @@ export async function saveUserSettings(
         .returning();
     }
 
-    return await getUserSettings(userId);
+    return {
+      userId,
+      openclawGatewayUrl: nextGatewayUrl,
+      openclawGatewayToken: nextGatewayToken,
+      tamboApiKey: nextTamboApiKey,
+      updatedAt: new Date(),
+    };
   } catch (_error) {
     throw new ChatSDKError(
       "bad_request:database",

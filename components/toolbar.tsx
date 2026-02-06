@@ -1,12 +1,11 @@
 "use client";
 import type { UseChatHelpers } from "@ai-sdk/react";
-import cx from "classnames";
 import {
   AnimatePresence,
   motion,
   useMotionValue,
   useTransform,
-} from "framer-motion";
+} from "motion/react";
 import { nanoid } from "nanoid";
 import {
   type Dispatch,
@@ -25,6 +24,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { ChatMessage } from "@/lib/types";
+import { cn } from "@/lib/utils";
 import { type ArtifactKind, artifactDefinitions } from "./artifact";
 import type { ArtifactToolbarItem } from "./create-artifact";
 import { ArrowUpIcon, StopIcon, SummarizeIcon } from "./icons";
@@ -89,7 +89,7 @@ const Tool = ({
       <TooltipTrigger asChild>
         <motion.div
           animate={{ opacity: 1, transition: { delay: 0.1 } }}
-          className={cx("rounded-full p-3", {
+          className={cn("rounded-full p-3", {
             "bg-primary text-primary-foreground!": selectedTool === description,
           })}
           exit={{
@@ -187,7 +187,7 @@ const ReadingLevelSelector = ({
         <Tooltip open={!isAnimating}>
           <TooltipTrigger asChild>
             <motion.div
-              className={cx(
+              className={cn(
                 "absolute flex flex-row items-center rounded-full border bg-background p-3",
                 {
                   "bg-primary text-primary-foreground": currentLevel !== 2,

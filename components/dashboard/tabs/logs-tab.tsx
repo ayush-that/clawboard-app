@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 
 type LogEntry = {
@@ -80,7 +80,20 @@ export const LogsTab = () => {
       if (!res.ok) {
         throw new Error(json.message ?? json.error ?? "Request failed");
       }
-      setLogs(Array.isArray(json) ? json : []);
+      const newLogs: LogEntry[] = Array.isArray(json) ? json : [];
+      setLogs((prev) => {
+        if (
+          prev.length === newLogs.length &&
+          prev.every(
+            (entry, i) =>
+              entry.timestamp === newLogs[i].timestamp &&
+              entry.content === newLogs[i].content
+          )
+        ) {
+          return prev;
+        }
+        return newLogs;
+      });
       setError(null);
       requestAnimationFrame(() => {
         if (autoScrollRef.current) {
@@ -99,18 +112,36 @@ export const LogsTab = () => {
   autoScrollRef.current = autoScroll;
 
   useEffect(() => {
-    fetchLogs();
-    const interval = setInterval(fetchLogs, 5000);
+    const poll = () => {
+      if (!document.hidden) {
+        fetchLogs();
+      }
+    };
+    poll();
+    const id = setInterval(poll, 5000);
+    const onVisChange = () => {
+      if (!document.hidden) {
+        poll();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisChange);
     return () => {
-      clearInterval(interval);
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisChange);
     };
   }, [fetchLogs]);
 
-  const filteredLogs =
-    filter === "All"
-      ? logs
-      : logs.filter((l) => l.level === filter.toLowerCase());
-  const displayLogs = [...filteredLogs].reverse();
+  const filteredLogs = useMemo(
+    () =>
+      filter === "All"
+        ? logs
+        : logs.filter((l) => l.level === filter.toLowerCase()),
+    [logs, filter]
+  );
+  const displayLogs = useMemo(
+    () => [...filteredLogs].reverse(),
+    [filteredLogs]
+  );
 
   if (loading) {
     return null;

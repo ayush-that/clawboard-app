@@ -31,10 +31,22 @@ export const ExecApprovalOverlay = () => {
   }, []);
 
   useEffect(() => {
-    fetchApprovals();
-    const interval = setInterval(fetchApprovals, 3000);
+    const poll = () => {
+      if (!document.hidden) {
+        fetchApprovals();
+      }
+    };
+    poll();
+    const id = setInterval(poll, 3000);
+    const onVisChange = () => {
+      if (!document.hidden) {
+        poll();
+      }
+    };
+    document.addEventListener("visibilitychange", onVisChange);
     return () => {
-      clearInterval(interval);
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisChange);
     };
   }, [fetchApprovals]);
 

@@ -1,6 +1,6 @@
+import dynamic from "next/dynamic";
 import { toast } from "sonner";
 import { Artifact } from "@/components/create-artifact";
-import { DiffView } from "@/components/diffview";
 import {
   ClockRewind,
   CopyIcon,
@@ -9,7 +9,17 @@ import {
   RedoIcon,
   UndoIcon,
 } from "@/components/icons";
-import { Editor } from "@/components/text-editor";
+
+const DiffView = dynamic(
+  () => import("@/components/diffview").then((m) => ({ default: m.DiffView })),
+  { ssr: false }
+);
+
+const Editor = dynamic(
+  () => import("@/components/text-editor").then((m) => ({ default: m.Editor })),
+  { ssr: false }
+);
+
 import type { Suggestion } from "@/lib/db/schema";
 import { getSuggestions } from "../actions";
 

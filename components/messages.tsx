@@ -1,9 +1,9 @@
 import type { UseChatHelpers } from "@ai-sdk/react";
-import type { ReactNode } from "react";
+import equal from "fast-deep-equal";
+import { memo, type ReactNode } from "react";
 import { useMessages } from "@/hooks/use-messages";
 import { ArrowDownIcon } from "@/lib/hugeicons";
 import type { ChatMessage } from "@/lib/types";
-import { useDataStream } from "./data-stream-provider";
 import { Greeting } from "./greeting";
 import { PreviewMessage, ThinkingMessage } from "./message";
 
@@ -40,8 +40,6 @@ function PureMessages({
   } = useMessages({
     status,
   });
-
-  useDataStream();
 
   return (
     <div className="relative flex-1">
@@ -120,4 +118,18 @@ function getNearestUserMessageId(
   return null;
 }
 
-export const Messages = PureMessages;
+export const Messages = memo(PureMessages, (prev, next) => {
+  if (prev.chatId !== next.chatId) {
+    return false;
+  }
+  if (prev.status !== next.status) {
+    return false;
+  }
+  if (prev.isReadonly !== next.isReadonly) {
+    return false;
+  }
+  if (!equal(prev.messages, next.messages)) {
+    return false;
+  }
+  return true;
+});

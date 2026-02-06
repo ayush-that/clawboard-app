@@ -2,17 +2,20 @@
 
 import type { DataUIPart } from "ai";
 import type React from "react";
-import { createContext, useContext, useMemo, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import type { CustomUIDataTypes } from "@/lib/types";
 
-type DataStreamContextValue = {
-  dataStream: DataUIPart<CustomUIDataTypes>[];
-  setDataStream: React.Dispatch<
-    React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>
-  >;
-};
+type DataStreamValueContextType = DataUIPart<CustomUIDataTypes>[];
 
-const DataStreamContext = createContext<DataStreamContextValue | null>(null);
+type DataStreamSetterContextType = React.Dispatch<
+  React.SetStateAction<DataUIPart<CustomUIDataTypes>[]>
+>;
+
+const DataStreamValueContext = createContext<DataStreamValueContextType | null>(
+  null
+);
+const DataStreamSetterContext =
+  createContext<DataStreamSetterContextType | null>(null);
 
 export function DataStreamProvider({
   children,
@@ -23,19 +26,37 @@ export function DataStreamProvider({
     []
   );
 
-  const value = useMemo(() => ({ dataStream, setDataStream }), [dataStream]);
-
   return (
-    <DataStreamContext.Provider value={value}>
-      {children}
-    </DataStreamContext.Provider>
+    <DataStreamSetterContext.Provider value={setDataStream}>
+      <DataStreamValueContext.Provider value={dataStream}>
+        {children}
+      </DataStreamValueContext.Provider>
+    </DataStreamSetterContext.Provider>
   );
 }
 
-export function useDataStream() {
-  const context = useContext(DataStreamContext);
-  if (!context) {
-    throw new Error("useDataStream must be used within a DataStreamProvider");
+export function useDataStreamValue() {
+  const context = useContext(DataStreamValueContext);
+  if (context === null) {
+    throw new Error(
+      "useDataStreamValue must be used within a DataStreamProvider"
+    );
   }
   return context;
+}
+
+export function useDataStreamSetter() {
+  const context = useContext(DataStreamSetterContext);
+  if (!context) {
+    throw new Error(
+      "useDataStreamSetter must be used within a DataStreamProvider"
+    );
+  }
+  return context;
+}
+
+export function useDataStream() {
+  const dataStream = useDataStreamValue();
+  const setDataStream = useDataStreamSetter();
+  return { dataStream, setDataStream };
 }

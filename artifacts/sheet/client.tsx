@@ -1,3 +1,4 @@
+import dynamic from "next/dynamic";
 import { parse, unparse } from "papaparse";
 import { toast } from "sonner";
 import { Artifact } from "@/components/create-artifact";
@@ -8,7 +9,14 @@ import {
   SparklesIcon,
   UndoIcon,
 } from "@/components/icons";
-import { SpreadsheetEditor } from "@/components/sheet-editor";
+
+const SpreadsheetEditor = dynamic(
+  () =>
+    import("@/components/sheet-editor").then((m) => ({
+      default: m.SpreadsheetEditor,
+    })),
+  { ssr: false }
+);
 
 type Metadata = any;
 
