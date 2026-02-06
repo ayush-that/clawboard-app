@@ -150,38 +150,63 @@ The chat side uses Vercel AI SDK's `streamText()` to stream responses from the a
 
 ```
 app/
-├── (auth)/              # login, register, NextAuth routes
-├── (chat)/              # chat UI, chat API, documents, history
+├── (auth)/                # login, register, NextAuth routes
+├── (chat)/                # chat UI, chat API, documents, history
 │   └── api/
-│       ├── chat/        # streaming chat endpoint
-│       ├── document/    # document CRUD
-│       ├── files/       # file uploads
-│       ├── history/     # chat history
-│       └── suggestions/ # AI suggestions
+│       ├── chat/          # streaming chat endpoint
+│       ├── document/      # document CRUD
+│       ├── files/         # file uploads
+│       ├── history/       # chat history
+│       └── suggestions/   # AI suggestions
 └── api/
-    ├── openclaw/        # 14 dashboard API routes
-    └── settings/        # per-user encrypted settings
+    ├── openclaw/          # 14 dashboard API routes
+    └── settings/          # per-user encrypted settings
 
 components/
-├── dashboard/
-│   ├── tabs/            # 9 tab components (sessions, logs, cron, etc.)
+├── chat/                  # chat interface (10 files)
+│   ├── chat.tsx           # main chat component
+│   ├── messages.tsx       # message list
+│   ├── message.tsx        # single message renderer
+│   ├── multimodal-input.tsx
+│   └── ...                # message-actions, message-editor, greeting, etc.
+├── artifact/              # document/artifact system (7 files)
+│   ├── artifact.tsx       # artifact panel
+│   ├── document.tsx       # document viewer
+│   └── ...                # artifact-actions, create-artifact, document-preview, etc.
+├── editor/                # code/text/sheet editors (5 files)
+│   ├── code-editor.tsx    # CodeMirror wrapper
+│   ├── text-editor.tsx    # ProseMirror wrapper
+│   └── ...                # sheet-editor, image-editor, diffview
+├── sidebar/               # sidebar navigation (6 files)
+│   ├── app-sidebar.tsx    # main sidebar
+│   ├── sidebar-history.tsx
+│   └── ...                # sidebar-toggle, sidebar-user-nav, etc.
+├── dashboard/             # ClawBoard dashboard
+│   ├── panel-view.tsx     # tab router (lazy-loads tabs)
+│   ├── main-content-switcher.tsx
 │   ├── exec-approval-overlay.tsx
-│   └── event-feed.tsx   # SSE event feed
-├── dashboard-panel-view.tsx    # tab router
-├── sidebar-dashboard-nav.tsx   # nav links
-└── chat.tsx                    # chat interface
+│   └── tabs/              # 9 tab components (sessions, logs, cron, etc.)
+├── ai-elements/           # AI-specific UI (canvas, prompt-input, etc.)
+├── elements/              # message part renderers
+├── generative/            # AI-generated content renderers
+├── ui/                    # shadcn/ui primitives
+└── [15 shared]            # auth-form, data-stream-*, toolbar, weather, etc.
 
 lib/
+├── icons.tsx              # all Phosphor icon wrappers (single source)
+├── format-utils.ts        # shared formatTimeAgo, formatTokens
 ├── openclaw/
-│   ├── client.ts        # barrel re-exports
-│   ├── core.ts          # invokeTool, chatCompletions
-│   ├── types.ts         # shared types
-│   ├── settings.ts      # per-user gateway config
-│   └── *.ts             # feature modules (sessions, logs, cron, etc.)
-├── ai/                  # models, tools, prompts, providers
-├── db/                  # Drizzle schema, queries, migrations
-├── security/            # encryption for user settings
-└── errors.ts            # typed error system
+│   ├── client.ts          # barrel re-exports
+│   ├── core.ts            # invokeTool, chatCompletions
+│   ├── types.ts           # shared types
+│   ├── settings.ts        # per-user gateway config (30s TTL cache)
+│   └── *.ts               # feature modules (sessions, logs, cron, etc.)
+├── ai/                    # models, tools, prompts, providers
+├── db/                    # Drizzle schema, queries, migrations
+│   └── queries/
+│       └── connection.ts  # DB connection singleton
+├── security/              # encryption for user settings
+└── errors.ts              # typed error system
 ```
 
 ## Commands
